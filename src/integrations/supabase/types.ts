@@ -14,16 +14,247 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      game_participants: {
+        Row: {
+          game_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          game_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          game_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_participants_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_min: number
+          host_id: string
+          id: string
+          latitude: number
+          longitude: number
+          price_cents: number
+          slots_total: number
+          sport_id: string
+          starts_at: string
+          title: string
+          urgency: Database["public"]["Enums"]["game_urgency"]
+          venue_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          host_id: string
+          id?: string
+          latitude: number
+          longitude: number
+          price_cents?: number
+          slots_total?: number
+          sport_id: string
+          starts_at: string
+          title: string
+          urgency?: Database["public"]["Enums"]["game_urgency"]
+          venue_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          host_id?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          price_cents?: number
+          slots_total?: number
+          sport_id?: string
+          starts_at?: string
+          title?: string
+          urgency?: Database["public"]["Enums"]["game_urgency"]
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "games_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          game_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          game_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          game_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          display_name: string
+          favorite_sport_id: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          points: number
+          sponsor_brand: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name: string
+          favorite_sport_id?: string | null
+          id: string
+          latitude?: number | null
+          longitude?: number | null
+          points?: number
+          sponsor_brand?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string
+          favorite_sport_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          points?: number
+          sponsor_brand?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sports: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      venues: {
+        Row: {
+          address: string | null
+          created_at: string
+          created_by: string
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          notes: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          notes?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_game_participant: {
+        Args: { _game_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      game_urgency: "relaxado" | "normal" | "urgente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +381,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      game_urgency: ["relaxado", "normal", "urgente"],
+    },
   },
 } as const
