@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Users, Zap, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Reviews } from "@/components/reviews";
 
 export const Route = createFileRoute("/_app/games/$id")({
   head: () => ({ meta: [{ title: "Jogo — PEGA" }] }),
