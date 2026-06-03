@@ -43,6 +43,33 @@ export type Database = {
           },
         ]
       }
+      game_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          game_id: string
+          id: string
+          rating: number
+          reviewer_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          game_id: string
+          id?: string
+          rating: number
+          reviewer_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          game_id?: string
+          id?: string
+          rating?: number
+          reviewer_id?: string
+        }
+        Relationships: []
+      }
       games: {
         Row: {
           created_at: string
@@ -140,6 +167,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      player_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          game_id: string
+          id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          game_id: string
+          id?: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          game_id?: string
+          id?: string
+          rating?: number
+          reviewee_id?: string
+          reviewer_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
