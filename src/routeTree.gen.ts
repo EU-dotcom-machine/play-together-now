@@ -13,7 +13,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSportsRouteImport } from './routes/_app.sports'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppNewRouteImport } from './routes/_app.new'
 import { Route as AppDiscoverRouteImport } from './routes/_app.discover'
+import { Route as AppGamesIdRouteImport } from './routes/_app.games.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -34,9 +37,24 @@ const AppSportsRoute = AppSportsRouteImport.update({
   path: '/sports',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNewRoute = AppNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDiscoverRoute = AppDiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGamesIdRoute = AppGamesIdRouteImport.update({
+  id: '/games/$id',
+  path: '/games/$id',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -44,13 +62,19 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/discover': typeof AppDiscoverRoute
+  '/new': typeof AppNewRoute
+  '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
+  '/games/$id': typeof AppGamesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/discover': typeof AppDiscoverRoute
+  '/new': typeof AppNewRoute
+  '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
+  '/games/$id': typeof AppGamesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -58,14 +82,40 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/discover': typeof AppDiscoverRoute
+  '/_app/new': typeof AppNewRoute
+  '/_app/profile': typeof AppProfileRoute
   '/_app/sports': typeof AppSportsRoute
+  '/_app/games/$id': typeof AppGamesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/discover' | '/sports'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/discover'
+    | '/new'
+    | '/profile'
+    | '/sports'
+    | '/games/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/discover' | '/sports'
-  id: '__root__' | '/' | '/_app' | '/auth' | '/_app/discover' | '/_app/sports'
+  to:
+    | '/'
+    | '/auth'
+    | '/discover'
+    | '/new'
+    | '/profile'
+    | '/sports'
+    | '/games/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/auth'
+    | '/_app/discover'
+    | '/_app/new'
+    | '/_app/profile'
+    | '/_app/sports'
+    | '/_app/games/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,6 +154,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSportsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/new': {
+      id: '/_app/new'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof AppNewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/discover': {
       id: '/_app/discover'
       path: '/discover'
@@ -111,17 +175,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDiscoverRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/games/$id': {
+      id: '/_app/games/$id'
+      path: '/games/$id'
+      fullPath: '/games/$id'
+      preLoaderRoute: typeof AppGamesIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppDiscoverRoute: typeof AppDiscoverRoute
+  AppNewRoute: typeof AppNewRoute
+  AppProfileRoute: typeof AppProfileRoute
   AppSportsRoute: typeof AppSportsRoute
+  AppGamesIdRoute: typeof AppGamesIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDiscoverRoute: AppDiscoverRoute,
+  AppNewRoute: AppNewRoute,
+  AppProfileRoute: AppProfileRoute,
   AppSportsRoute: AppSportsRoute,
+  AppGamesIdRoute: AppGamesIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
