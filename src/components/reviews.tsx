@@ -108,7 +108,7 @@ export function Reviews({
           {gameReviews.map((r) => (
             <li key={r.id} className="brutal-card p-3 bg-paper">
               <div className="flex items-center justify-between">
-                <p className="font-bold text-sm">{r.profiles?.display_name ?? "Jogador"}</p>
+                <p className="font-bold text-sm">{r.reviewer_name ?? "Jogador"}</p>
                 <Stars value={r.rating} />
               </div>
               {r.comment && <p className="text-sm mt-1 text-ink/80">{r.comment}</p>}
