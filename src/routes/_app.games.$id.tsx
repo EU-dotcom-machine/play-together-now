@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Users, Zap, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Reviews } from "@/components/reviews";
 
 export const Route = createFileRoute("/_app/games/$id")({
   head: () => ({ meta: [{ title: "Jogo — PEGA" }] }),
@@ -161,6 +162,15 @@ function GameDetail() {
       </ul>
 
       {joined && <Chat gameId={id} />}
+
+      <Reviews
+        gameId={id}
+        startsAt={game.starts_at}
+        durationMin={game.duration_min}
+        sportName={game.sports?.name}
+        participants={participants ?? []}
+        joined={joined}
+      />
 
       <style>{`
         @keyframes arm {
