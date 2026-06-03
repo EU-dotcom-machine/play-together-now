@@ -119,6 +119,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthBridge />
       <Outlet />
+      <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
 }
