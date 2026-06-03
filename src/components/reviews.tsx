@@ -37,7 +37,7 @@ export function Reviews({
     const [{ data: gr }, { data: pr }] = await Promise.all([
       supabase
         .from("game_reviews")
-        .select("id,reviewer_id,rating,comment,created_at,profiles!game_reviews_reviewer_id_fkey(display_name)")
+        .select("id,reviewer_id,rating,comment,created_at")
         .eq("game_id", gameId)
         .order("created_at", { ascending: false }),
       supabase
@@ -45,7 +45,16 @@ export function Reviews({
         .select("id,reviewer_id,reviewee_id,rating,comment,created_at")
         .eq("game_id", gameId),
     ]);
-    setGameReviews(gr ?? []);
+    const ids = Array.from(new Set((gr ?? []).map((r) => r.reviewer_id)));
+    let names: Record<string, string> = {};
+    if (ids.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,display_name")
+        .in("id", ids);
+      names = Object.fromEntries((profs ?? []).map((p) => [p.id, p.display_name]));
+    }
+    setGameReviews((gr ?? []).map((r) => ({ ...r, reviewer_name: names[r.reviewer_id] })));
     setPlayerReviews(pr ?? []);
     setLoading(false);
   }
