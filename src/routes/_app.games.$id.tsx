@@ -163,6 +163,15 @@ function GameDetail() {
 
       {joined && <Chat gameId={id} />}
 
+      <Reviews
+        gameId={id}
+        startsAt={game.starts_at}
+        durationMin={game.duration_min}
+        sportName={game.sports?.name}
+        participants={participants ?? []}
+        joined={joined}
+      />
+
       <style>{`
         @keyframes arm {
           0% { transform: rotate(0) translateY(0); }
