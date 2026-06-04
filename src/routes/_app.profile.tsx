@@ -32,11 +32,16 @@ function Profile() {
   const [display, setDisplay] = useState("");
   const [bio, setBio] = useState("");
   const [sponsor, setSponsor] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
-  // sync once profile loads
-  if (profile && display === "" && profile.display_name) setDisplay(profile.display_name);
-  if (profile && bio === "" && profile.bio) setBio(profile.bio);
-  if (profile && sponsor === null) setSponsor(profile.sponsor_brand);
+  useEffect(() => {
+    if (profile && !hydrated) {
+      setDisplay(profile.display_name ?? "");
+      setBio(profile.bio ?? "");
+      setSponsor(profile.sponsor_brand ?? null);
+      setHydrated(true);
+    }
+  }, [profile, hydrated]);
 
   async function save() {
     if (!user) return;
