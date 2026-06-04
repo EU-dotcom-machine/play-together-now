@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { distanceKm, formatDistance } from "@/lib/geo";
-import { MapPin, Zap, Users, Loader2 } from "lucide-react";
+import { MapPin, Zap, Users, Loader2, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/discover")({
@@ -20,7 +20,7 @@ type GameRow = {
   urgency: "relaxado" | "normal" | "urgente";
   latitude: number;
   longitude: number;
-  sports: { name: string; emoji: string } | null;
+  sports: { name: string; emoji: string; avg_rating: number | null; total_reviews: number | null } | null;
   venues: { name: string; address: string | null } | null;
   game_participants: { count: number }[];
 };
@@ -44,7 +44,7 @@ function Discover() {
       const { data, error } = await supabase
         .from("games")
         .select(
-          "id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sports(name,emoji),venues(name,address),game_participants(count)",
+          "id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sports(name,emoji,avg_rating,total_reviews),venues(name,address),game_participants(count)",
         )
         .gte("starts_at", new Date(Date.now() - 1000 * 60 * 60).toISOString())
         .order("starts_at", { ascending: true })
@@ -145,6 +145,12 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         <span className={cn("brutal-chip", free ? "bg-zap" : "bg-paper")}>
           {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
         </span>
+        {game.sports?.total_reviews && game.sports.total_reviews > 0 ? (
+          <span className="brutal-chip bg-paper">
+            <Star className="size-3 fill-pop stroke-ink" />
+            {game.sports.avg_rating?.toFixed(1)} · {game.sports.total_reviews}
+          </span>
+        ) : null}
       </div>
     </Link>
   );
