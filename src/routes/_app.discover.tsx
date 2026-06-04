@@ -145,6 +145,12 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         <span className={cn("brutal-chip", free ? "bg-zap" : "bg-paper")}>
           {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
         </span>
+        {game.sports?.total_reviews && game.sports.total_reviews > 0 ? (
+          <span className="brutal-chip bg-paper">
+            <Star className="size-3 fill-pop stroke-ink" />
+            {game.sports.avg_rating?.toFixed(1)} · {game.sports.total_reviews}
+          </span>
+        ) : null}
       </div>
     </Link>
   );
