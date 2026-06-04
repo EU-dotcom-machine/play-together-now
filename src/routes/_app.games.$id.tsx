@@ -20,16 +20,22 @@ function GameDetail() {
   const navigate = useNavigate();
   const [armRaised, setArmRaised] = useState(false);
 
-  const { data: game, isLoading } = useQuery({
+  const { data: game, isLoading, error: gameError } = useQuery({
     queryKey: ["game", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
-        .select("*,sports(name,emoji),venues(name,address),host:profiles!games_host_id_fkey(display_name)")
+        .select("*,sports(name,emoji),venues(name,address)")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data as any;
+      if (!data) return null;
+      const { data: host } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", data.host_id)
+        .maybeSingle();
+      return { ...data, host } as any;
     },
   });
 
@@ -38,10 +44,19 @@ function GameDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("game_participants")
-        .select("user_id,profiles(display_name,sponsor_brand)")
+        .select("user_id")
         .eq("game_id", id);
       if (error) throw error;
-      return data as any[];
+      const ids = (data ?? []).map((p) => p.user_id);
+      if (ids.length === 0) return [];
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,display_name,sponsor_brand")
+        .in("id", ids);
+      return (data ?? []).map((p) => ({
+        user_id: p.user_id,
+        profiles: profs?.find((pr) => pr.id === p.user_id) ?? null,
+      })) as any[];
     },
   });
 
