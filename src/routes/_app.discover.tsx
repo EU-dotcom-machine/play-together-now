@@ -44,7 +44,7 @@ function Discover() {
       const { data, error } = await supabase
         .from("games")
         .select(
-          "id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sports(name,emoji),venues(name,address),game_participants(count)",
+          "id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sports(name,emoji,avg_rating,total_reviews),venues(name,address),game_participants(count)",
         )
         .gte("starts_at", new Date(Date.now() - 1000 * 60 * 60).toISOString())
         .order("starts_at", { ascending: true })
