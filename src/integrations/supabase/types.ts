@@ -245,25 +245,31 @@ export type Database = {
       }
       sports: {
         Row: {
+          avg_rating: number | null
           created_at: string
           emoji: string
           id: string
           name: string
           slug: string
+          total_reviews: number | null
         }
         Insert: {
+          avg_rating?: number | null
           created_at?: string
           emoji?: string
           id?: string
           name: string
           slug: string
+          total_reviews?: number | null
         }
         Update: {
+          avg_rating?: number | null
           created_at?: string
           emoji?: string
           id?: string
           name?: string
           slug?: string
+          total_reviews?: number | null
         }
         Relationships: []
       }
