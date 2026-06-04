@@ -20,16 +20,22 @@ function GameDetail() {
   const navigate = useNavigate();
   const [armRaised, setArmRaised] = useState(false);
 
-  const { data: game, isLoading } = useQuery({
+  const { data: game, isLoading, error: gameError } = useQuery({
     queryKey: ["game", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
-        .select("*,sports(name,emoji),venues(name,address),host:profiles!games_host_id_fkey(display_name)")
+        .select("*,sports(name,emoji),venues(name,address)")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data as any;
+      if (!data) return null;
+      const { data: host } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", data.host_id)
+        .maybeSingle();
+      return { ...data, host } as any;
     },
   });
 
@@ -38,10 +44,19 @@ function GameDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("game_participants")
-        .select("user_id,profiles(display_name,sponsor_brand)")
+        .select("user_id")
         .eq("game_id", id);
       if (error) throw error;
-      return data as any[];
+      const ids = (data ?? []).map((p) => p.user_id);
+      if (ids.length === 0) return [];
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,display_name,sponsor_brand")
+        .in("id", ids);
+      return (data ?? []).map((p) => ({
+        user_id: p.user_id,
+        profiles: profs?.find((pr) => pr.id === p.user_id) ?? null,
+      })) as any[];
     },
   });
 
@@ -203,20 +218,35 @@ function Chat({ gameId }: { gameId: string }) {
     (async () => {
       const { data } = await supabase
         .from("messages")
-        .select("id,content,user_id,created_at,profiles(display_name)")
+        .select("id,content,user_id,created_at")
         .eq("game_id", gameId)
         .order("created_at");
-      if (mounted) setMessages(data ?? []);
+      const rows = data ?? [];
+      const ids = Array.from(new Set(rows.map((r) => r.user_id)));
+      const { data: profs } = ids.length
+        ? await supabase.from("profiles").select("id,display_name").in("id", ids)
+        : { data: [] as any[] };
+      const withProfiles = rows.map((r) => ({
+        ...r,
+        profiles: profs?.find((p) => p.id === r.user_id) ?? null,
+      }));
+      if (mounted) setMessages(withProfiles);
     })();
     const channel = supabase
       .channel(`game-${gameId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `game_id=eq.${gameId}` }, async (payload) => {
         const { data } = await supabase
           .from("messages")
-          .select("id,content,user_id,created_at,profiles(display_name)")
+          .select("id,content,user_id,created_at")
           .eq("id", payload.new.id)
-          .single();
-        if (data) setMessages((m) => [...m, data]);
+          .maybeSingle();
+        if (!data) return;
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", data.user_id)
+          .maybeSingle();
+        setMessages((m) => [...m, { ...data, profiles: prof }]);
       })
       .subscribe();
     return () => {
