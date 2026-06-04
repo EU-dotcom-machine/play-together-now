@@ -120,7 +120,5 @@
   box-shadow: var(--shadow-brutal-sm);
   outline: none;
   font-family: inherit;
-}
-@utility input-brutal {
   &:focus { background: color-mix(in oklab, var(--color-zap) 20%, var(--color-paper)); }
 }
