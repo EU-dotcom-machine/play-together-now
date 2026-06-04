@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Star } from "lucide-react";
 
 export const Route = createFileRoute("/_app/sports")({
   head: () => ({ meta: [{ title: "Esportes — PEGA" }] }),
   component: SportsList,
 });
 
-type Sport = { id: string; name: string; emoji: string; slug: string };
+type Sport = { id: string; name: string; emoji: string; slug: string; avg_rating: number | null; total_reviews: number | null };
 
 function SportsList() {
   const { data } = useQuery({
@@ -15,7 +16,7 @@ function SportsList() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sports")
-        .select("id,name,emoji,slug")
+        .select("id,name,emoji,slug,avg_rating,total_reviews")
         .order("name");
       if (error) throw error;
       return data as Sport[];
@@ -37,6 +38,14 @@ function SportsList() {
           >
             <span className="text-4xl">{s.emoji}</span>
             <span className="mt-2 font-bold uppercase text-sm">{s.name}</span>
+            {s.total_reviews && s.total_reviews > 0 ? (
+              <span className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-ink/80">
+                <Star className="size-3 fill-pop stroke-ink" />
+                {s.avg_rating?.toFixed(1)} · {s.total_reviews}
+              </span>
+            ) : (
+              <span className="mt-1 text-xs text-ink/40">Sem avaliações</span>
+            )}
           </li>
         ))}
       </ul>
