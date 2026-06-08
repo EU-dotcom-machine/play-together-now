@@ -87,6 +87,29 @@ function Discover() {
         </Link>
       </header>
 
+      {coords && (
+        <div className="mt-5 brutal-card-lg p-3 bg-paper">
+          <div className="flex items-center justify-between text-xs font-bold uppercase">
+            <span>Raio</span>
+            <span className="bg-pop text-paper px-2 py-0.5">{radiusKm} km</span>
+          </div>
+          <div className="mt-2 flex gap-2">
+            {[5, 10, 20, 50].map((r) => (
+              <button
+                key={r}
+                onClick={() => setRadiusKm(r)}
+                className={cn(
+                  "flex-1 brutal-chip justify-center text-xs font-bold",
+                  radiusKm === r ? "bg-pop text-paper border-ink" : "bg-paper",
+                )}
+              >
+                {r}km
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 grid gap-3">
         {isLoading && (
           <div className="flex items-center justify-center py-12 text-ink/60">
