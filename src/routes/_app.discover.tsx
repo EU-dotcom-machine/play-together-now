@@ -20,14 +20,16 @@ type GameRow = {
   urgency: "relaxado" | "normal" | "urgente";
   latitude: number;
   longitude: number;
+  distance_m: number | null;
   sports: { name: string; emoji: string; avg_rating: number | null; total_reviews: number | null } | null;
   venues: { name: string; address: string | null } | null;
-  game_participants: { count: number }[];
+  participants_count: number;
 };
 
 function Discover() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDenied, setGeoDenied] = useState(false);
+  const [radiusKm, setRadiusKm] = useState<number>(10);
 
   useEffect(() => {
     if (!navigator.geolocation) return setGeoDenied(true);
@@ -39,32 +41,33 @@ function Discover() {
   }, []);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["games"],
+    queryKey: ["games", coords?.lat, coords?.lng, radiusKm],
+    enabled: coords !== null || geoDenied,
     queryFn: async (): Promise<GameRow[]> => {
-      const { data, error } = await supabase
+      // Spatial path: PostGIS nearby_games RPC
+      if (coords) {
+        const wkt = `SRID=4326;POINT(${coords.lng} ${coords.lat})`;
+        const { data: rows, error } = await supabase.rpc("nearby_games" as any, {
+          center: wkt,
+          radius_m: radiusKm * 1000,
+        });
+        if (error) throw error;
+        return await hydrate((rows ?? []) as any[]);
+      }
+
+      // Fallback: all upcoming games ordered by time
+      const { data: rows, error } = await supabase
         .from("games")
-        .select(
-          "id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sports(name,emoji,avg_rating,total_reviews),venues(name,address),game_participants(count)",
-        )
+        .select("id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id")
         .gte("starts_at", new Date(Date.now() - 1000 * 60 * 60).toISOString())
         .order("starts_at", { ascending: true })
         .limit(50);
       if (error) throw error;
-      return (data ?? []) as unknown as GameRow[];
+      return await hydrate((rows ?? []).map((r) => ({ ...r, distance_m: null })));
     },
   });
 
-  const [radiusKm, setRadiusKm] = useState<number>(10);
-
-  const games = useMemo(() => {
-    if (!data) return [];
-    if (!coords) return data;
-    return [...data]
-      .map((g) => ({ g, d: distanceKm(coords.lat, coords.lng, g.latitude, g.longitude) }))
-      .filter((x) => x.d <= radiusKm)
-      .sort((a, b) => a.d - b.d)
-      .map((x) => x.g);
-  }, [data, coords, radiusKm]);
+  const games = useMemo(() => data ?? [], [data]);
 
   return (
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
@@ -130,9 +133,53 @@ function Discover() {
   );
 }
 
+async function hydrate(rows: any[]): Promise<GameRow[]> {
+  if (rows.length === 0) return [];
+  const sportIds = [...new Set(rows.map((r) => r.sport_id).filter(Boolean))];
+  const venueIds = [...new Set(rows.map((r) => r.venue_id).filter(Boolean))];
+  const gameIds = rows.map((r) => r.id);
+
+  const [sportsRes, venuesRes, partsRes] = await Promise.all([
+    sportIds.length
+      ? supabase.from("sports").select("id,name,emoji,avg_rating,total_reviews").in("id", sportIds)
+      : Promise.resolve({ data: [] as any[] }),
+    venueIds.length
+      ? supabase.from("venues").select("id,name,address").in("id", venueIds)
+      : Promise.resolve({ data: [] as any[] }),
+    supabase.from("game_participants").select("game_id").in("game_id", gameIds),
+  ]);
+
+  const sportsMap = new Map((sportsRes.data ?? []).map((s: any) => [s.id, s]));
+  const venuesMap = new Map((venuesRes.data ?? []).map((v: any) => [v.id, v]));
+  const counts = new Map<string, number>();
+  for (const p of (partsRes.data ?? []) as any[]) {
+    counts.set(p.game_id, (counts.get(p.game_id) ?? 0) + 1);
+  }
+
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    starts_at: r.starts_at,
+    slots_total: r.slots_total,
+    price_cents: r.price_cents,
+    urgency: r.urgency,
+    latitude: r.latitude,
+    longitude: r.longitude,
+    distance_m: r.distance_m ?? null,
+    sports: sportsMap.get(r.sport_id) ?? null,
+    venues: venuesMap.get(r.venue_id) ?? null,
+    participants_count: counts.get(r.id) ?? 0,
+  }));
+}
+
 function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng: number } | null }) {
-  const dist = coords ? distanceKm(coords.lat, coords.lng, game.latitude, game.longitude) : null;
-  const filled = game.game_participants?.[0]?.count ?? 0;
+  const distKm =
+    game.distance_m != null
+      ? game.distance_m / 1000
+      : coords
+        ? distanceKm(coords.lat, coords.lng, game.latitude, game.longitude)
+        : null;
+  const filled = game.participants_count;
   const start = new Date(game.starts_at);
   const free = game.price_cents === 0;
 
@@ -154,10 +201,10 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        {dist != null && (
+        {distKm != null && (
           <span className="brutal-chip bg-zap border-ink">
             <MapPin className="size-3" />
-            {formatDistance(dist)}
+            {formatDistance(distKm)}
           </span>
         )}
         <span className="brutal-chip bg-paper">
