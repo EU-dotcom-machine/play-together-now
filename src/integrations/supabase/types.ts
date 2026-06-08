@@ -75,15 +75,16 @@ export type Database = {
           created_at: string
           description: string | null
           duration_min: number
-          geog: unknown
           host_id: string
           id: string
           latitude: number
+          location: unknown
           longitude: number
           price_cents: number
           slots_total: number
           sport_id: string
           starts_at: string
+          status: string
           title: string
           urgency: Database["public"]["Enums"]["game_urgency"]
           venue_id: string | null
@@ -92,15 +93,16 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_min?: number
-          geog?: unknown
           host_id: string
           id?: string
           latitude: number
+          location?: unknown
           longitude: number
           price_cents?: number
           slots_total?: number
           sport_id: string
           starts_at: string
+          status?: string
           title: string
           urgency?: Database["public"]["Enums"]["game_urgency"]
           venue_id?: string | null
@@ -109,15 +111,16 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_min?: number
-          geog?: unknown
           host_id?: string
           id?: string
           latitude?: number
+          location?: unknown
           longitude?: number
           price_cents?: number
           slots_total?: number
           sport_id?: string
           starts_at?: string
+          status?: string
           title?: string
           urgency?: Database["public"]["Enums"]["game_urgency"]
           venue_id?: string | null
@@ -319,9 +322,9 @@ export type Database = {
         Returns: boolean
       }
       nearby_games: {
-        Args: { center: unknown; radius_m?: number }
+        Args: { radius_meters?: number; user_location: unknown }
         Returns: {
-          distance_m: number
+          distance_meters: number
           host_id: string
           id: string
           latitude: number
@@ -330,6 +333,7 @@ export type Database = {
           slots_total: number
           sport_id: string
           starts_at: string
+          status: string
           title: string
           urgency: Database["public"]["Enums"]["game_urgency"]
           venue_id: string

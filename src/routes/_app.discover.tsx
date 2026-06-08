@@ -20,7 +20,7 @@ type GameRow = {
   urgency: "relaxado" | "normal" | "urgente";
   latitude: number;
   longitude: number;
-  distance_m: number | null;
+  distance_meters: number | null;
   sports: { name: string; emoji: string; avg_rating: number | null; total_reviews: number | null } | null;
   venues: { name: string; address: string | null } | null;
   participants_count: number;
@@ -48,8 +48,8 @@ function Discover() {
       if (coords) {
         const wkt = `SRID=4326;POINT(${coords.lng} ${coords.lat})`;
         const { data: rows, error } = await supabase.rpc("nearby_games" as any, {
-          center: wkt,
-          radius_m: radiusKm * 1000,
+          user_location: wkt,
+          radius_meters: radiusKm * 1000,
         });
         if (error) throw error;
         return await hydrate((rows ?? []) as any[]);
@@ -63,7 +63,7 @@ function Discover() {
         .order("starts_at", { ascending: true })
         .limit(50);
       if (error) throw error;
-      return await hydrate((rows ?? []).map((r) => ({ ...r, distance_m: null })));
+      return await hydrate((rows ?? []).map((r) => ({ ...r, distance_meters: null })));
     },
   });
 
@@ -165,7 +165,7 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
     urgency: r.urgency,
     latitude: r.latitude,
     longitude: r.longitude,
-    distance_m: r.distance_m ?? null,
+    distance_meters: r.distance_meters ?? null,
     sports: sportsMap.get(r.sport_id) ?? null,
     venues: venuesMap.get(r.venue_id) ?? null,
     participants_count: counts.get(r.id) ?? 0,
@@ -174,8 +174,8 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
 
 function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng: number } | null }) {
   const distKm =
-    game.distance_m != null
-      ? game.distance_m / 1000
+    game.distance_meters != null
+      ? game.distance_meters / 1000
       : coords
         ? distanceKm(coords.lat, coords.lng, game.latitude, game.longitude)
         : null;
