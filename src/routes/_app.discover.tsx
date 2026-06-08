@@ -54,15 +54,17 @@ function Discover() {
     },
   });
 
+  const [radiusKm, setRadiusKm] = useState<number>(10);
+
   const games = useMemo(() => {
     if (!data) return [];
     if (!coords) return data;
-    return [...data].sort(
-      (a, b) =>
-        distanceKm(coords.lat, coords.lng, a.latitude, a.longitude) -
-        distanceKm(coords.lat, coords.lng, b.latitude, b.longitude),
-    );
-  }, [data, coords]);
+    return [...data]
+      .map((g) => ({ g, d: distanceKm(coords.lat, coords.lng, g.latitude, g.longitude) }))
+      .filter((x) => x.d <= radiusKm)
+      .sort((a, b) => a.d - b.d)
+      .map((x) => x.g);
+  }, [data, coords, radiusKm]);
 
   return (
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
@@ -84,6 +86,29 @@ function Discover() {
           + Criar
         </Link>
       </header>
+
+      {coords && (
+        <div className="mt-5 brutal-card-lg p-3 bg-paper">
+          <div className="flex items-center justify-between text-xs font-bold uppercase">
+            <span>Raio</span>
+            <span className="bg-pop text-paper px-2 py-0.5">{radiusKm} km</span>
+          </div>
+          <div className="mt-2 flex gap-2">
+            {[5, 10, 20, 50].map((r) => (
+              <button
+                key={r}
+                onClick={() => setRadiusKm(r)}
+                className={cn(
+                  "flex-1 brutal-chip justify-center text-xs font-bold",
+                  radiusKm === r ? "bg-pop text-paper border-ink" : "bg-paper",
+                )}
+              >
+                {r}km
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-3">
         {isLoading && (
@@ -129,10 +154,15 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
+        {dist != null && (
+          <span className="brutal-chip bg-zap border-ink">
+            <MapPin className="size-3" />
+            {formatDistance(dist)}
+          </span>
+        )}
         <span className="brutal-chip bg-paper">
           <MapPin className="size-3" />
           {game.venues?.name ?? "Sem local"}
-          {dist != null && ` • ${formatDistance(dist)}`}
         </span>
         <span className="brutal-chip bg-paper">
           {start.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
