@@ -154,10 +154,15 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
+        {dist != null && (
+          <span className="brutal-chip bg-zap border-ink">
+            <MapPin className="size-3" />
+            {formatDistance(dist)}
+          </span>
+        )}
         <span className="brutal-chip bg-paper">
           <MapPin className="size-3" />
           {game.venues?.name ?? "Sem local"}
-          {dist != null && ` • ${formatDistance(dist)}`}
         </span>
         <span className="brutal-chip bg-paper">
           {start.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
