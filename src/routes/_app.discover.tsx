@@ -20,7 +20,7 @@ type GameRow = {
   urgency: "relaxado" | "normal" | "urgente";
   latitude: number;
   longitude: number;
-  distance_m: number | null;
+  distance_meters: number | null;
   sports: { name: string; emoji: string; avg_rating: number | null; total_reviews: number | null } | null;
   venues: { name: string; address: string | null } | null;
   participants_count: number;
