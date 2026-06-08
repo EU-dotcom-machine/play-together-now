@@ -165,7 +165,7 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
     urgency: r.urgency,
     latitude: r.latitude,
     longitude: r.longitude,
-    distance_m: r.distance_m ?? null,
+    distance_meters: r.distance_meters ?? null,
     sports: sportsMap.get(r.sport_id) ?? null,
     venues: venuesMap.get(r.venue_id) ?? null,
     participants_count: counts.get(r.id) ?? 0,
