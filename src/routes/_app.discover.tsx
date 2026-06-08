@@ -174,8 +174,8 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
 
 function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng: number } | null }) {
   const distKm =
-    game.distance_m != null
-      ? game.distance_m / 1000
+    game.distance_meters != null
+      ? game.distance_meters / 1000
       : coords
         ? distanceKm(coords.lat, coords.lng, game.latitude, game.longitude)
         : null;
