@@ -54,15 +54,17 @@ function Discover() {
     },
   });
 
+  const [radiusKm, setRadiusKm] = useState<number>(10);
+
   const games = useMemo(() => {
     if (!data) return [];
     if (!coords) return data;
-    return [...data].sort(
-      (a, b) =>
-        distanceKm(coords.lat, coords.lng, a.latitude, a.longitude) -
-        distanceKm(coords.lat, coords.lng, b.latitude, b.longitude),
-    );
-  }, [data, coords]);
+    return [...data]
+      .map((g) => ({ g, d: distanceKm(coords.lat, coords.lng, g.latitude, g.longitude) }))
+      .filter((x) => x.d <= radiusKm)
+      .sort((a, b) => a.d - b.d)
+      .map((x) => x.g);
+  }, [data, coords, radiusKm]);
 
   return (
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
