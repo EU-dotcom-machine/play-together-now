@@ -48,8 +48,8 @@ function Discover() {
       if (coords) {
         const wkt = `SRID=4326;POINT(${coords.lng} ${coords.lat})`;
         const { data: rows, error } = await supabase.rpc("nearby_games" as any, {
-          center: wkt,
-          radius_m: radiusKm * 1000,
+          user_location: wkt,
+          radius_meters: radiusKm * 1000,
         });
         if (error) throw error;
         return await hydrate((rows ?? []) as any[]);
@@ -63,7 +63,7 @@ function Discover() {
         .order("starts_at", { ascending: true })
         .limit(50);
       if (error) throw error;
-      return await hydrate((rows ?? []).map((r) => ({ ...r, distance_m: null })));
+      return await hydrate((rows ?? []).map((r) => ({ ...r, distance_meters: null })));
     },
   });
 
