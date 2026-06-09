@@ -88,9 +88,20 @@ function GameDetail() {
     );
   }
 
-  const filled = participants?.length ?? 0;
+  const isHost = user?.id === game.host_id;
+  const others = (participants ?? []).filter((p) => p.user_id !== game.host_id);
+  const filled = others.length;
+  const slotsTotal = game.slots_total;
+  const remaining = Math.max(0, slotsTotal - filled);
   const start = new Date(game.starts_at);
   const free = game.price_cents === 0;
+
+  const slotsLabel =
+    filled >= slotsTotal
+      ? "Completo"
+      : filled === 0
+        ? `Aguardando ${slotsTotal} ${slotsTotal === 1 ? "jogador" : "jogadores"}`
+        : `${filled}/${slotsTotal} confirmados`;
 
   return (
     <main className="px-5 pt-6 max-w-md mx-auto">
