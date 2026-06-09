@@ -1,16 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { SPONSOR_BRANDS, brandGradient } from "@/lib/brands";
 import { toast } from "sonner";
 import { LogOut, Save, Trophy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — PEGA" }] }),
   component: Profile,
 });
+
+const YEARS = ["<1 ano", "1-3 anos", "3-5 anos", "5-10 anos", "10+ anos"] as const;
+const SIDES = ["Destro", "Canhoto", "Ambidestro"] as const;
+const LEVELS = ["Iniciante", "Intermediário", "Avançado", "Profissional"] as const;
+
+function positionsForSport(name: string): string[] {
+  const n = name.toLowerCase();
+  if (/(futebol|futsal|society)/.test(n))
+    return ["Goleiro", "Zagueiro", "Lateral", "Volante", "Meia", "Atacante"];
+  if (/basquete/.test(n)) return ["Armador", "Ala", "Pivô"];
+  if (/v[oô]lei/.test(n)) return ["Levantador", "Líbero", "Ponteiro", "Central", "Oposto"];
+  if (/(t[eê]nis|padel|beach)/.test(n)) return ["Simples", "Duplas"];
+  return [];
+}
 
 function Profile() {
   const { user } = useAuth();
@@ -20,110 +34,228 @@ function Profile() {
     queryKey: ["profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user!.id)
-        .single();
+      const { data } = await supabase.from("profiles").select("*").eq("id", user!.id).single();
       return data;
+    },
+  });
+
+  const { data: sports } = useQuery({
+    queryKey: ["sports"],
+    queryFn: async () => {
+      const { data } = await supabase.from("sports").select("id,name,emoji").order("name");
+      return data ?? [];
     },
   });
 
   const [display, setDisplay] = useState("");
   const [bio, setBio] = useState("");
-  const [sponsor, setSponsor] = useState<string | null>(null);
+  const [weight, setWeight] = useState<string>("");
+  const [height, setHeight] = useState<string>("");
+  const [years, setYears] = useState<string | null>(null);
+  const [side, setSide] = useState<string | null>(null);
+  const [level, setLevel] = useState<string | null>(null);
+  const [sportIds, setSportIds] = useState<string[]>([]);
+  const [positions, setPositions] = useState<Record<string, string>>({});
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     if (profile && !hydrated) {
       setDisplay(profile.display_name ?? "");
       setBio(profile.bio ?? "");
-      setSponsor(profile.sponsor_brand ?? null);
+      setWeight(profile.weight_kg ? String(profile.weight_kg) : "");
+      setHeight(profile.height_cm ? String(profile.height_cm) : "");
+      setYears(profile.years_playing ?? null);
+      setSide(profile.dominant_side ?? null);
+      setLevel(profile.skill_level ?? null);
+      setSportIds((profile as any).sport_ids ?? []);
+      setPositions(((profile as any).sport_positions ?? {}) as Record<string, string>);
       setHydrated(true);
     }
   }, [profile, hydrated]);
+
+  const selectedSports = useMemo(
+    () => (sports ?? []).filter((s: any) => sportIds.includes(s.id)),
+    [sports, sportIds],
+  );
+
+  function toggleSport(id: string) {
+    setSportIds((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+  }
 
   async function save() {
     if (!user) return;
     const { error } = await supabase
       .from("profiles")
-      .update({ display_name: display, bio, sponsor_brand: sponsor })
+      .update({
+        display_name: display,
+        bio,
+        weight_kg: weight ? Number(weight) : null,
+        height_cm: height ? Number(height) : null,
+        years_playing: years,
+        dominant_side: side,
+        skill_level: level,
+        sport_ids: sportIds,
+        sport_positions: positions,
+      } as any)
       .eq("id", user.id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Perfil salvo!");
-      qc.invalidateQueries({ queryKey: ["profile", user.id] });
-    }
+    if (error) return toast.error(error.message);
+    toast.success("Perfil salvo!");
+    qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
   async function signOut() {
     await supabase.auth.signOut();
   }
 
-  const gradient = brandGradient(sponsor);
-
   return (
-    <main className="max-w-md mx-auto">
+    <main className="max-w-md mx-auto pb-24">
+      {/* Header with dark gradient + yellow username */}
       <header
-        className="px-5 pt-10 pb-16 text-paper border-b-2 border-ink"
-        style={{ background: gradient }}
+        className="px-5 pt-10 pb-12"
+        style={{ background: "linear-gradient(180deg, #111111 0%, #1E1E1E 100%)" }}
       >
-        <div className="brutal-card-lg bg-paper text-ink p-4 inline-flex items-center gap-3">
-          <div className="size-12 rounded-full bg-pop border-2 border-ink text-paper flex items-center justify-center text-xl font-bold">
+        <div className="flex items-center gap-4">
+          <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold">
             {display?.[0]?.toUpperCase() ?? "?"}
           </div>
           <div>
-            <p className="text-xs uppercase font-bold opacity-70">jogador</p>
-            <p className="text-xl font-extrabold leading-none">{display || "—"}</p>
+            <p className="text-xs uppercase font-semibold text-[#888]">jogador</p>
+            <h1 className="text-2xl font-extrabold leading-none text-pop">{display || "—"}</h1>
           </div>
         </div>
 
-        <div className="mt-4 brutal-chip bg-zap text-ink">
-          <Trophy className="size-3" /> {profile?.points ?? 0} pontos
+        <div className="mt-5 inline-flex items-center gap-1.5 bg-pop text-[#111] px-3 py-1.5 rounded-full text-xs font-bold">
+          <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
         </div>
       </header>
 
-      <section className="px-5 py-6 grid gap-3">
+      <section className="px-5 py-6 grid gap-4">
         <Field label="Nome">
           <input value={display} onChange={(e) => setDisplay(e.target.value)} className="input-brutal" />
         </Field>
         <Field label="Bio">
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="input-brutal min-h-20" placeholder="Joga o quê, em que nível…" />
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="input-brutal min-h-20"
+            placeholder="Joga o quê, em que nível…"
+          />
         </Field>
 
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider mb-2">Patrocinador (estilo do perfil)</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setSponsor(null)}
-              className={`brutal-card p-3 text-sm font-bold uppercase ${sponsor === null ? "bg-zap" : "bg-paper"}`}
-            >
-              Nenhum
-            </button>
-            {SPONSOR_BRANDS.map((b) => (
-              <button
-                key={b.name}
-                type="button"
-                onClick={() => setSponsor(b.name)}
-                className={`brutal-card p-3 text-sm font-bold uppercase text-paper ${sponsor === b.name ? "ring-4 ring-ink" : ""}`}
-                style={{ background: b.gradient }}
-              >
-                {b.name}
-              </button>
-            ))}
-          </div>
+        {/* Sobre você */}
+        <SectionTitle>Sobre você</SectionTitle>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Peso (kg)">
+            <input
+              type="number"
+              inputMode="decimal"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="input-brutal"
+              placeholder="72"
+            />
+          </Field>
+          <Field label="Altura (cm)">
+            <input
+              type="number"
+              inputMode="decimal"
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+              className="input-brutal"
+              placeholder="178"
+            />
+          </Field>
         </div>
+
+        <Field label="Tempo jogando">
+          <ChipRow options={YEARS as unknown as string[]} value={years} onChange={setYears} />
+        </Field>
+
+        <Field label="Lado dominante">
+          <ChipRow options={SIDES as unknown as string[]} value={side} onChange={setSide} />
+        </Field>
+
+        <Field label="Nível">
+          <ChipRow options={LEVELS as unknown as string[]} value={level} onChange={setLevel} />
+        </Field>
+
+        {/* Esportes selection */}
+        <SectionTitle>Seus esportes</SectionTitle>
+        <div className="flex flex-wrap gap-2">
+          {(sports ?? []).map((s: any) => {
+            const on = sportIds.includes(s.id);
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => toggleSport(s.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors",
+                  on
+                    ? "bg-pop text-[#111] border-pop"
+                    : "bg-surface text-foreground border-border",
+                )}
+              >
+                <span className="mr-1">{s.emoji}</span>
+                {s.name}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Por esporte */}
+        {selectedSports.length > 0 && (
+          <>
+            <SectionTitle>Por esporte</SectionTitle>
+            <div className="grid gap-3">
+              {selectedSports.map((s: any) => {
+                const opts = positionsForSport(s.name);
+                return (
+                  <div
+                    key={s.id}
+                    className="bg-surface border border-border rounded-2xl p-4 relative overflow-hidden"
+                  >
+                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-pop" />
+                    <p className="text-sm font-bold flex items-center gap-2">
+                      <span className="text-lg">{s.emoji}</span> {s.name}
+                    </p>
+                    {opts.length > 0 ? (
+                      <select
+                        value={positions[s.id] ?? ""}
+                        onChange={(e) =>
+                          setPositions((p) => ({ ...p, [s.id]: e.target.value }))
+                        }
+                        className="input-brutal mt-2"
+                      >
+                        <option value="">Posição preferida…</option>
+                        {opts.map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <p className="mt-2 text-xs text-[#888]">
+                        Sem posições específicas pra esse esporte.
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
 
         <button
           onClick={save}
-          className="brutal-card-lg mt-3 px-5 py-4 bg-pop text-paper font-bold uppercase flex items-center justify-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="mt-4 px-5 py-4 bg-pop text-[#111] font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px]"
         >
           <Save className="size-4" /> Salvar
         </button>
         <button
           onClick={signOut}
-          className="brutal-card px-5 py-3 bg-paper font-bold uppercase flex items-center justify-center gap-2"
+          className="px-5 py-3 bg-transparent border border-pop text-pop font-bold uppercase rounded-full flex items-center justify-center gap-2"
         >
           <LogOut className="size-4" /> Sair
         </button>
@@ -132,10 +264,49 @@ function Profile() {
   );
 }
 
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-base font-bold uppercase tracking-wide text-foreground mt-2">
+      {children}
+    </h2>
+  );
+}
+
+function ChipRow({
+  options,
+  value,
+  onChange,
+}: {
+  options: string[];
+  value: string | null;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const on = value === o;
+        return (
+          <button
+            key={o}
+            type="button"
+            onClick={() => onChange(o)}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors",
+              on ? "bg-pop text-[#111] border-pop" : "bg-surface text-foreground border-border",
+            )}
+          >
+            {o}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="grid gap-1.5">
-      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-wider text-[#888]">{label}</span>
       {children}
     </label>
   );
