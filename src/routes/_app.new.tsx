@@ -80,9 +80,7 @@ function NewGame() {
         .select("id")
         .single();
       if (gErr) throw gErr;
-
-      // host joins automatically
-      await supabase.from("game_participants").insert({ game_id: game.id, user_id: user.id });
+      // Host is the organizer, not a confirmed slot — do not insert into game_participants.
 
       toast.success("Jogo criado!");
       navigate({ to: "/games/$id", params: { id: game.id } });
@@ -131,7 +129,7 @@ function NewGame() {
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Vagas">
+          <Field label="Vagas (além de você)">
             <input required type="number" min={1} max={50} value={slots} onChange={(e) => setSlots(+e.target.value)} className="input-brutal" />
           </Field>
           <Field label="Valor (R$)">
