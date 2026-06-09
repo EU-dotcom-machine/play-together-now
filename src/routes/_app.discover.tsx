@@ -217,7 +217,9 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         </span>
         <span className="brutal-chip bg-paper">
           <Users className="size-3" />
-          {filled}/{game.slots_total}
+          {filled >= game.slots_total
+            ? "Completo"
+            : `Falta${game.slots_total - filled === 1 ? "" : "m"} ${game.slots_total - filled} jogador${game.slots_total - filled === 1 ? "" : "es"}`}
         </span>
         <span className={cn("brutal-chip", free ? "bg-zap" : "bg-paper")}>
           {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
