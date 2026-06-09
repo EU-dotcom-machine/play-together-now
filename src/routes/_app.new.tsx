@@ -129,7 +129,7 @@ function NewGame() {
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Vagas">
+          <Field label="Vagas (além de você)">
             <input required type="number" min={1} max={50} value={slots} onChange={(e) => setSlots(+e.target.value)} className="input-brutal" />
           </Field>
           <Field label="Valor (R$)">
