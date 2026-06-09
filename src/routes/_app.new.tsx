@@ -80,9 +80,7 @@ function NewGame() {
         .select("id")
         .single();
       if (gErr) throw gErr;
-
-      // host joins automatically
-      await supabase.from("game_participants").insert({ game_id: game.id, user_id: user.id });
+      // Host is the organizer, not a confirmed slot — do not insert into game_participants.
 
       toast.success("Jogo criado!");
       navigate({ to: "/games/$id", params: { id: game.id } });
