@@ -1,0 +1,1 @@
+DELETE FROM public.game_participants gp USING public.games g WHERE gp.game_id = g.id AND gp.user_id = g.host_id;
