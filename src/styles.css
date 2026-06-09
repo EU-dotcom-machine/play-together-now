@@ -4,15 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Brutalist Pop — bold black borders, paper white, hot orange, electric yellow */
+/* Sport Energy — dark base, electric yellow accents */
 
 @theme inline {
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: "DM Sans", system-ui, sans-serif;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 16px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -33,42 +33,53 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-base: var(--base);
+  --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-paper: var(--paper);
   --color-pop: var(--pop);
   --color-zap: var(--zap);
+  --color-urgent: var(--urgent);
+  --color-success: var(--success);
+  --color-text-muted: var(--text-muted);
 
-  --shadow-brutal: 4px 4px 0 0 var(--ink);
-  --shadow-brutal-lg: 6px 6px 0 0 var(--ink);
-  --shadow-brutal-sm: 2px 2px 0 0 var(--ink);
+  --shadow-brutal: 0 4px 16px 0 rgba(0, 0, 0, 0.4);
+  --shadow-brutal-lg: 0 8px 24px 0 rgba(0, 0, 0, 0.5);
+  --shadow-brutal-sm: 0 2px 8px 0 rgba(0, 0, 0, 0.3);
 }
 
 :root {
-  --paper: oklch(0.99 0 0);
-  --ink: oklch(0.15 0 0);
-  --pop: oklch(0.68 0.21 36);        /* hot orange #ff5722 */
-  --zap: oklch(0.92 0.18 95);        /* electric yellow #ffeb3b */
+  --base: #111111;
+  --surface: #1E1E1E;
+  --ink: #FFFFFF;          /* main text / "ink-on-dark" */
+  --paper: #1E1E1E;        /* card surface (legacy alias) */
+  --pop: #FFD600;          /* electric yellow */
+  --zap: #FFD600;
+  --urgent: #FFC200;
+  --success: #2D6A4F;
+  --text-muted: #888888;
 
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: var(--paper);
-  --card-foreground: var(--ink);
-  --popover: var(--paper);
-  --popover-foreground: var(--ink);
-  --primary: var(--ink);
-  --primary-foreground: var(--paper);
-  --secondary: var(--zap);
-  --secondary-foreground: var(--ink);
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: var(--pop);
-  --accent-foreground: var(--paper);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: var(--paper);
-  --border: var(--ink);
-  --input: oklch(0.92 0 0);
-  --ring: var(--pop);
-  --radius: 6px;
+  --background: #111111;
+  --foreground: #FFFFFF;
+  --card: #1E1E1E;
+  --card-foreground: #FFFFFF;
+  --popover: #1E1E1E;
+  --popover-foreground: #FFFFFF;
+  --primary: #FFD600;
+  --primary-foreground: #111111;
+  --secondary: #1E1E1E;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1E1E1E;
+  --muted-foreground: #888888;
+  --accent: #FFD600;
+  --accent-foreground: #111111;
+  --destructive: #E5484D;
+  --destructive-foreground: #FFFFFF;
+  --border: #2A2A2A;
+  --input: #2A2A2A;
+  --ring: #FFD600;
+  --radius: 12px;
 }
 
 @layer base {
@@ -83,28 +94,30 @@
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.02em;
+    color: var(--color-foreground);
   }
 }
 
 @utility brutal-card {
-  background-color: var(--color-paper);
-  border: 2px solid var(--color-ink);
-  box-shadow: var(--shadow-brutal);
-  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-brutal-sm);
 }
 @utility brutal-card-lg {
-  background-color: var(--color-paper);
-  border: 3px solid var(--color-ink);
-  box-shadow: var(--shadow-brutal-lg);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-brutal);
 }
 @utility brutal-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.625rem;
-  border: 2px solid var(--color-ink);
-  background: var(--color-paper);
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-foreground);
   font-weight: 600;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -114,11 +127,20 @@
 @utility input-brutal {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: var(--color-paper);
-  border: 2px solid var(--color-ink);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-brutal-sm);
+  background: #2A2A2A;
+  color: var(--color-foreground);
+  border: 1px solid #2A2A2A;
+  border-radius: 10px;
   outline: none;
   font-family: inherit;
-  &:focus { background: color-mix(in oklab, var(--color-zap) 20%, var(--color-paper)); }
+  transition: border-color 120ms ease;
+  &::placeholder { color: var(--color-text-muted); }
+  &:focus { border-color: var(--color-pop); }
+}
+@utility btn-primary-pill {
+  background: var(--color-pop);
+  color: #111111;
+  border-radius: 999px;
+  font-weight: 700;
+  border: none;
 }
