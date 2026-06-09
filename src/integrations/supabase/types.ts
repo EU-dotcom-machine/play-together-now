@@ -211,13 +211,20 @@ export type Database = {
           city: string | null
           created_at: string
           display_name: string
+          dominant_side: string | null
           favorite_sport_id: string | null
+          height_cm: number | null
           id: string
           latitude: number | null
           longitude: number | null
           points: number
+          skill_level: string | null
           sponsor_brand: string | null
+          sport_ids: string[]
+          sport_positions: Json
           updated_at: string
+          weight_kg: number | null
+          years_playing: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -225,13 +232,20 @@ export type Database = {
           city?: string | null
           created_at?: string
           display_name: string
+          dominant_side?: string | null
           favorite_sport_id?: string | null
+          height_cm?: number | null
           id: string
           latitude?: number | null
           longitude?: number | null
           points?: number
+          skill_level?: string | null
           sponsor_brand?: string | null
+          sport_ids?: string[]
+          sport_positions?: Json
           updated_at?: string
+          weight_kg?: number | null
+          years_playing?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -239,13 +253,20 @@ export type Database = {
           city?: string | null
           created_at?: string
           display_name?: string
+          dominant_side?: string | null
           favorite_sport_id?: string | null
+          height_cm?: number | null
           id?: string
           latitude?: number | null
           longitude?: number | null
           points?: number
+          skill_level?: string | null
           sponsor_brand?: string | null
+          sport_ids?: string[]
+          sport_positions?: Json
           updated_at?: string
+          weight_kg?: number | null
+          years_playing?: string | null
         }
         Relationships: []
       }

@@ -164,7 +164,7 @@ function GameDetail() {
           <button
             onClick={sayEu}
             disabled={filled >= slotsTotal}
-            className="brutal-card-lg w-full px-5 py-5 bg-pop text-paper font-extrabold text-2xl uppercase active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50 flex items-center justify-center gap-3"
+            className="w-full px-5 py-5 bg-pop text-[#111] font-extrabold text-2xl uppercase rounded-full active:translate-y-[1px] disabled:opacity-50 flex items-center justify-center gap-3 shadow-[0_8px_24px_rgba(255,214,0,0.25)]"
           >
             <span className={cn("inline-block transition-transform origin-bottom-left", armRaised && "animate-[arm_1.4s_ease-out]")}>🙋</span>
             {filled >= slotsTotal ? "Completo" : "EU!"}
