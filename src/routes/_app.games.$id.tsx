@@ -125,7 +125,7 @@ function GameDetail() {
 
         <div className="mt-4 grid gap-2 text-sm">
           <Row icon={MapPin} text={`${game.venues?.name ?? "—"}${game.venues?.address ? " · " + game.venues.address : ""}`} />
-          <Row icon={Users} text={`${filled}/${game.slots_total} confirmados`} />
+          <Row icon={Users} text={slotsLabel} />
           <div className="flex gap-2">
             <span className="brutal-chip bg-paper">
               {start.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
@@ -145,7 +145,15 @@ function GameDetail() {
       </div>
 
       <div className="mt-4">
-        {joined ? (
+        {isHost ? (
+          <Link
+            to="/games/$id"
+            params={{ id }}
+            className="brutal-card-lg w-full px-5 py-4 bg-ink text-paper font-bold uppercase text-center block active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          >
+            Gerenciar Jogo
+          </Link>
+        ) : joined ? (
           <button
             onClick={leave}
             className="brutal-card-lg w-full px-5 py-4 bg-paper font-bold uppercase active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
@@ -155,21 +163,28 @@ function GameDetail() {
         ) : (
           <button
             onClick={sayEu}
-            disabled={filled >= game.slots_total}
+            disabled={filled >= slotsTotal}
             className="brutal-card-lg w-full px-5 py-5 bg-pop text-paper font-extrabold text-2xl uppercase active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50 flex items-center justify-center gap-3"
           >
             <span className={cn("inline-block transition-transform origin-bottom-left", armRaised && "animate-[arm_1.4s_ease-out]")}>🙋</span>
-            EU!
+            {filled >= slotsTotal ? "Completo" : "EU!"}
           </button>
         )}
-        <p className="mt-2 text-xs text-ink/60 text-center">
-          {game.urgency === "urgente" ? "+10 pontos por atender uma urgência" : game.urgency === "normal" ? "+3 pontos" : "+1 ponto"}
-        </p>
+        {!isHost && (
+          <p className="mt-2 text-xs text-ink/60 text-center">
+            {game.urgency === "urgente" ? "+10 pontos por atender uma urgência" : game.urgency === "normal" ? "+3 pontos" : "+1 ponto"}
+          </p>
+        )}
       </div>
 
-      <h2 className="mt-8 text-lg font-bold uppercase">Quem confirmou</h2>
+      <div className="mt-8 brutal-card p-3 bg-zap">
+        <p className="text-xs font-bold uppercase text-ink/70">Criado por</p>
+        <p className="font-bold">{game.host?.display_name ?? "—"}</p>
+      </div>
+
+      <h2 className="mt-6 text-lg font-bold uppercase">Quem confirmou</h2>
       <ul className="mt-2 grid gap-2">
-        {participants?.map((p) => (
+        {others.map((p) => (
           <li key={p.user_id} className="brutal-card p-3 flex items-center gap-3 bg-paper">
             <div className="size-9 rounded-full bg-zap border-2 border-ink flex items-center justify-center font-bold">
               {p.profiles?.display_name?.[0]?.toUpperCase() ?? "?"}
@@ -182,12 +197,12 @@ function GameDetail() {
             </div>
           </li>
         ))}
-        {participants?.length === 0 && (
+        {others.length === 0 && (
           <li className="brutal-card p-4 text-center text-ink/60">Seja o primeiro a dizer EU.</li>
         )}
       </ul>
 
-      {joined && <Chat gameId={id} />}
+      {(joined || isHost) && <Chat gameId={id} />}
 
       <Reviews
         gameId={id}
