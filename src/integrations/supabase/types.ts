@@ -19,18 +19,21 @@ export type Database = {
           game_id: string
           id: string
           joined_at: string
+          status: string
           user_id: string
         }
         Insert: {
           game_id: string
           id?: string
           joined_at?: string
+          status?: string
           user_id: string
         }
         Update: {
           game_id?: string
           id?: string
           joined_at?: string
+          status?: string
           user_id?: string
         }
         Relationships: [
