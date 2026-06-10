@@ -130,17 +130,6 @@ function GameDetail() {
     qc.invalidateQueries({ queryKey: ["participants", id] });
   }
 
-  async function decide(userId: string, status: "confirmed" | "declined") {
-    const { error } = await supabase
-      .from("game_participants")
-      .update({ status } as any)
-      .eq("game_id", id)
-      .eq("user_id", userId);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["participants", id] });
-    qc.invalidateQueries({ queryKey: ["games"] });
-    toast.success(status === "confirmed" ? "Jogador confirmado!" : "Pedido recusado");
-  }
 
   if (isLoading || !game) {
     return (
