@@ -139,7 +139,7 @@ function GameDetail() {
 
   const isHost = user?.id === game.host_id;
   const confirmed = (participants ?? []).filter((p) => p.status === "confirmed" && p.user_id !== game.host_id);
-  const pending = (participants ?? []).filter((p) => p.status === "pending" && p.user_id !== game.host_id);
+  
   const filled = confirmed.length;
   const slotsTotal = game.slots_total;
   const remaining = Math.max(0, slotsTotal - filled);
