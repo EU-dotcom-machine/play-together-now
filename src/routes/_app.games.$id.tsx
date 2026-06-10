@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check, X } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reviews } from "@/components/reviews";
+import { CandidatesPanel } from "@/components/candidates-panel";
 
 export const Route = createFileRoute("/_app/games/$id")({
   head: () => ({ meta: [{ title: "Jogo — PEGA" }] }),
@@ -129,17 +130,6 @@ function GameDetail() {
     qc.invalidateQueries({ queryKey: ["participants", id] });
   }
 
-  async function decide(userId: string, status: "confirmed" | "declined") {
-    const { error } = await supabase
-      .from("game_participants")
-      .update({ status } as any)
-      .eq("game_id", id)
-      .eq("user_id", userId);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["participants", id] });
-    qc.invalidateQueries({ queryKey: ["games"] });
-    toast.success(status === "confirmed" ? "Jogador confirmado!" : "Pedido recusado");
-  }
 
   if (isLoading || !game) {
     return (
@@ -149,7 +139,7 @@ function GameDetail() {
 
   const isHost = user?.id === game.host_id;
   const confirmed = (participants ?? []).filter((p) => p.status === "confirmed" && p.user_id !== game.host_id);
-  const pending = (participants ?? []).filter((p) => p.status === "pending" && p.user_id !== game.host_id);
+  
   const filled = confirmed.length;
   const slotsTotal = game.slots_total;
   const remaining = Math.max(0, slotsTotal - filled);
@@ -244,33 +234,14 @@ function GameDetail() {
         )}
       </div>
 
-      {isHost && pending.length > 0 && (
-        <section className="mt-6">
-          <h2 className="text-lg font-bold uppercase">Pedidos pendentes</h2>
-          <ul className="mt-2 grid gap-2">
-            {pending.map((p) => (
-              <li key={p.user_id} className="brutal-card p-3 flex items-center gap-3 bg-paper">
-                <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-[#111]">
-                  {p.profiles?.display_name?.[0]?.toUpperCase() ?? "?"}
-                </div>
-                <p className="flex-1 font-bold truncate">{p.profiles?.display_name}</p>
-                <button
-                  onClick={() => decide(p.user_id, "confirmed")}
-                  className="px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1"
-                  style={{ background: "#2D6A4F", color: "#fff" }}
-                >
-                  <Check className="size-4" /> Aceitar
-                </button>
-                <button
-                  onClick={() => decide(p.user_id, "declined")}
-                  className="px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1 border border-ink/20"
-                >
-                  <X className="size-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {isHost && (
+        <CandidatesPanel
+          gameId={id}
+          gameLat={game.latitude ?? null}
+          gameLng={game.longitude ?? null}
+          slotsTotal={slotsTotal}
+          gameStatus={game.status}
+        />
       )}
 
       <div className="mt-8 brutal-card p-3 bg-zap">
