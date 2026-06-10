@@ -146,7 +146,7 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
     venueIds.length
       ? supabase.from("venues").select("id,name,address").in("id", venueIds)
       : Promise.resolve({ data: [] as any[] }),
-    supabase.from("game_participants").select("game_id").in("game_id", gameIds),
+    supabase.from("game_participants").select("game_id").in("game_id", gameIds).eq("status" as any, "confirmed"),
   ]);
 
   const sportsMap = new Map((sportsRes.data ?? []).map((s: any) => [s.id, s]));
