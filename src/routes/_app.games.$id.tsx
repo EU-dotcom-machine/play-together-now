@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Users, Zap, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reviews } from "@/components/reviews";
 
@@ -13,14 +13,22 @@ export const Route = createFileRoute("/_app/games/$id")({
   component: GameDetail,
 });
 
+type Participant = {
+  user_id: string;
+  status: "pending" | "confirmed" | "declined";
+  profiles: { id: string; display_name: string; sponsor_brand?: string | null } | null;
+};
+
 function GameDetail() {
   const { id } = Route.useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [armRaised, setArmRaised] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
+  const prevStatusRef = useRef<string | null>(null);
 
-  const { data: game, isLoading, error: gameError } = useQuery({
+  const { data: game, isLoading } = useQuery({
     queryKey: ["game", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,45 +49,96 @@ function GameDetail() {
 
   const { data: participants } = useQuery({
     queryKey: ["participants", id],
-    queryFn: async () => {
+    queryFn: async (): Promise<Participant[]> => {
       const { data, error } = await supabase
         .from("game_participants")
-        .select("user_id")
+        .select("user_id,status" as any)
         .eq("game_id", id);
       if (error) throw error;
-      const ids = (data ?? []).map((p) => p.user_id);
+      const rows = (data ?? []) as any[];
+      const ids = rows.map((p) => p.user_id);
       if (ids.length === 0) return [];
       const { data: profs } = await supabase
         .from("profiles")
         .select("id,display_name,sponsor_brand")
         .in("id", ids);
-      return (data ?? []).map((p) => ({
+      return rows.map((p) => ({
         user_id: p.user_id,
+        status: (p.status ?? "pending") as Participant["status"],
         profiles: profs?.find((pr) => pr.id === p.user_id) ?? null,
-      })) as any[];
+      }));
     },
   });
 
-  const joined = !!participants?.find((p) => p.user_id === user?.id);
+  // Realtime: refresh participants on any change
+  useEffect(() => {
+    const channel = supabase
+      .channel(`participants-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "game_participants", filter: `game_id=eq.${id}` },
+        () => qc.invalidateQueries({ queryKey: ["participants", id] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, qc]);
+
+  const myEntry = participants?.find((p) => p.user_id === user?.id) ?? null;
+  const myStatus = myEntry?.status ?? null;
+
+  // Detect transition pending -> confirmed for the current user => celebrate
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    if (prev === "pending" && myStatus === "confirmed") {
+      setCelebrate(true);
+      setTimeout(() => setCelebrate(false), 2200);
+    }
+    if (prev === "pending" && myStatus === "declined") {
+      toast("Não foi dessa vez. Tente novamente.");
+    }
+    prevStatusRef.current = myStatus;
+  }, [myStatus]);
 
   async function sayEu() {
     if (!user) return;
     setArmRaised(true);
     setTimeout(() => setArmRaised(false), 1600);
-    const { error } = await supabase.from("game_participants").insert({ game_id: id, user_id: user.id });
-    if (error) {
-      toast.error(error.message);
+    // If a declined row exists, reset it back to pending; otherwise insert.
+    if (myEntry?.status === "declined") {
+      const { error } = await supabase
+        .from("game_participants")
+        .update({ status: "pending" } as any)
+        .eq("game_id", id)
+        .eq("user_id", user.id);
+      if (error) return toast.error(error.message);
     } else {
-      toast.success("EU! Vaga garantida. 💪");
-      qc.invalidateQueries({ queryKey: ["participants", id] });
-      qc.invalidateQueries({ queryKey: ["games"] });
+      const { error } = await supabase
+        .from("game_participants")
+        .insert({ game_id: id, user_id: user.id, status: "pending" } as any);
+      if (error) return toast.error(error.message);
     }
+    toast.success("Pedido enviado! Aguarde a confirmação.");
+    qc.invalidateQueries({ queryKey: ["participants", id] });
   }
 
   async function leave() {
     if (!user) return;
     await supabase.from("game_participants").delete().eq("game_id", id).eq("user_id", user.id);
     qc.invalidateQueries({ queryKey: ["participants", id] });
+  }
+
+  async function decide(userId: string, status: "confirmed" | "declined") {
+    const { error } = await supabase
+      .from("game_participants")
+      .update({ status } as any)
+      .eq("game_id", id)
+      .eq("user_id", userId);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["participants", id] });
+    qc.invalidateQueries({ queryKey: ["games"] });
+    toast.success(status === "confirmed" ? "Jogador confirmado!" : "Pedido recusado");
   }
 
   if (isLoading || !game) {
@@ -89,19 +148,22 @@ function GameDetail() {
   }
 
   const isHost = user?.id === game.host_id;
-  const others = (participants ?? []).filter((p) => p.user_id !== game.host_id);
-  const filled = others.length;
+  const confirmed = (participants ?? []).filter((p) => p.status === "confirmed" && p.user_id !== game.host_id);
+  const pending = (participants ?? []).filter((p) => p.status === "pending" && p.user_id !== game.host_id);
+  const filled = confirmed.length;
   const slotsTotal = game.slots_total;
   const remaining = Math.max(0, slotsTotal - filled);
   const start = new Date(game.starts_at);
   const free = game.price_cents === 0;
+  const full = filled >= slotsTotal;
 
-  const slotsLabel =
-    filled >= slotsTotal
-      ? "Completo"
-      : filled === 0
-        ? `Aguardando ${slotsTotal} ${slotsTotal === 1 ? "jogador" : "jogadores"}`
-        : `${filled}/${slotsTotal} confirmados`;
+  const slotsLabel = full
+    ? "Completo"
+    : filled === 0
+      ? `Aguardando ${slotsTotal} ${slotsTotal === 1 ? "jogador" : "jogadores"}`
+      : `${filled}/${slotsTotal} confirmados`;
+
+  const chatUnlocked = isHost || myStatus === "confirmed";
 
   return (
     <main className="px-5 pt-6 max-w-md mx-auto">
@@ -126,7 +188,7 @@ function GameDetail() {
         <div className="mt-4 grid gap-2 text-sm">
           <Row icon={MapPin} text={`${game.venues?.name ?? "—"}${game.venues?.address ? " · " + game.venues.address : ""}`} />
           <Row icon={Users} text={slotsLabel} />
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <span className="brutal-chip bg-paper">
               {start.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
             </span>
@@ -146,47 +208,81 @@ function GameDetail() {
 
       <div className="mt-4">
         {isHost ? (
-          <Link
-            to="/games/$id"
-            params={{ id }}
-            className="brutal-card-lg w-full px-5 py-4 bg-ink text-paper font-bold uppercase text-center block active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-          >
-            Gerenciar Jogo
-          </Link>
-        ) : joined ? (
+          <div className="brutal-card-lg w-full px-5 py-4 bg-ink text-paper font-bold uppercase text-center">
+            Você é o organizador
+          </div>
+        ) : myStatus === "confirmed" ? (
           <button
             onClick={leave}
-            className="brutal-card-lg w-full px-5 py-4 bg-paper font-bold uppercase active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+            className="w-full px-5 py-5 font-extrabold text-xl uppercase rounded-full flex items-center justify-center gap-2"
+            style={{ background: "#2D6A4F", color: "#fff" }}
           >
-            Sair do jogo
+            <Check className="size-5" /> Confirmado!
+          </button>
+        ) : myStatus === "pending" ? (
+          <button
+            disabled
+            className="w-full px-5 py-5 font-bold text-base uppercase rounded-full flex items-center justify-center gap-2 cursor-not-allowed"
+            style={{ background: "#2A2A2A", color: "#888" }}
+          >
+            <Hourglass className="size-5" /> Aguardando confirmação…
           </button>
         ) : (
           <button
             onClick={sayEu}
-            disabled={filled >= slotsTotal}
+            disabled={full}
             className="w-full px-5 py-5 bg-pop text-[#111] font-extrabold text-2xl uppercase rounded-full active:translate-y-[1px] disabled:opacity-50 flex items-center justify-center gap-3 shadow-[0_8px_24px_rgba(255,214,0,0.25)]"
           >
             <span className={cn("inline-block transition-transform origin-bottom-left", armRaised && "animate-[arm_1.4s_ease-out]")}>🙋</span>
-            {filled >= slotsTotal ? "Completo" : "EU!"}
+            {full ? "Completo" : "EU!"}
           </button>
         )}
-        {!isHost && (
+        {!isHost && myStatus !== "confirmed" && myStatus !== "pending" && (
           <p className="mt-2 text-xs text-ink/60 text-center">
-            {game.urgency === "urgente" ? "+10 pontos por atender uma urgência" : game.urgency === "normal" ? "+3 pontos" : "+1 ponto"}
+            {game.urgency === "urgente" ? "+5 pontos ao ser confirmado em urgência" : game.urgency === "normal" ? "+3 pontos" : "+1 ponto"}
           </p>
         )}
       </div>
 
+      {isHost && pending.length > 0 && (
+        <section className="mt-6">
+          <h2 className="text-lg font-bold uppercase">Pedidos pendentes</h2>
+          <ul className="mt-2 grid gap-2">
+            {pending.map((p) => (
+              <li key={p.user_id} className="brutal-card p-3 flex items-center gap-3 bg-paper">
+                <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-[#111]">
+                  {p.profiles?.display_name?.[0]?.toUpperCase() ?? "?"}
+                </div>
+                <p className="flex-1 font-bold truncate">{p.profiles?.display_name}</p>
+                <button
+                  onClick={() => decide(p.user_id, "confirmed")}
+                  className="px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1"
+                  style={{ background: "#2D6A4F", color: "#fff" }}
+                >
+                  <Check className="size-4" /> Aceitar
+                </button>
+                <button
+                  onClick={() => decide(p.user_id, "declined")}
+                  className="px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1 border border-ink/20"
+                >
+                  <X className="size-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="mt-8 brutal-card p-3 bg-zap">
-        <p className="text-xs font-bold uppercase text-ink/70">Criado por</p>
-        <p className="font-bold">{game.host?.display_name ?? "—"}</p>
+        <p className="text-xs font-bold uppercase text-[#111]/70">Criado por</p>
+        <p className="font-bold text-[#111]">{game.host?.display_name ?? "—"}</p>
       </div>
 
       <h2 className="mt-6 text-lg font-bold uppercase">Quem confirmou</h2>
       <ul className="mt-2 grid gap-2">
-        {others.map((p) => (
+        {confirmed.map((p) => (
           <li key={p.user_id} className="brutal-card p-3 flex items-center gap-3 bg-paper">
-            <div className="size-9 rounded-full bg-zap border-2 border-ink flex items-center justify-center font-bold">
+            <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-[#111]">
               {p.profiles?.display_name?.[0]?.toUpperCase() ?? "?"}
             </div>
             <div>
@@ -197,20 +293,32 @@ function GameDetail() {
             </div>
           </li>
         ))}
-        {others.length === 0 && (
-          <li className="brutal-card p-4 text-center text-ink/60">Seja o primeiro a dizer EU.</li>
-        )}
+        {Array.from({ length: remaining }).map((_, i) => (
+          <li key={`empty-${i}`} className="brutal-card p-3 text-center text-ink/40 text-sm">
+            vaga aberta
+          </li>
+        ))}
       </ul>
 
-      {(joined || isHost) && <Chat gameId={id} />}
+      {chatUnlocked && <Chat gameId={id} />}
+
+      {celebrate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-[fadeIn_0.2s_ease-out]">
+          <div className="text-center">
+            <div className="text-[120px] leading-none animate-[pop_0.6s_ease-out]">🙋</div>
+            <p className="mt-2 text-6xl font-extrabold uppercase text-pop tracking-tight">EU!</p>
+            <p className="mt-3 text-lg font-bold text-white">Você foi confirmado!</p>
+          </div>
+        </div>
+      )}
 
       <Reviews
         gameId={id}
         startsAt={game.starts_at}
         durationMin={game.duration_min}
         sportName={game.sports?.name}
-        participants={participants ?? []}
-        joined={joined}
+        participants={confirmed}
+        joined={myStatus === "confirmed"}
       />
 
       <style>{`
@@ -220,6 +328,12 @@ function GameDetail() {
           55% { transform: rotate(-30deg) translateY(-6px); }
           100% { transform: rotate(0) translateY(0); }
         }
+        @keyframes pop {
+          0% { transform: scale(0.3); opacity: 0; }
+          60% { transform: scale(1.15); opacity: 1; }
+          100% { transform: scale(1); }
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
     </main>
   );
@@ -301,7 +415,7 @@ function Chat({ gameId }: { gameId: string }) {
         {messages.map((m) => {
           const mine = m.user_id === user?.id;
           return (
-            <div key={m.id} className={cn("max-w-[80%] px-3 py-2 border-2 border-ink text-sm", mine ? "ml-auto bg-pop text-paper rounded-l-lg rounded-br-lg" : "bg-zap rounded-r-lg rounded-bl-lg")}>
+            <div key={m.id} className={cn("max-w-[80%] px-3 py-2 border border-ink/20 text-sm rounded-lg", mine ? "ml-auto bg-pop text-[#111]" : "bg-[#2A2A2A] text-white")}>
               {!mine && <p className="text-[10px] font-bold uppercase opacity-70">{m.profiles?.display_name}</p>}
               {m.content}
             </div>
@@ -310,7 +424,7 @@ function Chat({ gameId }: { gameId: string }) {
       </div>
       <form onSubmit={send} className="mt-2 flex gap-2">
         <input value={text} onChange={(e) => setText(e.target.value)} className="input-brutal flex-1" placeholder="Mensagem…" maxLength={500} />
-        <button className="brutal-card-lg px-4 bg-ink text-paper active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+        <button className="brutal-card-lg px-4 bg-pop text-[#111] font-bold">
           <Send className="size-4" />
         </button>
       </form>
