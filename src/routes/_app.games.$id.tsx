@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check, X } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reviews } from "@/components/reviews";
+import { CandidatesPanel } from "@/components/candidates-panel";
 
 export const Route = createFileRoute("/_app/games/$id")({
   head: () => ({ meta: [{ title: "Jogo — PEGA" }] }),
