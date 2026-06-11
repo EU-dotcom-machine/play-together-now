@@ -15,7 +15,7 @@ type Props = {
 type Confirm = {
   title: string;
   message: string;
-  onConfirm: () => Promise<void> | void;
+  onConfirm: () => unknown;
 } | null;
 
 export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
