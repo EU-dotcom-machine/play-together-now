@@ -113,7 +113,6 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
           {candidates.map((c) => {
             const p = c.profile;
             const initials = (p?.display_name ?? "?").slice(0, 1).toUpperCase();
-            const bioLine = (p?.bio ?? "").split("\n")[0];
             const km =
               gameLat != null && gameLng != null && p?.latitude != null && p?.longitude != null
                 ? distanceKm(gameLat, gameLng, p.latitude, p.longitude)
