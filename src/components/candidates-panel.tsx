@@ -113,7 +113,6 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
           {candidates.map((c) => {
             const p = c.profile;
             const initials = (p?.display_name ?? "?").slice(0, 1).toUpperCase();
-            const bioLine = (p?.bio ?? "").split("\n")[0];
             const km =
               gameLat != null && gameLng != null && p?.latitude != null && p?.longitude != null
                 ? distanceKm(gameLat, gameLng, p.latitude, p.longitude)
@@ -121,16 +120,21 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
             return (
               <li
                 key={c.user_id}
-                className="rounded-2xl p-4 border"
-                style={{ background: "#1E1E1E", borderColor: "#2A2A2A" }}
+                className="rounded-xl p-3 border"
+                style={{
+                  background: "#1E1E1E",
+                  borderColor: "#2A2A2A",
+                  borderLeftWidth: "3px",
+                  borderLeftColor: "#FFD600",
+                }}
               >
                 <div className="flex items-start gap-3">
                   <div
-                    className="size-12 rounded-full flex items-center justify-center font-extrabold text-lg shrink-0"
+                    className="size-10 rounded-full flex items-center justify-center font-extrabold text-base shrink-0"
                     style={{ background: "#FFD600", color: "#111" }}
                   >
                     {p?.avatar_url ? (
-                      <img src={p.avatar_url} alt="" className="size-12 rounded-full object-cover" />
+                      <img src={p.avatar_url} alt="" className="size-10 rounded-full object-cover" />
                     ) : (
                       initials
                     )}
@@ -142,19 +146,18 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                       </p>
                       <span
                         className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1"
-                        style={{ background: "rgba(255,214,0,0.15)", color: "#FFD600" }}
+                        style={{ background: "#FFD600", color: "#111" }}
                       >
                         <Zap className="size-3" /> {p?.points ?? 0} pts
                       </span>
                     </div>
-                    {bioLine && (
-                      <p className="text-xs mt-1 line-clamp-1" style={{ color: "#888" }}>
-                        {bioLine}
-                      </p>
-                    )}
-                    {km != null && (
+                    {km != null ? (
                       <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "#888" }}>
                         <MapPin className="size-3" /> {formatKm(km)}
+                      </p>
+                    ) : (
+                      <p className="text-xs mt-1" style={{ color: "#888" }}>
+                        Localização não informada
                       </p>
                     )}
                     {c.sports.length > 0 && (
@@ -163,7 +166,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                           <span
                             key={s.id}
                             className="px-2 py-0.5 rounded-full text-[10px] font-bold border"
-                            style={{ background: "#111", color: "#fff", borderColor: "#2A2A2A" }}
+                            style={{ background: "#1E1E1E", color: "#888", borderColor: "#2A2A2A" }}
                           >
                             {s.emoji} {s.name}
                           </span>
