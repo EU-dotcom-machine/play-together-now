@@ -142,10 +142,14 @@ function Profile() {
 
   return (
     <main className="max-w-md mx-auto pb-24">
-      {/* Header with dark gradient + yellow username */}
+      {/* Header with brand color background or default dark gradient + yellow username */}
       <header
-        className="px-5 pt-10 pb-12"
-        style={{ background: "linear-gradient(180deg, #111111 0%, #1E1E1E 100%)" }}
+        className="px-5 pt-10 pb-12 transition-colors"
+        style={
+          selectedBrand.color
+            ? { background: selectedBrand.color }
+            : { background: "linear-gradient(180deg, #111111 0%, #1E1E1E 100%)" }
+        }
       >
         <div className="flex items-center gap-4">
           <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold">
