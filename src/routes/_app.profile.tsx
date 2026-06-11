@@ -16,6 +16,20 @@ const YEARS = ["<1 ano", "1-3 anos", "3-5 anos", "5-10 anos", "10+ anos"] as con
 const SIDES = ["Destro", "Canhoto", "Ambidestro"] as const;
 const LEVELS = ["Iniciante", "Intermediário", "Avançado", "Profissional"] as const;
 
+const BRANDS: { id: string; name: string; color: string | null }[] = [
+  { id: "none", name: "Nenhum", color: null },
+  { id: "nike", name: "Nike", color: "#111111" },
+  { id: "adidas", name: "Adidas", color: "#000000" },
+  { id: "puma", name: "Puma", color: "#CC0000" },
+  { id: "under-armour", name: "Under Armour", color: "#1A1A2E" },
+  { id: "new-balance", name: "New Balance", color: "#CF0A2C" },
+  { id: "asics", name: "Asics", color: "#1A3A5C" },
+  { id: "olympikus", name: "Olympikus", color: "#F5A623" },
+  { id: "mizuno", name: "Mizuno", color: "#003087" },
+  { id: "penalty", name: "Penalty", color: "#006400" },
+  { id: "topper", name: "Topper", color: "#8B0000" },
+];
+
 function positionsForSport(name: string): string[] {
   const n = name.toLowerCase();
   if (/(futebol|futsal|society)/.test(n))
@@ -56,6 +70,7 @@ function Profile() {
   const [level, setLevel] = useState<string | null>(null);
   const [sportIds, setSportIds] = useState<string[]>([]);
   const [positions, setPositions] = useState<Record<string, string>>({});
+  const [brandId, setBrandId] = useState<string>("none");
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -69,9 +84,15 @@ function Profile() {
       setLevel(profile.skill_level ?? null);
       setSportIds((profile as any).sport_ids ?? []);
       setPositions(((profile as any).sport_positions ?? {}) as Record<string, string>);
+      setBrandId(((profile as any).sponsor_brand as string) || "none");
       setHydrated(true);
     }
   }, [profile, hydrated]);
+
+  const selectedBrand = useMemo(
+    () => BRANDS.find((b) => b.id === brandId) ?? BRANDS[0],
+    [brandId],
+  );
 
   const selectedSports = useMemo(
     () => (sports ?? []).filter((s: any) => sportIds.includes(s.id)),
@@ -96,11 +117,23 @@ function Profile() {
         skill_level: level,
         sport_ids: sportIds,
         sport_positions: positions,
+        sponsor_brand: brandId === "none" ? null : brandId,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
     toast.success("Perfil salvo!");
     qc.invalidateQueries({ queryKey: ["profile", user.id] });
+  }
+
+  async function selectBrand(id: string) {
+    setBrandId(id);
+    if (!user) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ sponsor_brand: id === "none" ? null : id } as any)
+      .eq("id", user.id);
+    if (error) toast.error(error.message);
+    else qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
   async function signOut() {
@@ -109,10 +142,14 @@ function Profile() {
 
   return (
     <main className="max-w-md mx-auto pb-24">
-      {/* Header with dark gradient + yellow username */}
+      {/* Header with brand color background or default dark gradient + yellow username */}
       <header
-        className="px-5 pt-10 pb-12"
-        style={{ background: "linear-gradient(180deg, #111111 0%, #1E1E1E 100%)" }}
+        className="px-5 pt-10 pb-12 transition-colors"
+        style={
+          selectedBrand.color
+            ? { background: selectedBrand.color }
+            : { background: "linear-gradient(180deg, #111111 0%, #1E1E1E 100%)" }
+        }
       >
         <div className="flex items-center gap-4">
           <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold">
@@ -141,6 +178,32 @@ function Profile() {
             placeholder="Joga o quê, em que nível…"
           />
         </Field>
+
+        {/* Patrocinador */}
+        <SectionTitle>Patrocinador (estilo do perfil)</SectionTitle>
+        <div className="grid grid-cols-2 gap-3">
+          {BRANDS.map((b) => {
+            const selected = brandId === b.id;
+            return (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => selectBrand(b.id)}
+                className="rounded-xl p-4 text-left font-bold text-white transition-all"
+                style={{
+                  background: b.color ?? "#1E1E1E",
+                  border: selected ? "2px solid #FFD600" : "2px solid transparent",
+                  boxShadow: selected ? "0 0 0 2px rgba(255,214,0,0.25)" : "none",
+                }}
+              >
+                <span className="text-xs uppercase tracking-wider text-white/70 block">
+                  Marca
+                </span>
+                <span className="text-base">{b.name}</span>
+              </button>
+            );
+          })}
+        </div>
 
         {/* Sobre você */}
         <SectionTitle>Sobre você</SectionTitle>
