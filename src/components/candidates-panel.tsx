@@ -112,7 +112,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
         <button
           className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 border"
           style={{ background: "#1E1E1E", color: "#fff", borderColor: "#2A2A2A" }}
-          onClick={() => toast("Em breve: editar, encerrar ou cancelar o jogo.")}
+          onClick={() => setManageOpen(true)}
         >
           <Settings2 className="size-3" /> Gerenciar Jogo
         </button>
