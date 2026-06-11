@@ -84,9 +84,15 @@ function Profile() {
       setLevel(profile.skill_level ?? null);
       setSportIds((profile as any).sport_ids ?? []);
       setPositions(((profile as any).sport_positions ?? {}) as Record<string, string>);
+      setBrandId(((profile as any).sponsor_brand as string) || "none");
       setHydrated(true);
     }
   }, [profile, hydrated]);
+
+  const selectedBrand = useMemo(
+    () => BRANDS.find((b) => b.id === brandId) ?? BRANDS[0],
+    [brandId],
+  );
 
   const selectedSports = useMemo(
     () => (sports ?? []).filter((s: any) => sportIds.includes(s.id)),
