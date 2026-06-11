@@ -21,6 +21,19 @@ function formatKm(km: number) {
 export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStatus }: Props) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
+  const [manageOpen, setManageOpen] = useState(false);
+
+  const { data: confirmedCount = 0 } = useQuery({
+    queryKey: ["confirmed-count", gameId],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("game_participants")
+        .select("user_id", { count: "exact", head: true })
+        .eq("game_id", gameId)
+        .eq("status" as any, "confirmed");
+      return count ?? 0;
+    },
+  });
 
   const { data: candidates = [] } = useQuery({
     queryKey: ["candidates", gameId],
