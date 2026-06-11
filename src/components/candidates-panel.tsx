@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Check, X, Zap, MapPin, Settings2 } from "lucide-react";
 import { distanceKm } from "@/lib/geo";
+import { ManageGameSheet } from "@/components/manage-game-sheet";
 
 type Props = {
   gameId: string;
@@ -20,6 +21,19 @@ function formatKm(km: number) {
 export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStatus }: Props) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
+  const [manageOpen, setManageOpen] = useState(false);
+
+  const { data: confirmedCount = 0 } = useQuery({
+    queryKey: ["confirmed-count", gameId],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("game_participants")
+        .select("user_id", { count: "exact", head: true })
+        .eq("game_id", gameId)
+        .eq("status" as any, "confirmed");
+      return count ?? 0;
+    },
+  });
 
   const { data: candidates = [] } = useQuery({
     queryKey: ["candidates", gameId],
@@ -98,7 +112,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
         <button
           className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 border"
           style={{ background: "#1E1E1E", color: "#fff", borderColor: "#2A2A2A" }}
-          onClick={() => toast("Em breve: editar, encerrar ou cancelar o jogo.")}
+          onClick={() => setManageOpen(true)}
         >
           <Settings2 className="size-3" /> Gerenciar Jogo
         </button>
@@ -199,6 +213,12 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
           })}
         </ul>
       )}
+      <ManageGameSheet
+        open={manageOpen}
+        onClose={() => setManageOpen(false)}
+        gameId={gameId}
+        slotsFilled={confirmedCount}
+      />
     </section>
   );
 }
