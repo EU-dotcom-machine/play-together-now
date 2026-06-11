@@ -125,6 +125,17 @@ function Profile() {
     qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
+  async function selectBrand(id: string) {
+    setBrandId(id);
+    if (!user) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ sponsor_brand: id === "none" ? null : id } as any)
+      .eq("id", user.id);
+    if (error) toast.error(error.message);
+    else qc.invalidateQueries({ queryKey: ["profile", user.id] });
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
   }
