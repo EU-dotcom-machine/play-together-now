@@ -70,6 +70,7 @@ function Profile() {
   const [level, setLevel] = useState<string | null>(null);
   const [sportIds, setSportIds] = useState<string[]>([]);
   const [positions, setPositions] = useState<Record<string, string>>({});
+  const [brandId, setBrandId] = useState<string>("none");
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
