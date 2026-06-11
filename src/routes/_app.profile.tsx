@@ -179,6 +179,32 @@ function Profile() {
           />
         </Field>
 
+        {/* Patrocinador */}
+        <SectionTitle>Patrocinador (estilo do perfil)</SectionTitle>
+        <div className="grid grid-cols-2 gap-3">
+          {BRANDS.map((b) => {
+            const selected = brandId === b.id;
+            return (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => selectBrand(b.id)}
+                className="rounded-xl p-4 text-left font-bold text-white transition-all"
+                style={{
+                  background: b.color ?? "#1E1E1E",
+                  border: selected ? "2px solid #FFD600" : "2px solid transparent",
+                  boxShadow: selected ? "0 0 0 2px rgba(255,214,0,0.25)" : "none",
+                }}
+              >
+                <span className="text-xs uppercase tracking-wider text-white/70 block">
+                  Marca
+                </span>
+                <span className="text-base">{b.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Sobre você */}
         <SectionTitle>Sobre você</SectionTitle>
 
