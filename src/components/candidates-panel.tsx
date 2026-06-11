@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Check, X, Zap, MapPin, Settings2 } from "lucide-react";
 import { distanceKm } from "@/lib/geo";
+import { ManageGameSheet } from "@/components/manage-game-sheet";
 
 type Props = {
   gameId: string;
