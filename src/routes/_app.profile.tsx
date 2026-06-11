@@ -117,6 +117,7 @@ function Profile() {
         skill_level: level,
         sport_ids: sportIds,
         sport_positions: positions,
+        sponsor_brand: brandId === "none" ? null : brandId,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
