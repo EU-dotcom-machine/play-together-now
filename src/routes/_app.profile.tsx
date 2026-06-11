@@ -16,6 +16,20 @@ const YEARS = ["<1 ano", "1-3 anos", "3-5 anos", "5-10 anos", "10+ anos"] as con
 const SIDES = ["Destro", "Canhoto", "Ambidestro"] as const;
 const LEVELS = ["Iniciante", "Intermediário", "Avançado", "Profissional"] as const;
 
+const BRANDS: { id: string; name: string; color: string | null }[] = [
+  { id: "none", name: "Nenhum", color: null },
+  { id: "nike", name: "Nike", color: "#111111" },
+  { id: "adidas", name: "Adidas", color: "#000000" },
+  { id: "puma", name: "Puma", color: "#CC0000" },
+  { id: "under-armour", name: "Under Armour", color: "#1A1A2E" },
+  { id: "new-balance", name: "New Balance", color: "#CF0A2C" },
+  { id: "asics", name: "Asics", color: "#1A3A5C" },
+  { id: "olympikus", name: "Olympikus", color: "#F5A623" },
+  { id: "mizuno", name: "Mizuno", color: "#003087" },
+  { id: "penalty", name: "Penalty", color: "#006400" },
+  { id: "topper", name: "Topper", color: "#8B0000" },
+];
+
 function positionsForSport(name: string): string[] {
   const n = name.toLowerCase();
   if (/(futebol|futsal|society)/.test(n))
