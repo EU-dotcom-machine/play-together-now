@@ -213,6 +213,12 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
           })}
         </ul>
       )}
+      <ManageGameSheet
+        open={manageOpen}
+        onClose={() => setManageOpen(false)}
+        gameId={gameId}
+        slotsFilled={confirmedCount}
+      />
     </section>
   );
 }
