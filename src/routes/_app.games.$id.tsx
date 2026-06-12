@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getCourtImage } from "@/lib/sport-courts";
 import { Reviews } from "@/components/reviews";
 import { CandidatesPanel } from "@/components/candidates-panel";
 
