@@ -96,13 +96,14 @@ function GameDetail() {
     const prev = prevStatusRef.current;
     if (prev === "pending" && myStatus === "confirmed") {
       setCelebrate(true);
+      trackEvent("game_joined", { game_id: id });
       setTimeout(() => setCelebrate(false), 2200);
     }
     if (prev === "pending" && myStatus === "declined") {
       toast("Não foi dessa vez. Tente novamente.");
     }
     prevStatusRef.current = myStatus;
-  }, [myStatus]);
+  }, [myStatus, id]);
 
   async function sayEu() {
     if (!user) return;
