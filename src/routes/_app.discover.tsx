@@ -120,7 +120,7 @@ function Discover() {
         <div className="mt-5 brutal-card-lg p-3 bg-paper">
           <div className="flex items-center justify-between text-xs font-bold uppercase">
             <span>Raio</span>
-            <span className="bg-pop text-paper px-2 py-0.5">{radiusKm} km</span>
+            <span className="bg-pop text-[#111] px-2 py-0.5">{radiusKm} km</span>
           </div>
           <div className="mt-2 flex gap-2">
             {[5, 10, 20, 50].map((r) => (
