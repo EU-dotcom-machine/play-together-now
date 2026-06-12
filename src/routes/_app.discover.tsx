@@ -218,7 +218,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
       className="block rounded-2xl overflow-hidden relative transition-transform active:translate-y-[1px]"
       style={{
         backgroundColor: "#1E1E1E",
-        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.78)), url(${imageUrl})`,
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.8)), url(${imageUrl})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "140px",
