@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { LogOut, Save, Trophy, MapPin, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/posthog";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
@@ -122,6 +123,7 @@ function Profile() {
       .eq("id", user.id);
     if (error) return toast.error(error.message);
     toast.success("Perfil salvo!");
+    trackEvent("profile_updated");
     qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 

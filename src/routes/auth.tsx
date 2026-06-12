@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { trackEvent } from "@/lib/posthog";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar — Esportes Unidos" }, { name: "robots", content: "noindex" }] }),
@@ -37,6 +38,7 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Conta criada! Bora jogar.");
+        trackEvent("user_signed_up");
         navigate({ to: "/discover" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });

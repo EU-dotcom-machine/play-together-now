@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { distanceKm } from "@/lib/geo";
+import { trackEvent } from "@/lib/posthog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -145,6 +146,7 @@ function NewGame() {
       if (gErr) throw gErr;
 
       toast.success("Jogo criado!");
+      trackEvent("game_created", { game_id: game.id });
       navigate({ to: "/games/$id", params: { id: game.id } });
     } catch (err: any) {
       toast.error(err?.message ?? "Não rolou");
