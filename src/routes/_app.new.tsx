@@ -222,7 +222,7 @@ function NewGame() {
 
         <button
           disabled={saving}
-          className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-paper font-bold uppercase flex items-center justify-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60"
+          className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase flex items-center justify-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60"
         >
           {saving && <Loader2 className="size-4 animate-spin" />}
           Publicar jogo
