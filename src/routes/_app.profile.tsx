@@ -123,6 +123,7 @@ function Profile() {
       .eq("id", user.id);
     if (error) return toast.error(error.message);
     toast.success("Perfil salvo!");
+    trackEvent("profile_updated");
     qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
