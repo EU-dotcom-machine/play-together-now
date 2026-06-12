@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy } from "lucide-react";
+import { LogOut, Save, Trophy, MapPin, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/profile")({
@@ -136,6 +136,24 @@ function Profile() {
     else qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
+  async function updateLocation() {
+    if (!user) return;
+    if (!navigator.geolocation) return toast.error("Geolocalização indisponível");
+    navigator.geolocation.getCurrentPosition(
+      async (p) => {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ latitude: p.coords.latitude, longitude: p.coords.longitude } as any)
+          .eq("id", user.id);
+        if (error) return toast.error(error.message);
+        toast.success("Localização atualizada!");
+        qc.invalidateQueries({ queryKey: ["profile", user.id] });
+      },
+      () => toast.error("Não foi possível obter sua localização"),
+      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 5000 },
+    );
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
   }
@@ -161,8 +179,23 @@ function Profile() {
           </div>
         </div>
 
-        <div className="mt-5 inline-flex items-center gap-1.5 bg-pop text-[#111] px-3 py-1.5 rounded-full text-xs font-bold">
-          <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
+        <div className="mt-5 flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center gap-1.5 bg-pop text-[#111] px-3 py-1.5 rounded-full text-xs font-bold">
+            <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
+          </div>
+          <div className="inline-flex items-center gap-2 bg-black/30 text-white px-3 py-1.5 rounded-full text-xs">
+            <MapPin className="size-3.5" />
+            {(profile as any)?.latitude != null
+              ? "Localização salva"
+              : "Sem localização"}
+            <button
+              type="button"
+              onClick={updateLocation}
+              className="ml-1 inline-flex items-center gap-1 bg-pop text-[#111] px-2 py-0.5 rounded-full font-bold uppercase"
+            >
+              <RefreshCw className="size-3" /> Atualizar
+            </button>
+          </div>
         </div>
       </header>
 

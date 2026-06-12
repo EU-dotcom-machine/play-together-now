@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { distanceKm, formatDistance } from "@/lib/geo";
+import { useAuth } from "@/hooks/use-auth";
 import { MapPin, Zap, Users, Loader2, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ type GameRow = {
 };
 
 function Discover() {
+  const { user } = useAuth();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDenied, setGeoDenied] = useState(false);
   const [radiusKm, setRadiusKm] = useState<number>(10);
@@ -39,6 +41,30 @@ function Discover() {
       { enableHighAccuracy: false, maximumAge: 60_000, timeout: 5000 },
     );
   }, []);
+
+  // Silently sync profile location when it changes by > ~200m
+  useEffect(() => {
+    if (!coords || !user) return;
+    (async () => {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("latitude,longitude")
+        .eq("id", user.id)
+        .single();
+      const lat = (prof as any)?.latitude as number | null;
+      const lng = (prof as any)?.longitude as number | null;
+      if (
+        lat != null &&
+        lng != null &&
+        distanceKm(lat, lng, coords.lat, coords.lng) < 0.2
+      )
+        return;
+      await supabase
+        .from("profiles")
+        .update({ latitude: coords.lat, longitude: coords.lng } as any)
+        .eq("id", user.id);
+    })();
+  }, [coords, user]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["games", coords?.lat, coords?.lng, radiusKm],
