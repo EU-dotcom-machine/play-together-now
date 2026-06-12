@@ -1,10 +1,10 @@
 export const sportCourtImage: Record<string, string> = {
-  Futebol: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&q=80",
+  Futebol: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&q=80",
   Futsal: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=600&q=80",
   Basquete: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80",
   Vôlei: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=600&q=80",
-  "Vôlei de Praia": "https://images.unsplash.com/photo-1565992441121-4367a2c08f97?w=600&q=80",
-  "Beach Tennis": "https://images.unsplash.com/photo-1565992441121-4367a2c08f97?w=600&q=80",
+  "Vôlei de Praia": "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=600&q=80",
+  "Beach Tennis": "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=600&q=80",
   Tênis: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&q=80",
   Padel: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=600&q=80",
   Natação: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=600&q=80",
