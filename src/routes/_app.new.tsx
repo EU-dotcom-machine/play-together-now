@@ -146,6 +146,7 @@ function NewGame() {
       if (gErr) throw gErr;
 
       toast.success("Jogo criado!");
+      trackEvent("game_created", { game_id: game.id });
       navigate({ to: "/games/$id", params: { id: game.id } });
     } catch (err: any) {
       toast.error(err?.message ?? "Não rolou");
