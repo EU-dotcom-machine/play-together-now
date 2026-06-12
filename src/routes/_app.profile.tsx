@@ -136,6 +136,24 @@ function Profile() {
     else qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
+  async function updateLocation() {
+    if (!user) return;
+    if (!navigator.geolocation) return toast.error("Geolocalização indisponível");
+    navigator.geolocation.getCurrentPosition(
+      async (p) => {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ latitude: p.coords.latitude, longitude: p.coords.longitude } as any)
+          .eq("id", user.id);
+        if (error) return toast.error(error.message);
+        toast.success("Localização atualizada!");
+        qc.invalidateQueries({ queryKey: ["profile", user.id] });
+      },
+      () => toast.error("Não foi possível obter sua localização"),
+      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 5000 },
+    );
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
   }
