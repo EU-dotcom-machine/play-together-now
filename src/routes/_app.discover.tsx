@@ -209,14 +209,21 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
   const filled = game.participants_count;
   const start = new Date(game.starts_at);
   const free = game.price_cents === 0;
+  const imageUrl = getCourtImage(game.sports?.name);
 
   return (
     <Link
       to="/games/$id"
       params={{ id: game.id }}
-      className="brutal-card-lg p-4 bg-paper block transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+      className="brutal-card-lg p-4 block transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none relative overflow-hidden"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.78)), url(${imageUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "140px",
+      }}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{game.sports?.emoji ?? "🏅"}</span>
           <div>
@@ -227,9 +234,9 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         <UrgencyChip urgency={game.urgency} />
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+      <div className="relative z-10 mt-3 flex flex-wrap gap-2 text-xs">
         {distKm != null && (
-          <span className="brutal-chip bg-zap border-ink">
+          <span className="brutal-chip bg-zap border-ink text-[#111]">
             <MapPin className="size-3" />
             {formatDistance(distKm)}
           </span>
@@ -248,7 +255,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
             ? "Completo"
             : `Falta${game.slots_total - filled === 1 ? "" : "m"} ${game.slots_total - filled} jogador${game.slots_total - filled === 1 ? "" : "es"}`}
         </span>
-        <span className={cn("brutal-chip", free ? "bg-zap" : "bg-paper")}>
+        <span className={cn("brutal-chip", free ? "bg-zap text-[#111]" : "bg-paper")}>
           {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
         </span>
         {game.sports?.total_reviews && game.sports.total_reviews > 0 ? (
