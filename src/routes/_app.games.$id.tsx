@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getCourtImage } from "@/lib/sport-courts";
 import { Reviews } from "@/components/reviews";
 import { CandidatesPanel } from "@/components/candidates-panel";
 
@@ -146,6 +147,7 @@ function GameDetail() {
   const start = new Date(game.starts_at);
   const free = game.price_cents === 0;
   const full = filled >= slotsTotal;
+  const imageUrl = getCourtImage(game.sports?.name);
 
   const slotsLabel = full
     ? "Completo"
@@ -161,39 +163,48 @@ function GameDetail() {
         <ArrowLeft className="size-3" /> Voltar
       </button>
 
-      <div className="brutal-card-lg p-5 bg-paper">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <span className="text-xs font-bold uppercase text-ink/60">
-              {game.sports?.emoji} {game.sports?.name}
-            </span>
-            <h1 className="text-3xl font-extrabold leading-tight mt-1">{game.title}</h1>
-            <p className="text-xs text-ink/70 mt-1">por {game.host?.display_name}</p>
+      <div
+        className="brutal-card-lg p-5 relative overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url(${imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className="text-xs font-bold uppercase text-ink/60">
+                {game.sports?.emoji} {game.sports?.name}
+              </span>
+              <h1 className="text-3xl font-extrabold leading-tight mt-1">{game.title}</h1>
+              <p className="text-xs text-ink/70 mt-1">por {game.host?.display_name}</p>
+            </div>
+            {game.urgency === "urgente" && (
+              <span className="brutal-chip bg-urgent text-white"><Zap className="size-3" /> URGENTE</span>
+            )}
           </div>
-          {game.urgency === "urgente" && (
-            <span className="brutal-chip bg-urgent text-white"><Zap className="size-3" /> URGENTE</span>
+
+          <div className="mt-4 grid gap-2 text-sm">
+            <Row icon={MapPin} text={`${game.venues?.name ?? "—"}${game.venues?.address ? " · " + game.venues.address : ""}`} />
+            <Row icon={Users} text={slotsLabel} />
+            <div className="flex gap-2 flex-wrap">
+              <span className="brutal-chip bg-paper">
+                {start.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
+              </span>
+              <span className="brutal-chip bg-paper">
+                {start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+              <span className={cn("brutal-chip", free ? "bg-zap text-[#111]" : "bg-paper")}>
+                {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
+              </span>
+            </div>
+          </div>
+
+          {game.description && (
+            <p className="mt-4 text-sm text-ink/80 whitespace-pre-wrap">{game.description}</p>
           )}
         </div>
-
-        <div className="mt-4 grid gap-2 text-sm">
-          <Row icon={MapPin} text={`${game.venues?.name ?? "—"}${game.venues?.address ? " · " + game.venues.address : ""}`} />
-          <Row icon={Users} text={slotsLabel} />
-          <div className="flex gap-2 flex-wrap">
-            <span className="brutal-chip bg-paper">
-              {start.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
-            </span>
-            <span className="brutal-chip bg-paper">
-              {start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-            </span>
-            <span className={cn("brutal-chip", free ? "bg-zap" : "bg-paper")}>
-              {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
-            </span>
-          </div>
-        </div>
-
-        {game.description && (
-          <p className="mt-4 text-sm text-ink/80 whitespace-pre-wrap">{game.description}</p>
-        )}
       </div>
 
       <div className="mt-4">
