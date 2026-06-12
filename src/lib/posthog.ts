@@ -1,9 +1,7 @@
-import type PostHog from "posthog-js";
+let posthogInstance: ReturnType<typeof import("posthog-js").default["init"]> | null = null;
+let initPromise: Promise<ReturnType<typeof import("posthog-js").default["init"]> | null> | null = null;
 
-let posthogInstance: PostHog | null = null;
-let initPromise: Promise<PostHog | null> | null = null;
-
-export async function getPosthog(): Promise<PostHog | null> {
+export async function getPosthog(): Promise<ReturnType<typeof import("posthog-js").default["init"]> | null> {
   if (typeof window === "undefined") return null;
   if (posthogInstance) return posthogInstance;
   if (initPromise) return initPromise;
@@ -13,12 +11,11 @@ export async function getPosthog(): Promise<PostHog | null> {
     const posthog = phModule.default;
     const key = import.meta.env.VITE_POSTHOG_KEY;
     if (key) {
-      posthog.init(key, {
+      posthogInstance = posthog.init(key, {
         api_host: import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com",
         capture_pageview: false,
         capture_pageleave: false,
       });
-      posthogInstance = posthog;
     }
     return posthogInstance;
   })();
