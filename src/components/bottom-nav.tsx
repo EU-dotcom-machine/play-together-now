@@ -22,7 +22,7 @@ export function BottomNav() {
                 to={to}
                 className={cn(
                   "flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
-                  active ? "text-pop" : "text-[#555555]",
+                  active ? "text-pop" : "text-[#888888]",
                 )}
               >
                 <Icon className={cn("size-6", active && "stroke-[2.5]")} />
