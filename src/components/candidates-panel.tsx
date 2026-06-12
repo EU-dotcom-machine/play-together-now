@@ -83,7 +83,6 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
       return toast.error(error.message);
     }
     if (status === "confirmed") {
-      // Check if game is now full and flip to 'full'
       const { count } = await supabase
         .from("game_participants")
         .select("user_id", { count: "exact", head: true })
@@ -106,12 +105,11 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
   return (
     <section className="mt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold uppercase tracking-wide" style={{ color: "#fff" }}>
+        <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">
           Candidatos
         </h2>
         <button
-          className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 border"
-          style={{ background: "#1E1E1E", color: "#fff", borderColor: "#2A2A2A" }}
+          className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 border border-border bg-surface text-foreground"
           onClick={() => setManageOpen(true)}
         >
           <Settings2 className="size-3" /> Gerenciar Jogo
@@ -119,7 +117,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
       </div>
 
       {candidates.length === 0 ? (
-        <p className="mt-3 text-sm" style={{ color: "#888" }}>
+        <p className="mt-3 text-sm text-muted-foreground">
           Nenhuma solicitação no momento.
         </p>
       ) : (
@@ -134,19 +132,10 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
             return (
               <li
                 key={c.user_id}
-                className="rounded-xl p-3 border"
-                style={{
-                  background: "#1E1E1E",
-                  borderColor: "#2A2A2A",
-                  borderLeftWidth: "3px",
-                  borderLeftColor: "#FFD600",
-                }}
+                className="rounded-xl p-3 border border-border bg-surface border-l-[3px] border-l-pop"
               >
                 <div className="flex items-start gap-3">
-                  <div
-                    className="size-10 rounded-full flex items-center justify-center font-extrabold text-base shrink-0"
-                    style={{ background: "#FFD600", color: "#111" }}
-                  >
+                  <div className="size-10 rounded-full flex items-center justify-center font-extrabold text-base shrink-0 bg-pop text-[#111]">
                     {p?.avatar_url ? (
                       <img src={p.avatar_url} alt="" className="size-10 rounded-full object-cover" />
                     ) : (
@@ -155,22 +144,19 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold truncate" style={{ color: "#fff" }}>
+                      <p className="font-bold truncate text-foreground">
                         {p?.display_name ?? "Jogador"}
                       </p>
-                      <span
-                        className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1"
-                        style={{ background: "#FFD600", color: "#111" }}
-                      >
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 bg-pop text-[#111]">
                         <Zap className="size-3" /> {p?.points ?? 0} pts
                       </span>
                     </div>
                     {km != null ? (
-                      <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "#888" }}>
+                      <p className="text-xs mt-1 flex items-center gap-1 text-muted-foreground">
                         <MapPin className="size-3" /> {formatKm(km)}
                       </p>
                     ) : (
-                      <p className="text-xs mt-1" style={{ color: "#888" }}>
+                      <p className="text-xs mt-1 text-muted-foreground">
                         Localização não informada
                       </p>
                     )}
@@ -179,8 +165,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                         {c.sports.map((s: any) => (
                           <span
                             key={s.id}
-                            className="px-2 py-0.5 rounded-full text-[10px] font-bold border"
-                            style={{ background: "#1E1E1E", color: "#888", borderColor: "#2A2A2A" }}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold border border-border bg-surface text-muted-foreground"
                           >
                             {s.emoji} {s.name}
                           </span>
@@ -194,16 +179,14 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                   <button
                     disabled={busy === c.user_id}
                     onClick={() => decide(c.user_id, "confirmed")}
-                    className="flex-1 px-4 py-2.5 rounded-full font-extrabold text-sm uppercase flex items-center justify-center gap-1 disabled:opacity-50"
-                    style={{ background: "#FFD600", color: "#111" }}
+                    className="flex-1 px-4 py-2.5 rounded-full font-extrabold text-sm uppercase flex items-center justify-center gap-1 disabled:opacity-50 bg-pop text-[#111]"
                   >
                     <Check className="size-4" /> Confirmar
                   </button>
                   <button
                     disabled={busy === c.user_id}
                     onClick={() => decide(c.user_id, "declined")}
-                    className="flex-1 px-4 py-2.5 rounded-full font-bold text-sm uppercase flex items-center justify-center gap-1 disabled:opacity-50"
-                    style={{ background: "#2A2A2A", color: "#888" }}
+                    className="flex-1 px-4 py-2.5 rounded-full font-bold text-sm uppercase flex items-center justify-center gap-1 disabled:opacity-50 bg-border text-muted-foreground"
                   >
                     <X className="size-4" /> Recusar
                   </button>

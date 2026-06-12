@@ -123,22 +123,10 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
       <div className="absolute inset-0 bg-black/60" />
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md mx-auto animate-[slideUp_0.25s_ease-out]"
-        style={{
-          background: "#1E1E1E",
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          padding: "20px 16px 32px",
-        }}
+        className="relative w-full max-w-md mx-auto animate-[slideUp_0.25s_ease-out] bg-surface rounded-t-3xl px-4 pt-5 pb-8"
       >
-        <div
-          className="mx-auto mb-4 rounded-full"
-          style={{ width: 44, height: 4, background: "#2A2A2A" }}
-        />
-        <h3
-          className="text-base font-bold uppercase tracking-wider mb-3 px-2"
-          style={{ color: "#fff" }}
-        >
+        <div className="mx-auto mb-4 h-1 w-11 rounded-full bg-border" />
+        <h3 className="text-base font-bold uppercase tracking-wider mb-3 px-2 text-foreground">
           Gerenciar Jogo
         </h3>
         <ul className="grid gap-1">
@@ -147,14 +135,10 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
               <button
                 onClick={it.onClick}
                 disabled={busy}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left disabled:opacity-50"
-                style={{ background: "transparent", color: "#fff" }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left disabled:opacity-50 text-foreground"
               >
-                <span
-                  className="size-9 rounded-full flex items-center justify-center"
-                  style={{ background: "rgba(255,214,0,0.12)" }}
-                >
-                  <it.icon className="size-4" style={{ color: "#FFD600" }} />
+                <span className="size-9 rounded-full flex items-center justify-center bg-pop/10">
+                  <it.icon className="size-4 text-pop" />
                 </span>
                 <span className="font-semibold">{it.label}</span>
               </button>
@@ -164,35 +148,31 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
 
         {confirm && (
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center px-6"
-            style={{ background: "rgba(0,0,0,0.7)" }}
+            className="fixed inset-0 z-[60] flex items-center justify-center px-6 bg-black/70"
             onClick={() => !busy && setConfirm(null)}
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-2xl p-5"
-              style={{ background: "#1E1E1E", border: "1px solid #2A2A2A" }}
+              className="w-full max-w-sm rounded-2xl p-5 bg-surface border border-border"
             >
-              <h4 className="text-lg font-bold" style={{ color: "#fff" }}>
+              <h4 className="text-lg font-bold text-foreground">
                 {confirm.title}
               </h4>
-              <p className="mt-1 text-sm" style={{ color: "#888" }}>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {confirm.message}
               </p>
               <div className="mt-5 grid grid-cols-2 gap-2">
                 <button
                   disabled={busy}
                   onClick={() => setConfirm(null)}
-                  className="py-3 rounded-full font-bold"
-                  style={{ background: "#2A2A2A", color: "#888" }}
+                  className="py-3 rounded-full font-bold bg-border text-muted-foreground"
                 >
                   Cancelar
                 </button>
                 <button
                   disabled={busy}
                   onClick={() => confirm.onConfirm()}
-                  className="py-3 rounded-full font-bold flex items-center justify-center gap-2"
-                  style={{ background: "#FFD600", color: "#111" }}
+                  className="py-3 rounded-full font-bold flex items-center justify-center gap-2 bg-pop text-[#111]"
                 >
                   {busy && <Loader2 className="size-4 animate-spin" />}
                   Confirmar

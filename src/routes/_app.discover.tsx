@@ -110,7 +110,7 @@ function Discover() {
         </div>
         <Link
           to="/new"
-          className="brutal-card-lg px-3 py-2 bg-pop text-paper text-xs font-bold uppercase shrink-0"
+          className="brutal-card-lg px-3 py-2 bg-pop text-[#111] text-xs font-bold uppercase shrink-0"
         >
           + Criar
         </Link>
@@ -120,7 +120,7 @@ function Discover() {
         <div className="mt-5 brutal-card-lg p-3 bg-paper">
           <div className="flex items-center justify-between text-xs font-bold uppercase">
             <span>Raio</span>
-            <span className="bg-pop text-paper px-2 py-0.5">{radiusKm} km</span>
+            <span className="bg-pop text-[#111] px-2 py-0.5">{radiusKm} km</span>
           </div>
           <div className="mt-2 flex gap-2">
             {[5, 10, 20, 50].map((r) => (
@@ -129,7 +129,7 @@ function Discover() {
                 onClick={() => setRadiusKm(r)}
                 className={cn(
                   "flex-1 brutal-chip justify-center text-xs font-bold",
-                  radiusKm === r ? "bg-pop text-paper border-ink" : "bg-paper",
+                  radiusKm === r ? "bg-pop text-[#111] border-ink" : "bg-paper",
                 )}
               >
                 {r}km
@@ -264,7 +264,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
 function UrgencyChip({ urgency }: { urgency: GameRow["urgency"] }) {
   if (urgency === "urgente")
     return (
-      <span className="brutal-chip bg-pop text-paper border-ink">
+      <span className="brutal-chip bg-urgent text-white border-ink">
         <Zap className="size-3" /> URGENTE
       </span>
     );
