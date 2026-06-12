@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { getCourtImage } from "@/lib/sport-courts";
 import { Reviews } from "@/components/reviews";
 import { CandidatesPanel } from "@/components/candidates-panel";
+import { trackEvent } from "@/lib/posthog";
 
 export const Route = createFileRoute("/_app/games/$id")({
   head: () => ({ meta: [{ title: "Jogo — Esportes Unidos" }] }),
