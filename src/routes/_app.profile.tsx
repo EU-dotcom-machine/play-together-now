@@ -161,8 +161,23 @@ function Profile() {
           </div>
         </div>
 
-        <div className="mt-5 inline-flex items-center gap-1.5 bg-pop text-[#111] px-3 py-1.5 rounded-full text-xs font-bold">
-          <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
+        <div className="mt-5 flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center gap-1.5 bg-pop text-[#111] px-3 py-1.5 rounded-full text-xs font-bold">
+            <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
+          </div>
+          <div className="inline-flex items-center gap-2 bg-black/30 text-white px-3 py-1.5 rounded-full text-xs">
+            <MapPin className="size-3.5" />
+            {(profile as any)?.latitude != null
+              ? "Localização salva"
+              : "Sem localização"}
+            <button
+              type="button"
+              onClick={updateLocation}
+              className="ml-1 inline-flex items-center gap-1 bg-pop text-[#111] px-2 py-0.5 rounded-full font-bold uppercase"
+            >
+              <RefreshCw className="size-3" /> Atualizar
+            </button>
+          </div>
         </div>
       </header>
 
