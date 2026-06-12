@@ -204,16 +204,26 @@ function NewGame() {
 
         <Field label="Urgência">
           <div className="grid grid-cols-3 gap-2">
-            {(["relaxado", "normal", "urgente"] as const).map((u) => (
-              <button
-                key={u}
-                type="button"
-                onClick={() => setUrgency(u)}
-                className={`brutal-card py-2 text-xs font-bold uppercase ${urgency === u ? (u === "urgente" ? "bg-urgent text-white" : u === "normal" ? "bg-pop text-[#111]" : "bg-success text-white") : "bg-paper"}`}
-              >
-                {u}
-              </button>
-            ))}
+            {(["relaxado", "normal", "urgente"] as const).map((u) => {
+              const isActive = urgency === u;
+              const activeCls =
+                u === "urgente"
+                  ? "bg-[#FF4444] text-white border-[#FF4444]"
+                  : u === "normal"
+                    ? "bg-[#FFD600] text-[#111] border-[#FFD600]"
+                    : "bg-[#2D6A4F] text-white border-[#2D6A4F]";
+              const inactiveCls = "bg-[#1E1E1E] border-[#2A2A2A] text-[#888]";
+              return (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => setUrgency(u)}
+                  className={`rounded-[10px] border py-2.5 text-xs font-bold uppercase tracking-wide ${isActive ? activeCls : inactiveCls}`}
+                >
+                  {u}
+                </button>
+              );
+            })}
           </div>
         </Field>
 
@@ -223,11 +233,12 @@ function NewGame() {
 
         <button
           disabled={saving}
-          className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase flex items-center justify-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60"
+          className="btn-primary-pill mt-2 flex items-center justify-center gap-2 active:opacity-90 disabled:opacity-60"
         >
           {saving && <Loader2 className="size-4 animate-spin" />}
           Publicar jogo
         </button>
+
       </form>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
