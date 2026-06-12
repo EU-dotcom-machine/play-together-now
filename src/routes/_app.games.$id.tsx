@@ -107,6 +107,7 @@ function GameDetail() {
 
   async function sayEu() {
     if (!user) return;
+    trackEvent("eu_button_clicked", { game_id: id });
     setArmRaised(true);
     setTimeout(() => setArmRaised(false), 1600);
     // If a declined row exists, reset it back to pending; otherwise insert.
