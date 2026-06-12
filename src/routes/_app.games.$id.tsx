@@ -171,7 +171,7 @@ function GameDetail() {
             <p className="text-xs text-ink/70 mt-1">por {game.host?.display_name}</p>
           </div>
           {game.urgency === "urgente" && (
-            <span className="brutal-chip bg-pop text-paper"><Zap className="size-3" /> URGENTE</span>
+            <span className="brutal-chip bg-urgent text-white"><Zap className="size-3" /> URGENTE</span>
           )}
         </div>
 
