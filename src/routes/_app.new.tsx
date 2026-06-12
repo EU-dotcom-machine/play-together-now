@@ -208,7 +208,7 @@ function NewGame() {
                 key={u}
                 type="button"
                 onClick={() => setUrgency(u)}
-                className={`brutal-card py-2 text-xs font-bold uppercase ${urgency === u ? (u === "urgente" ? "bg-pop text-paper" : "bg-zap") : "bg-paper"}`}
+                className={`brutal-card py-2 text-xs font-bold uppercase ${urgency === u ? (u === "urgente" ? "bg-urgent text-white" : u === "normal" ? "bg-pop text-[#111]" : "bg-success text-white") : "bg-paper"}`}
               >
                 {u}
               </button>
