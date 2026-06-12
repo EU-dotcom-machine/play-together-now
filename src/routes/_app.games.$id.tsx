@@ -96,16 +96,18 @@ function GameDetail() {
     const prev = prevStatusRef.current;
     if (prev === "pending" && myStatus === "confirmed") {
       setCelebrate(true);
+      trackEvent("game_joined", { game_id: id });
       setTimeout(() => setCelebrate(false), 2200);
     }
     if (prev === "pending" && myStatus === "declined") {
       toast("Não foi dessa vez. Tente novamente.");
     }
     prevStatusRef.current = myStatus;
-  }, [myStatus]);
+  }, [myStatus, id]);
 
   async function sayEu() {
     if (!user) return;
+    trackEvent("eu_button_clicked", { game_id: id });
     setArmRaised(true);
     setTimeout(() => setArmRaised(false), 1600);
     // If a declined row exists, reset it back to pending; otherwise insert.
@@ -123,7 +125,6 @@ function GameDetail() {
       if (error) return toast.error(error.message);
     }
     toast.success("Pedido enviado! Aguarde a confirmação.");
-    trackEvent("game_joined", { game_id: id });
     qc.invalidateQueries({ queryKey: ["participants", id] });
   }
 
