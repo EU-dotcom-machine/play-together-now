@@ -110,7 +110,7 @@ function Discover() {
         </div>
         <Link
           to="/new"
-          className="brutal-card-lg px-3 py-2 bg-pop text-paper text-xs font-bold uppercase shrink-0"
+          className="brutal-card-lg px-3 py-2 bg-pop text-[#111] text-xs font-bold uppercase shrink-0"
         >
           + Criar
         </Link>
