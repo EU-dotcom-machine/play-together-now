@@ -125,7 +125,6 @@ function GameDetail() {
       if (error) return toast.error(error.message);
     }
     toast.success("Pedido enviado! Aguarde a confirmação.");
-    trackEvent("game_joined", { game_id: id });
     qc.invalidateQueries({ queryKey: ["participants", id] });
   }
 
