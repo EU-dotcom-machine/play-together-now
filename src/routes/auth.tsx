@@ -38,6 +38,7 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Conta criada! Bora jogar.");
+        trackEvent("user_signed_up");
         navigate({ to: "/discover" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
