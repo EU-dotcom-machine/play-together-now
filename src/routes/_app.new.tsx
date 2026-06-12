@@ -1,15 +1,28 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
+import { distanceKm } from "@/lib/geo";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/new")({
   head: () => ({ meta: [{ title: "Criar jogo — PEGA" }] }),
   component: NewGame,
 });
+
+type Coords = { lat: number; lng: number };
 
 function NewGame() {
   const { user } = useAuth();
@@ -23,15 +36,62 @@ function NewGame() {
   const [price, setPrice] = useState(0);
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
   const [description, setDescription] = useState("");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
+  const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
+  const [source, setSource] = useState<"gps" | "address">("gps");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAddrCoords, setPendingAddrCoords] = useState<Coords | null>(null);
   const [saving, setSaving] = useState(false);
+  const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
-      (p) => setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      (p) => setGpsCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
       () => {},
     );
   }, []);
+
+  // Debounced geocoding of typed address
+  useEffect(() => {
+    if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+    const addr = venueAddress.trim();
+    if (addr.length < 5) {
+      setAddressCoords(null);
+      setSource("gps");
+      return;
+    }
+    geocodeTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(addr)}`,
+          { headers: { "Accept-Language": "pt-BR" } },
+        );
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          setAddressCoords(null);
+          setSource("gps");
+          return;
+        }
+        const found: Coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+        if (!isFinite(found.lat) || !isFinite(found.lng)) return;
+        setAddressCoords(found);
+        if (gpsCoords) {
+          const d = distanceKm(gpsCoords.lat, gpsCoords.lng, found.lat, found.lng);
+          if (d > 0.5) {
+            setPendingAddrCoords(found);
+            setConfirmOpen(true);
+            return;
+          }
+        }
+        setSource("address");
+      } catch {
+        setAddressCoords(null);
+      }
+    }, 800);
+    return () => {
+      if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+    };
+  }, [venueAddress, gpsCoords]);
 
   const { data: sports } = useQuery({
     queryKey: ["sports"],
@@ -41,9 +101,12 @@ function NewGame() {
     },
   });
 
+  const effectiveCoords: Coords | null =
+    source === "address" && addressCoords ? addressCoords : gpsCoords;
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user || !coords) {
+    if (!user || !effectiveCoords) {
       toast.error("Precisamos da sua localização pra criar o jogo");
       return;
     }
@@ -55,8 +118,8 @@ function NewGame() {
           created_by: user.id,
           name: venueName,
           address: venueAddress || null,
-          latitude: coords.lat,
-          longitude: coords.lng,
+          latitude: effectiveCoords.lat,
+          longitude: effectiveCoords.lng,
         })
         .select("id")
         .single();
@@ -74,13 +137,12 @@ function NewGame() {
           slots_total: slots,
           price_cents: Math.round(price * 100),
           urgency,
-          latitude: coords.lat,
-          longitude: coords.lng,
+          latitude: effectiveCoords.lat,
+          longitude: effectiveCoords.lng,
         })
         .select("id")
         .single();
       if (gErr) throw gErr;
-      // Host is the organizer, not a confirmed slot — do not insert into game_participants.
 
       toast.success("Jogo criado!");
       navigate({ to: "/games/$id", params: { id: game.id } });
@@ -121,7 +183,9 @@ function NewGame() {
 
         <div className="brutal-chip bg-zap w-fit">
           <MapPin className="size-3" />
-          {coords ? "Localização capturada" : "Aguardando GPS…"}
+          {effectiveCoords
+            ? `Localização: ${source === "address" ? "endereço" : "GPS"}`
+            : "Aguardando GPS…"}
         </div>
 
         <Field label="Quando">
@@ -164,6 +228,36 @@ function NewGame() {
           Publicar jogo
         </button>
       </form>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Endereço diferente da sua posição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está em outro lugar agora. Usar o endereço digitado como local do jogo?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setSource("gps");
+                setPendingAddrCoords(null);
+              }}
+            >
+              Usar minha posição
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingAddrCoords) setAddressCoords(pendingAddrCoords);
+                setSource("address");
+                setPendingAddrCoords(null);
+              }}
+            >
+              Usar endereço
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
