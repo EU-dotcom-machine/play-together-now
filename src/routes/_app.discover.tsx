@@ -8,7 +8,7 @@ import { MapPin, Zap, Users, Loader2, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/discover")({
-  head: () => ({ meta: [{ title: "Jogos perto de você — PEGA" }] }),
+  head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
   component: Discover,
 });
 

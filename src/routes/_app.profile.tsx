@@ -8,7 +8,7 @@ import { LogOut, Save, Trophy, MapPin, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/profile")({
-  head: () => ({ meta: [{ title: "Perfil — PEGA" }] }),
+  head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
   component: Profile,
 });
 

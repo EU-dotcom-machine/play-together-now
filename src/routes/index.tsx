@@ -5,9 +5,9 @@ import { ArrowRight, Zap, MapPin, Users } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PEGA — bora jogar?" },
+      { title: "Esportes Unidos — bora jogar?" },
       { name: "description", content: "Ache jogos rolando perto de você. Diga EU e levanta o braço." },
-      { property: "og:title", content: "PEGA — bora jogar?" },
+      { property: "og:title", content: "Esportes Unidos — bora jogar?" },
       { property: "og:description", content: "Ache jogos rolando perto de você." },
     ],
   }),
@@ -31,7 +31,7 @@ function Landing() {
             Bora<br />jogar<span className="text-pop">.</span>
           </h1>
           <p className="mt-5 text-lg font-medium text-ink/80 max-w-sm">
-            Falta gente pra completar o time? PEGA conecta você com jogos rolando agora, perto de você.
+            Falta gente pra completar o time? O Esportes Unidos conecta você com jogos rolando agora, perto de você. Diga EU! e entra no jogo.
           </p>
 
           <div className="mt-8 flex flex-col gap-3">

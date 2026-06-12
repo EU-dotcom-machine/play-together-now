@@ -10,7 +10,7 @@ import { Reviews } from "@/components/reviews";
 import { CandidatesPanel } from "@/components/candidates-panel";
 
 export const Route = createFileRoute("/_app/games/$id")({
-  head: () => ({ meta: [{ title: "Jogo — PEGA" }] }),
+  head: () => ({ meta: [{ title: "Jogo — Esportes Unidos" }] }),
   component: GameDetail,
 });
 
