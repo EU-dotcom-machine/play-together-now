@@ -181,12 +181,13 @@ function NewGame() {
           <input value={venueAddress} onChange={(e) => setVenueAddress(e.target.value)} className="input-brutal" placeholder="Rua, número, bairro" />
         </Field>
 
-        <div className="brutal-chip bg-zap w-fit">
-          <MapPin className="size-3" />
+        <div className="inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 bg-pop text-[#111] text-xs font-bold uppercase">
+          <MapPin className="size-3.5" />
           {effectiveCoords
-            ? `Localização: ${source === "address" ? "endereço" : "GPS"}`
+            ? `Localização capturada · ${source === "address" ? "endereço" : "GPS"}`
             : "Aguardando GPS…"}
         </div>
+
 
         <Field label="Quando">
           <input required type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="input-brutal" />
