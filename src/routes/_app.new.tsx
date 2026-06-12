@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/new")({
-  head: () => ({ meta: [{ title: "Criar jogo — PEGA" }] }),
+  head: () => ({ meta: [{ title: "Criar jogo — Esportes Unidos" }] }),
   component: NewGame,
 });
 

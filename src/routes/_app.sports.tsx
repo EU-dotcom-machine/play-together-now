@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Star } from "lucide-react";
 
 export const Route = createFileRoute("/_app/sports")({
-  head: () => ({ meta: [{ title: "Esportes — PEGA" }] }),
+  head: () => ({ meta: [{ title: "Esportes — Esportes Unidos" }] }),
   component: SportsList,
 });
 

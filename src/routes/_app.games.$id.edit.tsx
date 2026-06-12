@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/games/$id/edit")({
-  head: () => ({ meta: [{ title: "Editar jogo — PEGA" }] }),
+  head: () => ({ meta: [{ title: "Editar jogo — Esportes Unidos" }] }),
   component: EditGame,
 });
 
