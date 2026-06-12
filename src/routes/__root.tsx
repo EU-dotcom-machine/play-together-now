@@ -130,11 +130,27 @@ function AuthBridge() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const { getPosthog } = await import("@/lib/posthog");
+      const ph = await getPosthog();
+      if (cancelled) return;
+
       const { supabase } = await import("@/integrations/supabase/client");
       if (cancelled) return;
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         queryClient.invalidateQueries();
+        if (session?.user?.id && ph) {
+          ph.identify(session.user.id);
+        } else if (event === "SIGNED_OUT" && ph) {
+          ph.reset();
+        }
       });
+
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user?.id && ph) {
+        ph.identify(data.session.user.id);
+      }
+
       return () => subscription.unsubscribe();
     })();
     return () => { cancelled = true; };
