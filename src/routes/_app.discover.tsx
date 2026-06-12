@@ -264,7 +264,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
 function UrgencyChip({ urgency }: { urgency: GameRow["urgency"] }) {
   if (urgency === "urgente")
     return (
-      <span className="brutal-chip bg-pop text-paper border-ink">
+      <span className="brutal-chip bg-urgent text-white border-ink">
         <Zap className="size-3" /> URGENTE
       </span>
     );
