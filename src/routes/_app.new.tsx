@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { distanceKm } from "@/lib/geo";
+import { trackEvent } from "@/lib/posthog";
 import {
   AlertDialog,
   AlertDialogAction,
