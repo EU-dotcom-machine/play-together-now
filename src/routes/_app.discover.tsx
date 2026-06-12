@@ -129,7 +129,7 @@ function Discover() {
                 onClick={() => setRadiusKm(r)}
                 className={cn(
                   "flex-1 brutal-chip justify-center text-xs font-bold",
-                  radiusKm === r ? "bg-pop text-paper border-ink" : "bg-paper",
+                  radiusKm === r ? "bg-pop text-[#111] border-ink" : "bg-paper",
                 )}
               >
                 {r}km
