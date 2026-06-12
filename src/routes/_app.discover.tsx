@@ -215,20 +215,27 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
     <Link
       to="/games/$id"
       params={{ id: game.id }}
-      className="brutal-card-lg p-4 block transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none relative overflow-hidden"
+      className="block rounded-2xl overflow-hidden relative transition-transform active:translate-y-[1px]"
       style={{
+        backgroundColor: "#1E1E1E",
         backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.78)), url(${imageUrl})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "140px",
+        borderLeft: "4px solid #FFD600",
+        padding: "16px",
       }}
     >
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{game.sports?.emoji ?? "🏅"}</span>
           <div>
-            <p className="text-xs font-bold uppercase text-ink/60">{game.sports?.name}</p>
-            <h3 className="text-lg font-bold leading-tight">{game.title}</h3>
+            <p className="uppercase text-white/70" style={{ fontSize: "10px", letterSpacing: "0.06em" }}>
+              {game.sports?.name}
+            </p>
+            <h3 className="text-white font-bold leading-tight" style={{ fontSize: "15px" }}>
+              {game.title}
+            </h3>
           </div>
         </div>
         <UrgencyChip urgency={game.urgency} />
@@ -236,31 +243,36 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
 
       <div className="relative z-10 mt-3 flex flex-wrap gap-2 text-xs">
         {distKm != null && (
-          <span className="brutal-chip bg-zap border-ink text-[#111]">
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#FFD600] text-[#111] font-bold">
             <MapPin className="size-3" />
             {formatDistance(distKm)}
           </span>
         )}
-        <span className="brutal-chip bg-paper">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
           <MapPin className="size-3" />
           {game.venues?.name ?? "Sem local"}
         </span>
-        <span className="brutal-chip bg-paper">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
           {start.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
           {start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
         </span>
-        <span className="brutal-chip bg-paper">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
           <Users className="size-3" />
           {filled >= game.slots_total
             ? "Completo"
             : `Falta${game.slots_total - filled === 1 ? "" : "m"} ${game.slots_total - filled} jogador${game.slots_total - filled === 1 ? "" : "es"}`}
         </span>
-        <span className={cn("brutal-chip", free ? "bg-zap text-[#111]" : "bg-paper")}>
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-bold",
+            free ? "bg-[#FFD600] text-[#111]" : "bg-[#2A2A2A] text-white",
+          )}
+        >
           {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
         </span>
         {game.sports?.total_reviews && game.sports.total_reviews > 0 ? (
-          <span className="brutal-chip bg-paper">
-            <Star className="size-3 fill-pop stroke-ink" />
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
+            <Star className="size-3 fill-[#FFD600] stroke-[#FFD600]" />
             {game.sports.avg_rating?.toFixed(1)} · {game.sports.total_reviews}
           </span>
         ) : null}
@@ -272,10 +284,19 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
 function UrgencyChip({ urgency }: { urgency: GameRow["urgency"] }) {
   if (urgency === "urgente")
     return (
-      <span className="brutal-chip bg-urgent text-white border-ink">
+      <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#FF4444] text-white text-xs" style={{ fontWeight: 800 }}>
         <Zap className="size-3" /> URGENTE
       </span>
     );
-  if (urgency === "normal") return <span className="brutal-chip bg-zap">NORMAL</span>;
-  return <span className="brutal-chip bg-paper">RELAX</span>;
+  if (urgency === "normal")
+    return (
+      <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-[#FFD600] text-[#111] text-xs" style={{ fontWeight: 800 }}>
+        NORMAL
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white text-xs font-bold">
+      RELAX
+    </span>
+  );
 }

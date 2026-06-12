@@ -127,20 +127,31 @@
 @utility input-brutal {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: #2A2A2A;
-  color: var(--color-foreground);
+  background: #1E1E1E;
+  color: #FFFFFF;
   border: 1px solid #2A2A2A;
   border-radius: 10px;
   outline: none;
   font-family: inherit;
   transition: border-color 120ms ease;
   &::placeholder { color: var(--color-text-muted); }
-  &:focus { border-color: var(--color-pop); }
+  &:focus { border-color: #FFD600; }
 }
 @utility btn-primary-pill {
-  background: var(--color-pop);
+  background: #FFD600;
   color: #111111;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 16px;
   border: none;
+  width: 100%;
+  padding: 14px 20px;
+  text-transform: uppercase;
+}
+@utility section-label {
+  color: #888888;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 600;
 }
