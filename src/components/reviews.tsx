@@ -193,7 +193,7 @@ function GameReviewForm({
       />
       <button
         disabled={saving}
-        className="brutal-card-lg bg-pop text-paper font-extrabold uppercase py-3 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
+        className="brutal-card-lg bg-pop text-[#111] font-extrabold uppercase py-3 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
       >
         {saving ? "Enviando…" : "Enviar avaliação"}
       </button>
@@ -300,7 +300,7 @@ function PlayerRow({
           <button
             onClick={submit}
             disabled={saving}
-            className="brutal-card bg-pop text-paper font-bold uppercase py-2 text-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
+            className="brutal-card bg-pop text-[#111] font-bold uppercase py-2 text-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
           >
             {saving ? "Enviando…" : "Enviar"}
           </button>
