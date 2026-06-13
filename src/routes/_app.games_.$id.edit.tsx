@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
-export const Route = createFileRoute("/_app/games/$id/edit")({
+export const Route = createFileRoute("/_app/games_/$id/edit")({
   head: () => ({ meta: [{ title: "Editar jogo — Esportes Unidos" }] }),
   component: EditGame,
 });
@@ -34,8 +34,8 @@ function EditGame() {
   const [title, setTitle] = useState("");
   const [sportId, setSportId] = useState("");
   const [startsAt, setStartsAt] = useState("");
-  const [slots, setSlots] = useState(10);
-  const [price, setPrice] = useState(0);
+  const [slots, setSlots] = useState("");
+  const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -50,8 +50,8 @@ function EditGame() {
       setStartsAt(
         `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
       );
-      setSlots(game.slots_total ?? 10);
-      setPrice((game.price_cents ?? 0) / 100);
+      setSlots(String(game.slots_total ?? ""));
+      setPrice(game.price_cents ? String((game.price_cents ?? 0) / 100) : "");
       setUrgency((game.urgency as any) ?? "normal");
       setDescription(game.description ?? "");
       setHydrated(true);
@@ -67,8 +67,8 @@ function EditGame() {
         title,
         sport_id: sportId,
         starts_at: new Date(startsAt).toISOString(),
-        slots_total: slots,
-        price_cents: Math.round(price * 100),
+        slots_total: Math.max(1, parseInt(slots || "10", 10) || 10),
+        price_cents: Math.round((price.trim() === "" ? 0 : parseFloat(price) || 0) * 100),
         urgency,
         description: description || null,
       } as any)
@@ -133,20 +133,24 @@ function EditGame() {
             <input
               required
               type="number"
+              inputMode="numeric"
               min={1}
               max={50}
               value={slots}
-              onChange={(e) => setSlots(+e.target.value)}
+              placeholder="10"
+              onChange={(e) => setSlots(e.target.value.replace(/^0+(?=\d)/, ""))}
               className="input-brutal"
             />
           </Field>
           <Field label="Valor (R$)">
             <input
               type="number"
+              inputMode="decimal"
               min={0}
               step="0.5"
               value={price}
-              onChange={(e) => setPrice(+e.target.value)}
+              placeholder="0"
+              onChange={(e) => setPrice(e.target.value.replace(/^0+(?=\d)/, ""))}
               className="input-brutal"
             />
           </Field>
