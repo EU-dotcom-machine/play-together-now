@@ -67,8 +67,8 @@ function EditGame() {
         title,
         sport_id: sportId,
         starts_at: new Date(startsAt).toISOString(),
-        slots_total: slots,
-        price_cents: Math.round(price * 100),
+        slots_total: Math.max(1, parseInt(slots || "10", 10) || 10),
+        price_cents: Math.round((price.trim() === "" ? 0 : parseFloat(price) || 0) * 100),
         urgency,
         description: description || null,
       } as any)
