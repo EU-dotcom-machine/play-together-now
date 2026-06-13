@@ -34,8 +34,8 @@ function EditGame() {
   const [title, setTitle] = useState("");
   const [sportId, setSportId] = useState("");
   const [startsAt, setStartsAt] = useState("");
-  const [slots, setSlots] = useState(10);
-  const [price, setPrice] = useState(0);
+  const [slots, setSlots] = useState("");
+  const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
