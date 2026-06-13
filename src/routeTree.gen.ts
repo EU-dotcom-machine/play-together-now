@@ -17,7 +17,7 @@ import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppNewRouteImport } from './routes/_app.new'
 import { Route as AppDiscoverRouteImport } from './routes/_app.discover'
 import { Route as AppGamesIdRouteImport } from './routes/_app.games.$id'
-import { Route as AppGamesIdEditRouteImport } from './routes/_app.games.$id.edit'
+import { Route as AppGamesIdEditRouteImport } from './routes/_app.games_.$id.edit'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -59,9 +59,9 @@ const AppGamesIdRoute = AppGamesIdRouteImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 const AppGamesIdEditRoute = AppGamesIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => AppGamesIdRoute,
+  id: '/games_/$id/edit',
+  path: '/games/$id/edit',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -71,7 +71,7 @@ export interface FileRoutesByFullPath {
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
-  '/games/$id': typeof AppGamesIdRouteWithChildren
+  '/games/$id': typeof AppGamesIdRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -81,7 +81,7 @@ export interface FileRoutesByTo {
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
-  '/games/$id': typeof AppGamesIdRouteWithChildren
+  '/games/$id': typeof AppGamesIdRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
 export interface FileRoutesById {
@@ -93,8 +93,8 @@ export interface FileRoutesById {
   '/_app/new': typeof AppNewRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/sports': typeof AppSportsRoute
-  '/_app/games/$id': typeof AppGamesIdRouteWithChildren
-  '/_app/games/$id/edit': typeof AppGamesIdEditRoute
+  '/_app/games/$id': typeof AppGamesIdRoute
+  '/_app/games_/$id/edit': typeof AppGamesIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,7 +127,7 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/sports'
     | '/_app/games/$id'
-    | '/_app/games/$id/edit'
+    | '/_app/games_/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -194,34 +194,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGamesIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/games/$id/edit': {
-      id: '/_app/games/$id/edit'
-      path: '/edit'
+    '/_app/games_/$id/edit': {
+      id: '/_app/games_/$id/edit'
+      path: '/games/$id/edit'
       fullPath: '/games/$id/edit'
       preLoaderRoute: typeof AppGamesIdEditRouteImport
-      parentRoute: typeof AppGamesIdRoute
+      parentRoute: typeof AppRoute
     }
   }
 }
-
-interface AppGamesIdRouteChildren {
-  AppGamesIdEditRoute: typeof AppGamesIdEditRoute
-}
-
-const AppGamesIdRouteChildren: AppGamesIdRouteChildren = {
-  AppGamesIdEditRoute: AppGamesIdEditRoute,
-}
-
-const AppGamesIdRouteWithChildren = AppGamesIdRoute._addFileChildren(
-  AppGamesIdRouteChildren,
-)
 
 interface AppRouteChildren {
   AppDiscoverRoute: typeof AppDiscoverRoute
   AppNewRoute: typeof AppNewRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSportsRoute: typeof AppSportsRoute
-  AppGamesIdRoute: typeof AppGamesIdRouteWithChildren
+  AppGamesIdRoute: typeof AppGamesIdRoute
+  AppGamesIdEditRoute: typeof AppGamesIdEditRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -229,7 +218,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppNewRoute: AppNewRoute,
   AppProfileRoute: AppProfileRoute,
   AppSportsRoute: AppSportsRoute,
-  AppGamesIdRoute: AppGamesIdRouteWithChildren,
+  AppGamesIdRoute: AppGamesIdRoute,
+  AppGamesIdEditRoute: AppGamesIdEditRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
