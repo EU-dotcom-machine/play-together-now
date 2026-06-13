@@ -133,20 +133,24 @@ function EditGame() {
             <input
               required
               type="number"
+              inputMode="numeric"
               min={1}
               max={50}
               value={slots}
-              onChange={(e) => setSlots(+e.target.value)}
+              placeholder="10"
+              onChange={(e) => setSlots(e.target.value.replace(/^0+(?=\d)/, ""))}
               className="input-brutal"
             />
           </Field>
           <Field label="Valor (R$)">
             <input
               type="number"
+              inputMode="decimal"
               min={0}
               step="0.5"
               value={price}
-              onChange={(e) => setPrice(+e.target.value)}
+              placeholder="0"
+              onChange={(e) => setPrice(e.target.value.replace(/^0+(?=\d)/, ""))}
               className="input-brutal"
             />
           </Field>
