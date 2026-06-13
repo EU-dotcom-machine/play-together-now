@@ -24,6 +24,7 @@ export const Route = createFileRoute("/_app/new")({
 });
 
 type Coords = { lat: number; lng: number };
+type Suggestion = { display_name: string; lat: string; lon: string };
 
 function NewGame() {
   const { user } = useAuth();
@@ -33,8 +34,8 @@ function NewGame() {
   const [venueName, setVenueName] = useState("");
   const [venueAddress, setVenueAddress] = useState("");
   const [startsAt, setStartsAt] = useState("");
-  const [slots, setSlots] = useState(10);
-  const [price, setPrice] = useState(0);
+  const [slots, setSlots] = useState("");
+  const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
@@ -43,7 +44,10 @@ function NewGame() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAddrCoords, setPendingAddrCoords] = useState<Coords | null>(null);
   const [saving, setSaving] = useState(false);
-  const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const justSelectedRef = useRef(false);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
@@ -52,47 +56,57 @@ function NewGame() {
     );
   }, []);
 
-  // Debounced geocoding of typed address
+  // Debounced suggestion fetch (no dialog while typing)
   useEffect(() => {
-    if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
-    const addr = venueAddress.trim();
-    if (addr.length < 5) {
-      setAddressCoords(null);
-      setSource("gps");
+    if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    if (justSelectedRef.current) {
+      justSelectedRef.current = false;
       return;
     }
-    geocodeTimer.current = setTimeout(async () => {
+    const addr = venueAddress.trim();
+    if (addr.length < 4) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    suggestTimer.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(addr)}`,
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=5&countrycodes=br`,
           { headers: { "Accept-Language": "pt-BR" } },
         );
         const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) {
-          setAddressCoords(null);
-          setSource("gps");
-          return;
+        if (Array.isArray(data)) {
+          setSuggestions(data);
+          setShowSuggestions(data.length > 0);
         }
-        const found: Coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-        if (!isFinite(found.lat) || !isFinite(found.lng)) return;
-        setAddressCoords(found);
-        if (gpsCoords) {
-          const d = distanceKm(gpsCoords.lat, gpsCoords.lng, found.lat, found.lng);
-          if (d > 0.5) {
-            setPendingAddrCoords(found);
-            setConfirmOpen(true);
-            return;
-          }
-        }
-        setSource("address");
       } catch {
-        setAddressCoords(null);
+        setSuggestions([]);
       }
     }, 800);
     return () => {
-      if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+      if (suggestTimer.current) clearTimeout(suggestTimer.current);
     };
-  }, [venueAddress, gpsCoords]);
+  }, [venueAddress]);
+
+  function selectSuggestion(s: Suggestion) {
+    const found: Coords = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
+    justSelectedRef.current = true;
+    setVenueAddress(s.display_name);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    if (!isFinite(found.lat) || !isFinite(found.lng)) return;
+    setAddressCoords(found);
+    if (gpsCoords) {
+      const d = distanceKm(gpsCoords.lat, gpsCoords.lng, found.lat, found.lng);
+      if (d > 0.5) {
+        setPendingAddrCoords(found);
+        setConfirmOpen(true);
+        return;
+      }
+    }
+    setSource("address");
+  }
 
   const { data: sports } = useQuery({
     queryKey: ["sports"],
@@ -105,12 +119,35 @@ function NewGame() {
   const effectiveCoords: Coords | null =
     source === "address" && addressCoords ? addressCoords : gpsCoords;
 
+  async function geocodeOnce(addr: string): Promise<Coords | null> {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1&countrycodes=br`,
+        { headers: { "Accept-Language": "pt-BR" } },
+      );
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return null;
+      const c = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      return isFinite(c.lat) && isFinite(c.lng) ? c : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user || !effectiveCoords) {
+    if (!user) return;
+    let coords = effectiveCoords;
+    if (!coords && venueAddress.trim().length >= 4) {
+      coords = await geocodeOnce(venueAddress.trim());
+    }
+    if (!coords) {
       toast.error("Precisamos da sua localização pra criar o jogo");
       return;
     }
+    const slotsNum = Math.max(1, parseInt(slots || "10", 10) || 10);
+    const priceNum = price.trim() === "" ? 0 : parseFloat(price) || 0;
+
     setSaving(true);
     try {
       const { data: venue, error: vErr } = await supabase
@@ -119,8 +156,8 @@ function NewGame() {
           created_by: user.id,
           name: venueName,
           address: venueAddress || null,
-          latitude: effectiveCoords.lat,
-          longitude: effectiveCoords.lng,
+          latitude: coords.lat,
+          longitude: coords.lng,
         })
         .select("id")
         .single();
@@ -135,11 +172,11 @@ function NewGame() {
           title,
           description: description || null,
           starts_at: new Date(startsAt).toISOString(),
-          slots_total: slots,
-          price_cents: Math.round(price * 100),
+          slots_total: slotsNum,
+          price_cents: Math.round(priceNum * 100),
           urgency,
-          latitude: effectiveCoords.lat,
-          longitude: effectiveCoords.lng,
+          latitude: coords.lat,
+          longitude: coords.lng,
         })
         .select("id")
         .single();
@@ -180,7 +217,33 @@ function NewGame() {
           <input required value={venueName} onChange={(e) => setVenueName(e.target.value)} className="input-brutal" placeholder="Quadra do Zé" />
         </Field>
         <Field label="Endereço (opcional)">
-          <input value={venueAddress} onChange={(e) => setVenueAddress(e.target.value)} className="input-brutal" placeholder="Rua, número, bairro" />
+          <div className="relative">
+            <input
+              value={venueAddress}
+              onChange={(e) => setVenueAddress(e.target.value)}
+              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+              className="input-brutal w-full"
+              placeholder="Rua, número, bairro"
+              autoComplete="off"
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <ul className="absolute z-20 mt-1 w-full rounded-[10px] border bg-[#1E1E1E] border-[#2A2A2A] text-white max-h-64 overflow-auto shadow-lg">
+                {suggestions.map((s, i) => (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => selectSuggestion(s)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-[#2A2A2A]"
+                    >
+                      {s.display_name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </Field>
 
         <div className="inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 bg-pop text-[#111] text-xs font-bold uppercase">
@@ -197,10 +260,29 @@ function NewGame() {
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Vagas (além de você)">
-            <input required type="number" min={1} max={50} value={slots} onChange={(e) => setSlots(+e.target.value)} className="input-brutal" />
+            <input
+              required
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={50}
+              value={slots}
+              placeholder="10"
+              onChange={(e) => setSlots(e.target.value.replace(/^0+(?=\d)/, ""))}
+              className="input-brutal"
+            />
           </Field>
           <Field label="Valor (R$)">
-            <input type="number" min={0} step="0.5" value={price} onChange={(e) => setPrice(+e.target.value)} className="input-brutal" />
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.5"
+              value={price}
+              placeholder="0"
+              onChange={(e) => setPrice(e.target.value.replace(/^0+(?=\d)/, ""))}
+              className="input-brutal"
+            />
           </Field>
         </div>
 
