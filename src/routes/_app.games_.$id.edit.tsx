@@ -50,8 +50,8 @@ function EditGame() {
       setStartsAt(
         `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
       );
-      setSlots(game.slots_total ?? 10);
-      setPrice((game.price_cents ?? 0) / 100);
+      setSlots(String(game.slots_total ?? ""));
+      setPrice(game.price_cents ? String((game.price_cents ?? 0) / 100) : "");
       setUrgency((game.urgency as any) ?? "normal");
       setDescription(game.description ?? "");
       setHydrated(true);
