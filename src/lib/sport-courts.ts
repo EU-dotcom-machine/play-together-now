@@ -15,10 +15,12 @@ export const sportCourtImage: Record<string, string> = {
   Handebol: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80",
   Pickleball: "https://images.unsplash.com/photo-1593341646782-e0b495cff86d?w=600&q=80",
   "MMA / Luta": "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=600&q=80",
+  MMA: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=600&q=80",
   Golfe: "https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=600&q=80",
   "Tênis de Mesa": "https://images.unsplash.com/photo-1534158914592-062992fbe900?w=600&q=80",
   Badminton: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&q=80",
   CrossFit: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80",
+  Crossfit: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80",
   Yoga: "https://images.unsplash.com/photo-1545389336-cf090694435e?w=600&q=80",
 };
 
