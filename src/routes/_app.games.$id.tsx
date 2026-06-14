@@ -10,6 +10,7 @@ import { getCourtImage } from "@/lib/sport-courts";
 import { Reviews } from "@/components/reviews";
 import { CandidatesPanel } from "@/components/candidates-panel";
 import { trackEvent } from "@/lib/posthog";
+import { AddFriendButton } from "@/components/add-friend-button";
 
 export const Route = createFileRoute("/_app/games/$id")({
   head: () => ({ meta: [{ title: "Jogo — Esportes Unidos" }] }),
@@ -270,12 +271,13 @@ function GameDetail() {
             <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-[#111]">
               {p.profiles?.display_name?.[0]?.toUpperCase() ?? "?"}
             </div>
-            <div>
-              <p className="font-bold">{p.profiles?.display_name}</p>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold truncate">{p.profiles?.display_name}</p>
               {p.profiles?.sponsor_brand && (
                 <p className="text-xs text-ink/60">patrocinador: {p.profiles.sponsor_brand}</p>
               )}
             </div>
+            {p.profiles?.id && <AddFriendButton targetId={p.profiles.id} />}
           </li>
         ))}
         {Array.from({ length: remaining }).map((_, i) => (
