@@ -7,6 +7,7 @@ import { getCourtImage } from "@/lib/sport-courts";
 import { useAuth } from "@/hooks/use-auth";
 import { MapPin, Zap, Users, Loader2, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InstallPrompt } from "@/components/install-prompt";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
@@ -156,6 +157,7 @@ function Discover() {
           <GameCard key={g.id} game={g} coords={coords} />
         ))}
       </div>
+      <InstallPrompt />
     </main>
   );
 }
