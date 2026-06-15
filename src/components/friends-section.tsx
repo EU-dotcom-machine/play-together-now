@@ -64,8 +64,8 @@ export function FriendsSection() {
     queryKey: ["friend-profiles", profileIds.sort().join(",")],
     enabled: profileIds.length > 0,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
+      const { data } = await (supabase as any)
+        .from("profiles_public")
         .select("id,display_name,avatar_url")
         .in("id", profileIds);
       const map: Record<string, Profile> = {};
@@ -85,8 +85,8 @@ export function FriendsSection() {
     }
     let cancelled = false;
     const timer = setTimeout(async () => {
-      const { data } = await supabase
-        .from("profiles")
+      const { data } = await (supabase as any)
+        .from("profiles_public")
         .select("id,display_name,avatar_url")
         .ilike("display_name", `%${t}%`)
         .neq("id", user?.id ?? "")
