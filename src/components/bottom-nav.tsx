@@ -1,11 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Compass, PlusCircle, User, MapPin } from "lucide-react";
+import { Compass, PlusCircle, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePendingRequestCount } from "@/components/friends-section";
 
 const items = [
   { to: "/discover", label: "Jogos", icon: Compass },
-  { to: "/sports", label: "Esportes", icon: MapPin },
+  { to: "/friends", label: "Amigos", icon: Users },
   { to: "/new", label: "Criar", icon: PlusCircle },
   { to: "/profile", label: "Perfil", icon: User },
 ] as const;
@@ -18,7 +18,8 @@ export function BottomNav() {
       <ul className="grid grid-cols-4 max-w-md mx-auto">
         {items.map(({ to, label, icon: Icon }) => {
           const active = pathname.startsWith(to);
-          const showBadge = to === "/profile" && pending > 0;
+          const showBadge = to === "/friends" && pending > 0;
+
           return (
             <li key={to}>
               <Link
@@ -31,10 +32,9 @@ export function BottomNav() {
                 <span className="relative">
                   <Icon className={cn("size-6", active && "stroke-[2.5]")} />
                   {showBadge && (
-                    <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-pop text-[#111] text-[10px] font-extrabold flex items-center justify-center">
-                      {pending > 9 ? "9+" : pending}
-                    </span>
+                    <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-pop ring-2 ring-surface" />
                   )}
+
                 </span>
                 {label}
               </Link>
