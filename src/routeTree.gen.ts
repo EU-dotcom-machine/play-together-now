@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSportsRouteImport } from './routes/_app.sports'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppNewRouteImport } from './routes/_app.new'
+import { Route as AppFriendsRouteImport } from './routes/_app.friends'
 import { Route as AppDiscoverRouteImport } from './routes/_app.discover'
 import { Route as AppGamesIdRouteImport } from './routes/_app.games.$id'
 import { Route as AppGamesIdEditRouteImport } from './routes/_app.games_.$id.edit'
@@ -48,6 +49,11 @@ const AppNewRoute = AppNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFriendsRoute = AppFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDiscoverRoute = AppDiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/discover': typeof AppDiscoverRoute
+  '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/discover': typeof AppDiscoverRoute
+  '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/discover': typeof AppDiscoverRoute
+  '/_app/friends': typeof AppFriendsRoute
   '/_app/new': typeof AppNewRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/sports': typeof AppSportsRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/discover'
+    | '/friends'
     | '/new'
     | '/profile'
     | '/sports'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/discover'
+    | '/friends'
     | '/new'
     | '/profile'
     | '/sports'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/auth'
     | '/_app/discover'
+    | '/_app/friends'
     | '/_app/new'
     | '/_app/profile'
     | '/_app/sports'
@@ -180,6 +192,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNewRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/friends': {
+      id: '/_app/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AppFriendsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/discover': {
       id: '/_app/discover'
       path: '/discover'
@@ -206,6 +225,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppDiscoverRoute: typeof AppDiscoverRoute
+  AppFriendsRoute: typeof AppFriendsRoute
   AppNewRoute: typeof AppNewRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSportsRoute: typeof AppSportsRoute
@@ -215,6 +235,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppDiscoverRoute: AppDiscoverRoute,
+  AppFriendsRoute: AppFriendsRoute,
   AppNewRoute: AppNewRoute,
   AppProfileRoute: AppProfileRoute,
   AppSportsRoute: AppSportsRoute,
