@@ -351,11 +351,11 @@ function Chat({ gameId }: { gameId: string }) {
       const rows = data ?? [];
       const ids = Array.from(new Set(rows.map((r) => r.user_id)));
       const { data: profs } = ids.length
-        ? await supabase.from("profiles").select("id,display_name").in("id", ids)
+        ? await (supabase as any).from("profiles_public").select("id,display_name").in("id", ids)
         : { data: [] as any[] };
       const withProfiles = rows.map((r) => ({
         ...r,
-        profiles: profs?.find((p) => p.id === r.user_id) ?? null,
+        profiles: ((profs ?? []) as any[]).find((p: any) => p.id === r.user_id) ?? null,
       }));
       if (mounted) setMessages(withProfiles);
     })();
@@ -368,8 +368,8 @@ function Chat({ gameId }: { gameId: string }) {
           .eq("id", payload.new.id)
           .maybeSingle();
         if (!data) return;
-        const { data: prof } = await supabase
-          .from("profiles")
+        const { data: prof } = await (supabase as any)
+          .from("profiles_public")
           .select("display_name")
           .eq("id", data.user_id)
           .maybeSingle();
