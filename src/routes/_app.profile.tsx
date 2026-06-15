@@ -126,6 +126,7 @@ function Profile() {
         sport_ids: sportIds,
         sport_positions: positions,
         sponsor_brand: brandId === "none" ? null : brandId,
+        cep: cep.trim() ? cep.replace(/\D/g, "").slice(0, 8) : null,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
