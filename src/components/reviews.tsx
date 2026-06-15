@@ -48,11 +48,11 @@ export function Reviews({
     const ids = Array.from(new Set((gr ?? []).map((r) => r.reviewer_id)));
     let names: Record<string, string> = {};
     if (ids.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
+      const { data: profs } = await (supabase as any)
+        .from("profiles_public")
         .select("id,display_name")
         .in("id", ids);
-      names = Object.fromEntries((profs ?? []).map((p) => [p.id, p.display_name]));
+      names = Object.fromEntries(((profs ?? []) as any[]).map((p: any) => [p.id, p.display_name]));
     }
     setGameReviews((gr ?? []).map((r) => ({ ...r, reviewer_name: names[r.reviewer_id] })));
     setPlayerReviews(pr ?? []);

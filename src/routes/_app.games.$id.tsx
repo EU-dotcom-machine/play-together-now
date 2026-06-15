@@ -42,8 +42,8 @@ function GameDetail() {
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      const { data: host } = await supabase
-        .from("profiles")
+      const { data: host } = await (supabase as any)
+        .from("profiles_public")
         .select("display_name")
         .eq("id", data.host_id)
         .maybeSingle();
@@ -62,14 +62,14 @@ function GameDetail() {
       const rows = (data ?? []) as any[];
       const ids = rows.map((p) => p.user_id);
       if (ids.length === 0) return [];
-      const { data: profs } = await supabase
-        .from("profiles")
+      const { data: profs } = await (supabase as any)
+        .from("profiles_public")
         .select("id,display_name,sponsor_brand")
         .in("id", ids);
       return rows.map((p) => ({
         user_id: p.user_id,
         status: (p.status ?? "pending") as Participant["status"],
-        profiles: profs?.find((pr) => pr.id === p.user_id) ?? null,
+        profiles: ((profs ?? []) as any[]).find((pr: any) => pr.id === p.user_id) ?? null,
       }));
     },
   });
