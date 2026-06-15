@@ -155,3 +155,7 @@
   letter-spacing: 1px;
   font-weight: 600;
 }
+
+.chips-filter::-webkit-scrollbar {
+  display: none;
+}
