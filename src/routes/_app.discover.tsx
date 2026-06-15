@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { MapPin, Zap, Users, Loader2, Star, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
+import { NotificationsBell } from "@/components/notifications-bell";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
