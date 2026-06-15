@@ -20,6 +20,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [networkError, setNetworkError] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
 
   if (authLoading) return null;
   if (user) return <Navigate to="/discover" replace />;
