@@ -332,6 +332,46 @@ function NewGame() {
           </div>
         </Field>
 
+        <Field label="Visibilidade">
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { id: "public", label: "Público" },
+              { id: "friends", label: "Só amigos" },
+              { id: "cep", label: "Condomínio" },
+            ] as const).map((v) => {
+              const isActive = visibility === v.id;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setVisibility(v.id)}
+                  className={`rounded-[10px] border py-2.5 text-xs font-bold uppercase tracking-wide ${
+                    isActive
+                      ? "bg-[#FFD600] text-[#111] border-[#FFD600]"
+                      : "bg-[#1E1E1E] border-[#2A2A2A] text-[#888]"
+                  }`}
+                >
+                  {v.label}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
+        {visibility === "cep" && (
+          <Field label="CEP do condomínio (8 dígitos)">
+            <input
+              inputMode="numeric"
+              maxLength={8}
+              value={cep}
+              onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              placeholder="00000000"
+              className="input-brutal"
+            />
+          </Field>
+        )}
+
+
         <Field label="Detalhes">
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-brutal min-h-24" placeholder="Nível, regras, o que levar…" />
         </Field>
