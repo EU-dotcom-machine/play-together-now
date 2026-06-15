@@ -37,6 +37,8 @@ function NewGame() {
   const [slots, setSlots] = useState("");
   const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
+  const [visibility, setVisibility] = useState<"public" | "friends" | "cep">("public");
+  const [cep, setCep] = useState("");
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
@@ -116,6 +118,16 @@ function NewGame() {
     },
   });
 
+  // Prefill CEP from host profile when "cep" visibility is chosen
+  useEffect(() => {
+    if (visibility !== "cep" || !user || cep) return;
+    (async () => {
+      const { data } = await supabase.from("profiles").select("cep").eq("id", user.id).single();
+      const c = (data as any)?.cep as string | null;
+      if (c) setCep(c);
+    })();
+  }, [visibility, user, cep]);
+
   const effectiveCoords: Coords | null =
     source === "address" && addressCoords ? addressCoords : gpsCoords;
 
@@ -144,6 +156,13 @@ function NewGame() {
     if (!coords) {
       toast.error("Precisamos da sua localização pra criar o jogo");
       return;
+    }
+    if (visibility === "cep") {
+      const digits = cep.replace(/\D/g, "");
+      if (digits.length !== 8) {
+        toast.error("Informe um CEP válido (8 dígitos)");
+        return;
+      }
     }
     const slotsNum = Math.max(1, parseInt(slots || "10", 10) || 10);
     const priceNum = price.trim() === "" ? 0 : parseFloat(price) || 0;
@@ -175,9 +194,11 @@ function NewGame() {
           slots_total: slotsNum,
           price_cents: Math.round(priceNum * 100),
           urgency,
+          visibility,
+          cep: visibility === "cep" ? cep.replace(/\D/g, "").slice(0, 8) || null : null,
           latitude: coords.lat,
           longitude: coords.lng,
-        })
+        } as any)
         .select("id")
         .single();
       if (gErr) throw gErr;
@@ -310,6 +331,46 @@ function NewGame() {
             })}
           </div>
         </Field>
+
+        <Field label="Visibilidade">
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { id: "public", label: "Público" },
+              { id: "friends", label: "Só amigos" },
+              { id: "cep", label: "Condomínio" },
+            ] as const).map((v) => {
+              const isActive = visibility === v.id;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setVisibility(v.id)}
+                  className={`rounded-[10px] border py-2.5 text-xs font-bold uppercase tracking-wide ${
+                    isActive
+                      ? "bg-[#FFD600] text-[#111] border-[#FFD600]"
+                      : "bg-[#1E1E1E] border-[#2A2A2A] text-[#888]"
+                  }`}
+                >
+                  {v.label}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
+        {visibility === "cep" && (
+          <Field label="CEP do condomínio (8 dígitos)">
+            <input
+              inputMode="numeric"
+              maxLength={8}
+              value={cep}
+              onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              placeholder="00000000"
+              className="input-brutal"
+            />
+          </Field>
+        )}
+
 
         <Field label="Detalhes">
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-brutal min-h-24" placeholder="Nível, regras, o que levar…" />

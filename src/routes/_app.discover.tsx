@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import { getCourtImage } from "@/lib/sport-courts";
 import { useAuth } from "@/hooks/use-auth";
-import { MapPin, Zap, Users, Loader2, Star } from "lucide-react";
+import { MapPin, Zap, Users, Loader2, Star, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 
@@ -25,6 +25,8 @@ type GameRow = {
   longitude: number;
   distance_meters: number | null;
   sport_id: string | null;
+  visibility: "public" | "friends" | "cep";
+  cep: string | null;
   sports: { name: string; emoji: string; avg_rating: number | null; total_reviews: number | null } | null;
   venues: { name: string; address: string | null } | null;
   participants_count: number;
@@ -79,25 +81,51 @@ function Discover() {
   }, [coords, user]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["games", coords?.lat, coords?.lng, radiusKm],
+    queryKey: ["games", coords?.lat, coords?.lng, radiusKm, user?.id],
     enabled: coords !== null || geoDenied,
     queryFn: async (): Promise<GameRow[]> => {
-      // Spatial path: PostGIS nearby_games RPC
+      // Spatial path: PostGIS nearby_games RPC (server-side visibility filter)
       if (coords) {
         const wkt = `SRID=4326;POINT(${coords.lng} ${coords.lat})`;
         const { data: rows, error } = await supabase.rpc("nearby_games" as any, {
           user_location: wkt,
           radius_meters: radiusKm * 1000,
+          viewer_id: user?.id ?? null,
         });
         if (error) throw error;
         return await hydrate((rows ?? []) as any[]);
       }
 
-      // Fallback: all upcoming games ordered by time
+      // Fallback: load viewer context for visibility filtering
+      let friendHostIds: string[] = [];
+      let viewerCep: string | null = null;
+      if (user) {
+        const [friendsRes, profRes] = await Promise.all([
+          supabase
+            .from("friendships")
+            .select("requester_id,addressee_id")
+            .eq("status" as any, "accepted")
+            .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
+          supabase.from("profiles").select("cep").eq("id", user.id).single(),
+        ]);
+        friendHostIds = ((friendsRes.data ?? []) as any[]).map((f) =>
+          f.requester_id === user.id ? f.addressee_id : f.requester_id,
+        );
+        viewerCep = ((profRes.data as any)?.cep ?? null) as string | null;
+      }
+
+      // WHERE clause: public OR (host is me) OR (friends + host in my friends) OR (cep + matching cep)
+      const orParts = ["visibility.eq.public"];
+      if (user) orParts.push(`host_id.eq.${user.id}`);
+      if (friendHostIds.length > 0)
+        orParts.push(`and(visibility.eq.friends,host_id.in.(${friendHostIds.join(",")}))`);
+      if (viewerCep) orParts.push(`and(visibility.eq.cep,cep.eq.${viewerCep})`);
+
       const { data: rows, error } = await supabase
         .from("games")
-        .select("id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id")
+        .select("id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id,host_id,visibility,cep")
         .gte("starts_at", new Date(Date.now() - 1000 * 60 * 60).toISOString())
+        .or(orParts.join(","))
         .order("starts_at", { ascending: true })
         .limit(50);
       if (error) throw error;
@@ -263,6 +291,8 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
     longitude: r.longitude,
     distance_meters: r.distance_meters ?? null,
     sport_id: r.sport_id ?? null,
+    visibility: (r.visibility as GameRow["visibility"]) ?? "public",
+    cep: r.cep ?? null,
     sports: sportsMap.get(r.sport_id) ?? null,
     venues: venuesMap.get(r.venue_id) ?? null,
     participants_count: counts.get(r.id) ?? 0,
@@ -303,7 +333,8 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
             <p className="uppercase text-white/70" style={{ fontSize: "10px", letterSpacing: "0.06em" }}>
               {game.sports?.name}
             </p>
-            <h3 className="text-white font-bold leading-tight" style={{ fontSize: "15px" }}>
+            <h3 className="text-white font-bold leading-tight inline-flex items-center gap-1.5" style={{ fontSize: "15px" }}>
+              {game.visibility !== "public" && <Lock className="size-3.5 text-white/80" />}
               {game.title}
             </h3>
           </div>

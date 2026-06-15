@@ -74,6 +74,7 @@ function Profile() {
   const [sportIds, setSportIds] = useState<string[]>([]);
   const [positions, setPositions] = useState<Record<string, string>>({});
   const [brandId, setBrandId] = useState<string>("none");
+  const [cep, setCep] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
   const [sponsorOpen, setSponsorOpen] = useState(false);
   const [sportsOpen, setSportsOpen] = useState(false);
@@ -91,6 +92,7 @@ function Profile() {
       setSportIds((profile as any).sport_ids ?? []);
       setPositions(((profile as any).sport_positions ?? {}) as Record<string, string>);
       setBrandId(((profile as any).sponsor_brand as string) || "none");
+      setCep(((profile as any).cep as string) ?? "");
       setHydrated(true);
     }
   }, [profile, hydrated]);
@@ -124,6 +126,7 @@ function Profile() {
         sport_ids: sportIds,
         sport_positions: positions,
         sponsor_brand: brandId === "none" ? null : brandId,
+        cep: cep.trim() ? cep.replace(/\D/g, "").slice(0, 8) : null,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
@@ -284,6 +287,19 @@ function Profile() {
             />
           </Field>
         </div>
+
+        <Field label="CEP">
+          <input
+            inputMode="numeric"
+            maxLength={8}
+            value={cep}
+            onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            className="input-brutal"
+            placeholder="00000000"
+          />
+        </Field>
+
+
 
         <Field label="Tempo jogando">
           <ChipRow options={YEARS as unknown as string[]} value={years} onChange={setYears} />
