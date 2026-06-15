@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy, MapPin, RefreshCw } from "lucide-react";
+import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { FriendsSection } from "@/components/friends-section";
 import { brandGradient } from "@/lib/brands";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
@@ -75,6 +76,9 @@ function Profile() {
   const [positions, setPositions] = useState<Record<string, string>>({});
   const [brandId, setBrandId] = useState<string>("none");
   const [hydrated, setHydrated] = useState(false);
+  const [sponsorOpen, setSponsorOpen] = useState(false);
+  const [sportsOpen, setSportsOpen] = useState(false);
+  const [bySportOpen, setBySportOpen] = useState(false);
 
   useEffect(() => {
     if (profile && !hydrated) {
@@ -213,37 +217,48 @@ function Profile() {
         </Field>
 
         {/* Patrocinador */}
-        <SectionTitle>Patrocinador (estilo do perfil)</SectionTitle>
-        <div className="grid grid-cols-2 gap-3">
-          {BRANDS.map((b) => {
-            const selected = brandId === b.id;
-            return (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() => selectBrand(b.id)}
-                className={cn(
-                  "relative overflow-hidden rounded-xl p-4 text-left transition-all border-2",
-                  selected
-                    ? "border-[#FFD600] shadow-[0_0_0_2px_rgba(255,214,0,0.25)]"
-                    : "border-[#2A2A2A]",
-                )}
-                style={{ background: b.id === "none" ? "#1E1E1E" : brandGradient(b.name) }}
-              >
-                <div
-                  className="absolute inset-0"
-                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}
-                />
-                <div className="relative z-10">
-                  <span className="text-[10px] uppercase tracking-wider text-white/70 block">
-                    Marca
-                  </span>
-                  <span className="text-white font-extrabold text-base">{b.name}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        <Collapsible open={sponsorOpen} onOpenChange={setSponsorOpen}>
+          <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
+            <span className="text-base font-bold uppercase tracking-wide text-foreground">
+              Patrocinador (estilo do perfil)
+            </span>
+            <ChevronDown
+              className={cn("size-5 transition-transform duration-200", sponsorOpen && "rotate-180")}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+            <div className="grid grid-cols-2 gap-3 pt-3">
+              {BRANDS.map((b) => {
+                const selected = brandId === b.id;
+                return (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => selectBrand(b.id)}
+                    className={cn(
+                      "relative overflow-hidden rounded-xl p-4 text-left transition-all border-2",
+                      selected
+                        ? "border-[#FFD600] shadow-[0_0_0_2px_rgba(255,214,0,0.25)]"
+                        : "border-[#2A2A2A]",
+                    )}
+                    style={{ background: b.id === "none" ? "#1E1E1E" : brandGradient(b.name) }}
+                  >
+                    <div
+                      className="absolute inset-0"
+                      style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}
+                    />
+                    <div className="relative z-10">
+                      <span className="text-[10px] uppercase tracking-wider text-white/70 block">
+                        Marca
+                      </span>
+                      <span className="text-white font-extrabold text-base">{b.name}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* Sobre você */}
         <SectionTitle>Sobre você</SectionTitle>
@@ -284,70 +299,86 @@ function Profile() {
         </Field>
 
         {/* Esportes selection */}
-        <SectionTitle>Seus esportes</SectionTitle>
-        <div className="flex flex-wrap gap-2">
-          {(sports ?? []).map((s: any) => {
-            const on = sportIds.includes(s.id);
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => toggleSport(s.id)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors",
-                  on
-                    ? "bg-pop text-[#111] border-pop"
-                    : "bg-surface text-foreground border-border",
-                )}
-              >
-                <span className="mr-1">{s.emoji}</span>
-                {s.name}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Por esporte */}
-        {selectedSports.length > 0 && (
-          <>
-            <SectionTitle>Por esporte</SectionTitle>
-            <div className="grid gap-3">
-              {selectedSports.map((s: any) => {
-                const opts = positionsForSport(s.name);
+        <Collapsible open={sportsOpen} onOpenChange={setSportsOpen}>
+          <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
+            <span className="text-base font-bold uppercase tracking-wide text-foreground">Seus esportes</span>
+            <ChevronDown
+              className={cn("size-5 transition-transform duration-200", sportsOpen && "rotate-180")}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+            <div className="flex flex-wrap gap-2 pt-3">
+              {(sports ?? []).map((s: any) => {
+                const on = sportIds.includes(s.id);
                 return (
-                  <div
+                  <button
                     key={s.id}
-                    className="bg-surface border border-border rounded-2xl p-4 relative overflow-hidden"
-                  >
-                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-pop" />
-                    <p className="text-sm font-bold flex items-center gap-2">
-                      <span className="text-lg">{s.emoji}</span> {s.name}
-                    </p>
-                    {opts.length > 0 ? (
-                      <select
-                        value={positions[s.id] ?? ""}
-                        onChange={(e) =>
-                          setPositions((p) => ({ ...p, [s.id]: e.target.value }))
-                        }
-                        className="input-brutal mt-2"
-                      >
-                        <option value="">Posição preferida…</option>
-                        {opts.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <p className="mt-2 text-xs text-[#888]">
-                        Sem posições específicas pra esse esporte.
-                      </p>
+                    type="button"
+                    onClick={() => toggleSport(s.id)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors",
+                      on
+                        ? "bg-pop text-[#111] border-pop"
+                        : "bg-surface text-foreground border-border",
                     )}
-                  </div>
+                  >
+                    <span className="mr-1">{s.emoji}</span>
+                    {s.name}
+                  </button>
                 );
               })}
             </div>
-          </>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Por esporte */}
+        {selectedSports.length > 0 && (
+          <Collapsible open={bySportOpen} onOpenChange={setBySportOpen}>
+            <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
+              <span className="text-base font-bold uppercase tracking-wide text-foreground">Por esporte</span>
+              <ChevronDown
+                className={cn("size-5 transition-transform duration-200", bySportOpen && "rotate-180")}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+              <div className="grid gap-3 pt-3">
+                {selectedSports.map((s: any) => {
+                  const opts = positionsForSport(s.name);
+                  return (
+                    <div
+                      key={s.id}
+                      className="bg-surface border border-border rounded-2xl p-4 relative overflow-hidden"
+                    >
+                      <span className="absolute left-0 top-0 bottom-0 w-1 bg-pop" />
+                      <p className="text-sm font-bold flex items-center gap-2">
+                        <span className="text-lg">{s.emoji}</span> {s.name}
+                      </p>
+                      {opts.length > 0 ? (
+                        <select
+                          value={positions[s.id] ?? ""}
+                          onChange={(e) =>
+                            setPositions((p) => ({ ...p, [s.id]: e.target.value }))
+                          }
+                          className="input-brutal mt-2"
+                        >
+                          <option value="">Posição preferida…</option>
+                          {opts.map((o) => (
+                            <option key={o} value={o}>
+                              {o}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="mt-2 text-xs text-[#888]">
+                          Sem posições específicas pra esse esporte.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
 
         <button
