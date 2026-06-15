@@ -155,12 +155,15 @@ function Discover() {
                 : "Buscando sua localização…"}
           </p>
         </div>
-        <Link
-          to="/new"
-          className="brutal-card-lg px-3 py-2 bg-pop text-[#111] text-xs font-bold uppercase shrink-0"
-        >
-          + Criar
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <NotificationsBell />
+          <Link
+            to="/new"
+            className="brutal-card-lg px-3 py-2 bg-pop text-[#111] text-xs font-bold uppercase"
+          >
+            + Criar
+          </Link>
+        </div>
       </header>
 
       {coords && (
