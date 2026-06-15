@@ -90,7 +90,6 @@ function Discover() {
         const { data: rows, error } = await supabase.rpc("nearby_games" as any, {
           user_location: wkt,
           radius_meters: radiusKm * 1000,
-          viewer_id: user?.id ?? null,
         });
         if (error) throw error;
         return await hydrate((rows ?? []) as any[]);

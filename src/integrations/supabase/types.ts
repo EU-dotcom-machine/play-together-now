@@ -440,11 +440,7 @@ export type Database = {
         Returns: boolean
       }
       nearby_games: {
-        Args: {
-          radius_meters?: number
-          user_location: unknown
-          viewer_id?: string
-        }
+        Args: { radius_meters?: number; user_location: unknown }
         Returns: {
           cep: string
           distance_meters: number
