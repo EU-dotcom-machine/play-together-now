@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "messages select confirmed or host" ON public.messages;
