@@ -8,6 +8,7 @@ import { LogOut, Save, Trophy, MapPin, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { FriendsSection } from "@/components/friends-section";
+import { brandGradient } from "@/lib/brands";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
@@ -166,11 +167,7 @@ function Profile() {
       {/* Header with brand color background or default dark gradient + yellow username */}
       <header
         className="px-5 pt-10 pb-12 transition-colors"
-        style={
-          selectedBrand.color
-            ? { background: selectedBrand.color }
-            : { background: "linear-gradient(180deg, #111111 0%, #1E1E1E 100%)" }
-        }
+        style={{ background: brandGradient(selectedBrand.name) }}
       >
         <div className="flex items-center gap-4">
           <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold">
@@ -225,17 +222,24 @@ function Profile() {
                 key={b.id}
                 type="button"
                 onClick={() => selectBrand(b.id)}
-                className="rounded-xl p-4 text-left font-bold text-white transition-all"
-                style={{
-                  background: b.color ?? "#1E1E1E",
-                  border: selected ? "2px solid #FFD600" : "2px solid transparent",
-                  boxShadow: selected ? "0 0 0 2px rgba(255,214,0,0.25)" : "none",
-                }}
+                className={cn(
+                  "relative overflow-hidden rounded-xl p-4 text-left transition-all border-2",
+                  selected
+                    ? "border-[#FFD600] shadow-[0_0_0_2px_rgba(255,214,0,0.25)]"
+                    : "border-[#2A2A2A]",
+                )}
+                style={{ background: b.id === "none" ? "#1E1E1E" : brandGradient(b.name) }}
               >
-                <span className="text-xs uppercase tracking-wider text-white/70 block">
-                  Marca
-                </span>
-                <span className="text-base">{b.name}</span>
+                <div
+                  className="absolute inset-0"
+                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}
+                />
+                <div className="relative z-10">
+                  <span className="text-[10px] uppercase tracking-wider text-white/70 block">
+                    Marca
+                  </span>
+                  <span className="text-white font-extrabold text-base">{b.name}</span>
+                </div>
               </button>
             );
           })}
