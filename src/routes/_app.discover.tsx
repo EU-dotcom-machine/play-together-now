@@ -158,6 +158,35 @@ function Discover() {
         </div>
       )}
 
+      {sports && sports.length > 0 && (
+        <div className="mt-4 -mx-5 px-5">
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <button
+              onClick={() => setFilterSportId(null)}
+              className={cn(
+                "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold",
+                filterSportId === null ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
+              )}
+            >
+              Todos
+            </button>
+            {sports.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setFilterSportId(filterSportId === s.id ? null : s.id)}
+                className={cn(
+                  "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5",
+                  filterSportId === s.id ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
+                )}
+              >
+                <span>{s.emoji}</span>
+                <span>{s.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 grid gap-3">
         {isLoading && (
           <div className="flex items-center justify-center py-12 text-ink/60">
@@ -166,8 +195,20 @@ function Discover() {
         )}
         {!isLoading && games.length === 0 && (
           <div className="brutal-card p-6 text-center">
-            <p className="font-bold uppercase">Nenhum jogo rolando</p>
-            <p className="text-sm text-ink/70 mt-1">Que tal criar o primeiro?</p>
+            <p className="font-bold uppercase">
+              {selectedSport
+                ? `Nenhum jogo de ${selectedSport.emoji} ${selectedSport.name} perto de você`
+                : "Nenhum jogo rolando"}
+            </p>
+            <p className="text-sm text-ink/70 mt-1">
+              {selectedSport ? (
+                <button onClick={() => setFilterSportId(null)} className="underline underline-offset-2 text-pop">
+                  Limpar filtro
+                </button>
+              ) : (
+                "Que tal criar o primeiro?"
+              )}
+            </p>
           </div>
         )}
         {games.map((g) => (
@@ -212,6 +253,7 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
     latitude: r.latitude,
     longitude: r.longitude,
     distance_meters: r.distance_meters ?? null,
+    sport_id: r.sport_id ?? null,
     sports: sportsMap.get(r.sport_id) ?? null,
     venues: venuesMap.get(r.venue_id) ?? null,
     participants_count: counts.get(r.id) ?? 0,
