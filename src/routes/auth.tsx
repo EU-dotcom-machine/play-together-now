@@ -130,6 +130,17 @@ function AuthPage() {
           </button>
         </form>
 
+        {networkError && (
+          <button
+            type="button"
+            onClick={retry}
+            className="brutal-card mt-4 w-full px-5 py-3 bg-paper font-bold uppercase tracking-wide text-sm"
+          >
+            Tentar novamente
+          </button>
+        )}
+
+
         <button
           type="button"
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
