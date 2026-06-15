@@ -128,6 +128,7 @@ export type Database = {
       }
       games: {
         Row: {
+          cep: string | null
           created_at: string
           description: string | null
           duration_min: number
@@ -144,8 +145,10 @@ export type Database = {
           title: string
           urgency: Database["public"]["Enums"]["game_urgency"]
           venue_id: string | null
+          visibility: string
         }
         Insert: {
+          cep?: string | null
           created_at?: string
           description?: string | null
           duration_min?: number
@@ -162,8 +165,10 @@ export type Database = {
           title: string
           urgency?: Database["public"]["Enums"]["game_urgency"]
           venue_id?: string | null
+          visibility?: string
         }
         Update: {
+          cep?: string | null
           created_at?: string
           description?: string | null
           duration_min?: number
@@ -180,6 +185,7 @@ export type Database = {
           title?: string
           urgency?: Database["public"]["Enums"]["game_urgency"]
           venue_id?: string | null
+          visibility?: string
         }
         Relationships: [
           {
@@ -264,6 +270,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          cep: string | null
           city: string | null
           created_at: string
           display_name: string
@@ -285,6 +292,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          cep?: string | null
           city?: string | null
           created_at?: string
           display_name: string
@@ -306,6 +314,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          cep?: string | null
           city?: string | null
           created_at?: string
           display_name?: string
@@ -431,8 +440,13 @@ export type Database = {
         Returns: boolean
       }
       nearby_games: {
-        Args: { radius_meters?: number; user_location: unknown }
+        Args: {
+          radius_meters?: number
+          user_location: unknown
+          viewer_id?: string
+        }
         Returns: {
+          cep: string
           distance_meters: number
           host_id: string
           id: string
@@ -446,6 +460,7 @@ export type Database = {
           title: string
           urgency: Database["public"]["Enums"]["game_urgency"]
           venue_id: string
+          visibility: string
         }[]
       }
     }
