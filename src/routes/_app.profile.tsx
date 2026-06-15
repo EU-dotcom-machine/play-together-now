@@ -92,6 +92,7 @@ function Profile() {
       setSportIds((profile as any).sport_ids ?? []);
       setPositions(((profile as any).sport_positions ?? {}) as Record<string, string>);
       setBrandId(((profile as any).sponsor_brand as string) || "none");
+      setCep(((profile as any).cep as string) ?? "");
       setHydrated(true);
     }
   }, [profile, hydrated]);
