@@ -1,11 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Compass, PlusCircle, User, MapPin } from "lucide-react";
+import { Compass, PlusCircle, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePendingRequestCount } from "@/components/friends-section";
 
 const items = [
   { to: "/discover", label: "Jogos", icon: Compass },
-  { to: "/sports", label: "Esportes", icon: MapPin },
+  { to: "/friends", label: "Amigos", icon: Users },
   { to: "/new", label: "Criar", icon: PlusCircle },
   { to: "/profile", label: "Perfil", icon: User },
 ] as const;
@@ -18,7 +18,8 @@ export function BottomNav() {
       <ul className="grid grid-cols-4 max-w-md mx-auto">
         {items.map(({ to, label, icon: Icon }) => {
           const active = pathname.startsWith(to);
-          const showBadge = to === "/profile" && pending > 0;
+          const showBadge = to === "/friends" && pending > 0;
+
           return (
             <li key={to}>
               <Link
