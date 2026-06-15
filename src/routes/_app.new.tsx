@@ -118,6 +118,16 @@ function NewGame() {
     },
   });
 
+  // Prefill CEP from host profile when "cep" visibility is chosen
+  useEffect(() => {
+    if (visibility !== "cep" || !user || cep) return;
+    (async () => {
+      const { data } = await supabase.from("profiles").select("cep").eq("id", user.id).single();
+      const c = (data as any)?.cep as string | null;
+      if (c) setCep(c);
+    })();
+  }, [visibility, user, cep]);
+
   const effectiveCoords: Coords | null =
     source === "address" && addressCoords ? addressCoords : gpsCoords;
 
