@@ -74,6 +74,7 @@ function Profile() {
   const [sportIds, setSportIds] = useState<string[]>([]);
   const [positions, setPositions] = useState<Record<string, string>>({});
   const [brandId, setBrandId] = useState<string>("none");
+  const [cep, setCep] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
   const [sponsorOpen, setSponsorOpen] = useState(false);
   const [sportsOpen, setSportsOpen] = useState(false);
