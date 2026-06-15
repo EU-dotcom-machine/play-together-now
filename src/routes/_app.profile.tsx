@@ -392,8 +392,6 @@ function Profile() {
         >
           <LogOut className="size-4" /> Sair
         </button>
-
-        <FriendsSection />
       </section>
     </main>
   );
