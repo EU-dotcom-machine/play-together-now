@@ -21,6 +21,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [networkError, setNetworkError] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
 
   if (authLoading) return null;
   if (user) return <Navigate to="/discover" replace />;
@@ -33,6 +34,32 @@ function AuthPage() {
       msg.includes("networkerror") ||
       msg.includes("load failed")
     );
+  }
+
+  function isEmailNotConfirmed(err: any) {
+    return String(err?.message ?? "").toLowerCase().includes("email not confirmed");
+  }
+
+  async function resendVerification() {
+    if (!verificationEmail) return;
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: verificationEmail,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      toast.success("E-mail reenviado! Verifique sua caixa de entrada.");
+    } catch (err: any) {
+      if (isNetworkError(err)) {
+        toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
+      } else {
+        toast.error(err?.message ?? "Erro ao reenviar e-mail");
+      }
+    } finally {
+      setResendLoading(false);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -50,9 +77,8 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Conta criada! Bora jogar.");
         trackEvent("user_signed_up");
-        navigate({ to: "/discover" });
+        setVerificationEmail(email);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -62,6 +88,8 @@ function AuthPage() {
       if (isNetworkError(err)) {
         setNetworkError(true);
         toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
+      } else if (isEmailNotConfirmed(err)) {
+        setVerificationEmail(email);
       } else {
         toast.error(err?.message ?? "Algo deu errado");
       }
@@ -87,51 +115,74 @@ function AuthPage() {
           {mode === "signup" ? "Bora pro próximo jogo." : "Já é da pelada?"}
         </p>
 
-        <form id="auth-form" onSubmit={submit} className="mt-8 grid gap-3">
-          {mode === "signup" && (
-            <Field label="Como te chamam">
+        {verificationEmail ? (
+          <div className="mt-8 brutal-card-lg p-6 bg-paper text-center">
+            <div className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-zap/20 text-pop">
+              <Mail className="size-7" />
+            </div>
+            <h2 className="text-2xl font-extrabold uppercase">Verifique seu e-mail ✉️</h2>
+            <p className="mt-3 text-ink/80">
+              Enviamos um link de confirmação para{" "}
+              <span className="font-semibold text-ink">{verificationEmail}</span>. Clique nele para
+              ativar sua conta.
+            </p>
+            <button
+              type="button"
+              onClick={resendVerification}
+              disabled={resendLoading}
+              className="brutal-card mt-5 w-full px-5 py-3 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {resendLoading && <Loader2 className="size-4 animate-spin" />}
+              Reenviar e-mail
+            </button>
+          </div>
+        ) : (
+          <form id="auth-form" onSubmit={submit} className="mt-8 grid gap-3">
+            {mode === "signup" && (
+              <Field label="Como te chamam">
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
+                  placeholder="Ex.: Bruno"
+                  required
+                />
+              </Field>
+            )}
+            <Field label="E-mail">
               <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
-                placeholder="Ex.: Bruno"
+                placeholder="voce@exemplo.com"
                 required
               />
             </Field>
-          )}
-          <Field label="E-mail">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
-              placeholder="voce@exemplo.com"
-              required
-            />
-          </Field>
-          <Field label="Senha">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
-              placeholder="••••••••"
-              minLength={8}
-              required
-            />
-          </Field>
+            <Field label="Senha">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
+                placeholder="••••••••"
+                minLength={8}
+                required
+              />
+            </Field>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {loading && <Loader2 className="size-4 animate-spin" />}
-            {mode === "signup" ? "Criar conta" : "Entrar"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {loading && <Loader2 className="size-4 animate-spin" />}
+              {mode === "signup" ? "Criar conta" : "Entrar"}
+            </button>
+          </form>
+        )}
 
-        {networkError && (
+        {networkError && !verificationEmail && (
           <button
             type="button"
             onClick={retry}
@@ -140,7 +191,6 @@ function AuthPage() {
             Tentar novamente
           </button>
         )}
-
 
         <button
           type="button"
