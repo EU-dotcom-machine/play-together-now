@@ -47,9 +47,9 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
       const rows = (parts ?? []) as any[];
       const ids = rows.map((r) => r.user_id);
       if (ids.length === 0) return [];
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id,display_name,bio,avatar_url,points,latitude,longitude,sport_ids")
+      const { data: profs } = await (supabase as any)
+        .from("profiles_public")
+        .select("id,display_name,bio,avatar_url,points,sport_ids")
         .in("id", ids);
       const allSportIds = Array.from(
         new Set((profs ?? []).flatMap((p: any) => (p.sport_ids as string[] | null) ?? [])),
