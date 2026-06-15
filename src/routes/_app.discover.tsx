@@ -333,7 +333,8 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
             <p className="uppercase text-white/70" style={{ fontSize: "10px", letterSpacing: "0.06em" }}>
               {game.sports?.name}
             </p>
-            <h3 className="text-white font-bold leading-tight" style={{ fontSize: "15px" }}>
+            <h3 className="text-white font-bold leading-tight inline-flex items-center gap-1.5" style={{ fontSize: "15px" }}>
+              {game.visibility !== "public" && <Lock className="size-3.5 text-white/80" />}
               {game.title}
             </h3>
           </div>
