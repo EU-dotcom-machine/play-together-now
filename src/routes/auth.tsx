@@ -86,7 +86,7 @@ function AuthPage() {
           {mode === "signup" ? "Bora pro próximo jogo." : "Já é da pelada?"}
         </p>
 
-        <form onSubmit={submit} className="mt-8 grid gap-3">
+        <form id="auth-form" onSubmit={submit} className="mt-8 grid gap-3">
           {mode === "signup" && (
             <Field label="Como te chamam">
               <input
