@@ -288,6 +288,19 @@ function Profile() {
           </Field>
         </div>
 
+        <Field label="CEP">
+          <input
+            inputMode="numeric"
+            maxLength={8}
+            value={cep}
+            onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            className="input-brutal"
+            placeholder="00000000"
+          />
+        </Field>
+
+
+
         <Field label="Tempo jogando">
           <ChipRow options={YEARS as unknown as string[]} value={years} onChange={setYears} />
         </Field>
