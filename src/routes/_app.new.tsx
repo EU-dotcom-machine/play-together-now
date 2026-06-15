@@ -37,6 +37,8 @@ function NewGame() {
   const [slots, setSlots] = useState("");
   const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
+  const [visibility, setVisibility] = useState<"public" | "friends" | "cep">("public");
+  const [cep, setCep] = useState("");
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
