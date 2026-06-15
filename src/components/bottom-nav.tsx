@@ -32,10 +32,9 @@ export function BottomNav() {
                 <span className="relative">
                   <Icon className={cn("size-6", active && "stroke-[2.5]")} />
                   {showBadge && (
-                    <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-pop text-[#111] text-[10px] font-extrabold flex items-center justify-center">
-                      {pending > 9 ? "9+" : pending}
-                    </span>
+                    <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-pop ring-2 ring-surface" />
                   )}
+
                 </span>
                 {label}
               </Link>
