@@ -187,9 +187,11 @@ function NewGame() {
           slots_total: slotsNum,
           price_cents: Math.round(priceNum * 100),
           urgency,
+          visibility,
+          cep: visibility === "cep" ? cep.replace(/\D/g, "").slice(0, 8) || null : null,
           latitude: coords.lat,
           longitude: coords.lng,
-        })
+        } as any)
         .select("id")
         .single();
       if (gErr) throw gErr;
