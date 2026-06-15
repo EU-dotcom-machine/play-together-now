@@ -157,6 +157,13 @@ function NewGame() {
       toast.error("Precisamos da sua localização pra criar o jogo");
       return;
     }
+    if (visibility === "cep") {
+      const digits = cep.replace(/\D/g, "");
+      if (digits.length !== 8) {
+        toast.error("Informe um CEP válido (8 dígitos)");
+        return;
+      }
+    }
     const slotsNum = Math.max(1, parseInt(slots || "10", 10) || 10);
     const priceNum = price.trim() === "" ? 0 : parseFloat(price) || 0;
 
