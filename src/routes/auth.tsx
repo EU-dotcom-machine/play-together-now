@@ -19,13 +19,25 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
 
   if (authLoading) return null;
   if (user) return <Navigate to="/discover" replace />;
 
+  function isNetworkError(err: any) {
+    const msg = String(err?.message ?? err ?? "").toLowerCase();
+    return (
+      err instanceof TypeError ||
+      msg.includes("failed to fetch") ||
+      msg.includes("networkerror") ||
+      msg.includes("load failed")
+    );
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setNetworkError(false);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
@@ -46,10 +58,21 @@ function AuthPage() {
         navigate({ to: "/discover" });
       }
     } catch (err: any) {
-      toast.error(err?.message ?? "Algo deu errado");
+      if (isNetworkError(err)) {
+        setNetworkError(true);
+        toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
+      } else {
+        toast.error(err?.message ?? "Algo deu errado");
+      }
     } finally {
       setLoading(false);
     }
+  }
+
+  function retry() {
+    setNetworkError(false);
+    const form = document.getElementById("auth-form") as HTMLFormElement | null;
+    form?.requestSubmit();
   }
 
   return (
