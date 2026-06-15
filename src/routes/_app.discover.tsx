@@ -35,6 +35,15 @@ function Discover() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDenied, setGeoDenied] = useState(false);
   const [radiusKm, setRadiusKm] = useState<number>(10);
+  const [filterSportId, setFilterSportId] = useState<string | null>(null);
+
+  const { data: sports } = useQuery({
+    queryKey: ["sports"],
+    queryFn: async () => {
+      const { data } = await supabase.from("sports").select("id,name,emoji").order("name");
+      return data ?? [];
+    },
+  });
 
   useEffect(() => {
     if (!navigator.geolocation) return setGeoDenied(true);
@@ -96,7 +105,14 @@ function Discover() {
     },
   });
 
-  const games = useMemo(() => data ?? [], [data]);
+  const games = useMemo(
+    () => (data ?? []).filter((g) => filterSportId === null || g.sport_id === filterSportId),
+    [data, filterSportId],
+  );
+  const selectedSport = useMemo(
+    () => sports?.find((s) => s.id === filterSportId),
+    [sports, filterSportId],
+  );
 
   return (
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
