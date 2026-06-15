@@ -49,7 +49,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
       if (ids.length === 0) return [];
       const { data: profsRaw } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name,bio,avatar_url,points,sport_ids")
+        .select("id,display_name,avatar_url,points,sport_ids")
         .in("id", ids);
       const profs = (profsRaw ?? []) as any[];
       const allSportIds = Array.from(
