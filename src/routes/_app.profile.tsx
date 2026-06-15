@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
-import { FriendsSection } from "@/components/friends-section";
 import { brandGradient } from "@/lib/brands";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -393,8 +392,6 @@ function Profile() {
         >
           <LogOut className="size-4" /> Sair
         </button>
-
-        <FriendsSection />
       </section>
     </main>
   );
