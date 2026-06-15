@@ -160,29 +160,38 @@ function Discover() {
 
       {sports && sports.length > 0 && (
         <div className="mt-4 -mx-5 px-5">
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-            <button
-              onClick={() => setFilterSportId(null)}
-              className={cn(
-                "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold",
-                filterSportId === null ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
-              )}
+          <div className="relative">
+            <div
+              className="flex gap-2 overflow-x-auto pb-1 chips-filter"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              Todos
-            </button>
-            {sports.map((s) => (
               <button
-                key={s.id}
-                onClick={() => setFilterSportId(filterSportId === s.id ? null : s.id)}
+                onClick={() => setFilterSportId(null)}
                 className={cn(
-                  "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5",
-                  filterSportId === s.id ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
+                  "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold",
+                  filterSportId === null ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
                 )}
               >
-                <span>{s.emoji}</span>
-                <span>{s.name}</span>
+                Todos
               </button>
-            ))}
+              {sports.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setFilterSportId(filterSportId === s.id ? null : s.id)}
+                  className={cn(
+                    "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5",
+                    filterSportId === s.id ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
+                  )}
+                >
+                  <span>{s.emoji}</span>
+                  <span>{s.name}</span>
+                </button>
+              ))}
+            </div>
+            <div
+              className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none"
+              style={{ background: "linear-gradient(to right, transparent, #111111)" }}
+            />
           </div>
         </div>
       )}
