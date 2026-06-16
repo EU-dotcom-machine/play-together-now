@@ -494,6 +494,8 @@ function Profile() {
           className="mt-4 px-5 py-4 bg-pop text-[#111] font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px]"
         >
           <Save className="size-4" /> Salvar
+        </button>
+
 
         <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
           <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
