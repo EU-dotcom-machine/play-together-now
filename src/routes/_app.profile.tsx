@@ -79,6 +79,37 @@ function Profile() {
   const [sponsorOpen, setSponsorOpen] = useState(false);
   const [sportsOpen, setSportsOpen] = useState(false);
   const [bySportOpen, setBySportOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function onAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      // Resize/compress to max 400x400 via canvas
+      const blob = await resizeImage(file, 400);
+      const path = `${user.id}/avatar.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = `${pub.publicUrl}?v=${Date.now()}`;
+      const { error: updErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url } as any)
+        .eq("id", user.id);
+      if (updErr) throw updErr;
+      toast.success("Foto atualizada!");
+      qc.invalidateQueries({ queryKey: ["profile", user.id] });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro ao enviar foto");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   useEffect(() => {
     if (profile && !hydrated) {
