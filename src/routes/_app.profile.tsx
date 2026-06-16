@@ -207,8 +207,34 @@ function Profile() {
         style={{ background: brandGradient(selectedBrand.name) }}
       >
         <div className="flex items-center gap-4">
-          <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold">
-            {display?.[0]?.toUpperCase() ?? "?"}
+          <div className="relative size-16 shrink-0">
+            <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold overflow-hidden">
+              {(profile as any)?.avatar_url ? (
+                <img
+                  src={(profile as any).avatar_url}
+                  alt=""
+                  className="size-16 rounded-full object-cover"
+                />
+              ) : (
+                display?.[0]?.toUpperCase() ?? "?"
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              aria-label="Trocar foto"
+              className="absolute -bottom-0.5 -right-0.5 size-5 bg-pop text-[#111] rounded-full p-0.5 cursor-pointer border border-[#111] flex items-center justify-center disabled:opacity-60"
+            >
+              <Camera className="size-3" />
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onAvatarFile}
+            />
           </div>
           <div>
             <p className="text-xs uppercase font-semibold text-[#888]">jogador</p>
