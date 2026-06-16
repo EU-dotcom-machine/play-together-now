@@ -5,18 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
-import { distanceKm } from "@/lib/geo";
 import { trackEvent } from "@/lib/posthog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/new")({
   head: () => ({ meta: [{ title: "Criar jogo — Esportes Unidos" }] }),
