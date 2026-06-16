@@ -136,12 +136,14 @@ function AuthPage() {
     <main className="min-h-screen bg-paper px-5 py-10 flex flex-col">
       <div className="max-w-md w-full mx-auto">
         <h1 className="text-5xl font-extrabold uppercase leading-none">
-          {mode === "signup" ? "Criar conta" : "Entrar"}
+          {forgotMode ? "Redefinir senha" : mode === "signup" ? "Criar conta" : "Entrar"}
           <span className="text-pop">.</span>
         </h1>
-        <p className="mt-2 text-ink/70">
-          {mode === "signup" ? "Bora pro próximo jogo." : "Já é da pelada?"}
-        </p>
+        {!forgotMode && (
+          <p className="mt-2 text-ink/70">
+            {mode === "signup" ? "Bora pro próximo jogo." : "Já é da pelada?"}
+          </p>
+        )}
 
         {verificationEmail ? (
           <div className="mt-8 brutal-card-lg p-6 bg-paper text-center">
@@ -164,6 +166,55 @@ function AuthPage() {
               Reenviar e-mail
             </button>
           </div>
+        ) : forgotMode ? (
+          forgotSent ? (
+            <div className="mt-8 brutal-card-lg p-6 bg-paper text-center">
+              <div className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-zap/20 text-pop">
+                <Mail className="size-7" />
+              </div>
+              <h2 className="text-2xl font-extrabold uppercase">Verifique seu e-mail ✉️</h2>
+              <p className="mt-3 text-ink/80">
+                Enviamos um link para{" "}
+                <span className="font-semibold text-ink">{forgotSent}</span>. Clique nele para
+                criar uma nova senha.
+              </p>
+              <button
+                type="button"
+                onClick={backToSignin}
+                className="mt-6 text-sm font-semibold underline underline-offset-4 decoration-2"
+              >
+                Voltar ao login
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={submitForgot} className="mt-8 grid gap-3">
+              <Field label="E-mail">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
+                  placeholder="voce@exemplo.com"
+                  required
+                />
+              </Field>
+              <button
+                type="submit"
+                disabled={forgotLoading}
+                className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {forgotLoading && <Loader2 className="size-4 animate-spin" />}
+                Enviar link de redefinição
+              </button>
+              <button
+                type="button"
+                onClick={backToSignin}
+                className="mt-4 text-sm font-semibold underline underline-offset-4 decoration-2 justify-self-start"
+              >
+                Voltar ao login
+              </button>
+            </form>
+          )
         ) : (
           <form id="auth-form" onSubmit={submit} className="mt-8 grid gap-3">
             {mode === "signup" && (
@@ -198,6 +249,15 @@ function AuthPage() {
                 required
               />
             </Field>
+            {mode === "signin" && (
+              <button
+                type="button"
+                onClick={() => setForgotMode(true)}
+                className="-mt-1 text-xs text-ink/60 underline underline-offset-4 justify-self-end"
+              >
+                Esqueci minha senha
+              </button>
+            )}
 
             <button
               type="submit"
@@ -220,13 +280,15 @@ function AuthPage() {
           </button>
         )}
 
-        <button
-          type="button"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          className="mt-6 text-sm font-semibold underline underline-offset-4 decoration-2"
-        >
-          {mode === "signin" ? "Não tem conta? Criar uma" : "Já tem conta? Entrar"}
-        </button>
+        {!forgotMode && (
+          <button
+            type="button"
+            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+            className="mt-6 text-sm font-semibold underline underline-offset-4 decoration-2"
+          >
+            {mode === "signin" ? "Não tem conta? Criar uma" : "Já tem conta? Entrar"}
+          </button>
+        )}
       </div>
     </main>
   );
