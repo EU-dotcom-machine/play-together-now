@@ -296,6 +296,25 @@ function GameDetail() {
         )}
       </div>
 
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent className="bg-[#1A1A1A] border-[#333] text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sair do jogo?</AlertDialogTitle>
+            <AlertDialogDescription className="text-ink/60">
+              Sua vaga será liberada e você perderá acesso ao chat.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowLeaveDialog(false)} className="bg-surface text-white border-none hover:bg-surface/80">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={leave} className="bg-[#FF4444] text-white hover:bg-[#FF4444]/90">
+              Confirmar saída
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {isHost && (
         <CandidatesPanel
           gameId={id}
