@@ -5,18 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
-import { distanceKm } from "@/lib/geo";
 import { trackEvent } from "@/lib/posthog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/new")({
   head: () => ({ meta: [{ title: "Criar jogo — Esportes Unidos" }] }),
@@ -42,9 +31,8 @@ function NewGame() {
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
-  const [source, setSource] = useState<"gps" | "address">("gps");
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingAddrCoords, setPendingAddrCoords] = useState<Coords | null>(null);
+  const [addressLabel, setAddressLabel] = useState<string>("");
+  const [noResults, setNoResults] = useState(false);
   const [saving, setSaving] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -58,17 +46,21 @@ function NewGame() {
     );
   }, []);
 
-  // Debounced suggestion fetch (no dialog while typing)
+  // Debounced suggestion fetch
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
     }
+    // User is typing — invalidate any previously selected address coords
+    setAddressCoords(null);
+    setAddressLabel("");
     const addr = venueAddress.trim();
     if (addr.length < 4) {
       setSuggestions([]);
       setShowSuggestions(false);
+      setNoResults(false);
       return;
     }
     suggestTimer.current = setTimeout(async () => {
@@ -81,9 +73,11 @@ function NewGame() {
         if (Array.isArray(data)) {
           setSuggestions(data);
           setShowSuggestions(data.length > 0);
+          setNoResults(data.length === 0);
         }
       } catch {
         setSuggestions([]);
+        setNoResults(true);
       }
     }, 800);
     return () => {
@@ -97,17 +91,10 @@ function NewGame() {
     setVenueAddress(s.display_name);
     setSuggestions([]);
     setShowSuggestions(false);
+    setNoResults(false);
     if (!isFinite(found.lat) || !isFinite(found.lng)) return;
     setAddressCoords(found);
-    if (gpsCoords) {
-      const d = distanceKm(gpsCoords.lat, gpsCoords.lng, found.lat, found.lng);
-      if (d > 0.5) {
-        setPendingAddrCoords(found);
-        setConfirmOpen(true);
-        return;
-      }
-    }
-    setSource("address");
+    setAddressLabel(s.display_name);
   }
 
   const { data: sports } = useQuery({
@@ -128,8 +115,8 @@ function NewGame() {
     })();
   }, [visibility, user, cep]);
 
-  const effectiveCoords: Coords | null =
-    source === "address" && addressCoords ? addressCoords : gpsCoords;
+  const effectiveCoords: Coords | null = addressCoords ?? gpsCoords;
+  const effectiveSource: "address" | "gps" = addressCoords ? "address" : "gps";
 
   async function geocodeOnce(addr: string): Promise<Coords | null> {
     try {
@@ -149,14 +136,20 @@ function NewGame() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    let coords = effectiveCoords;
+    let coords: Coords | null = addressCoords;
+    // If user typed an address but didn't pick a suggestion, try to geocode it once.
     if (!coords && venueAddress.trim().length >= 4) {
       coords = await geocodeOnce(venueAddress.trim());
+      if (!coords && gpsCoords) {
+        toast("Usando sua localização atual como local do jogo.");
+      }
     }
+    if (!coords) coords = gpsCoords;
     if (!coords) {
       toast.error("Precisamos da sua localização pra criar o jogo");
       return;
     }
+
     if (visibility === "cep") {
       const digits = cep.replace(/\D/g, "");
       if (digits.length !== 8) {
@@ -267,11 +260,19 @@ function NewGame() {
           </div>
         </Field>
 
+        {noResults && (
+          <p className="text-xs text-[#FF4444] -mt-1">
+            Endereço não encontrado. O jogo será mapeado pela sua localização atual.
+          </p>
+        )}
+
         <div className="inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 bg-pop text-[#111] text-xs font-bold uppercase">
           <MapPin className="size-3.5" />
-          {effectiveCoords
-            ? `Localização capturada · ${source === "address" ? "endereço" : "GPS"}`
-            : "Aguardando GPS…"}
+          {effectiveSource === "address" && addressCoords
+            ? `Localização: ${(addressLabel.split(",")[0] || venueName || "endereço selecionado").trim()} (endereço)`
+            : effectiveCoords
+              ? "Localização: GPS do dispositivo"
+              : "Aguardando GPS…"}
         </div>
 
 
@@ -385,36 +386,6 @@ function NewGame() {
         </button>
 
       </form>
-
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Endereço diferente da sua posição</AlertDialogTitle>
-            <AlertDialogDescription>
-              Você está em outro lugar agora. Usar o endereço digitado como local do jogo?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setSource("gps");
-                setPendingAddrCoords(null);
-              }}
-            >
-              Usar minha posição
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (pendingAddrCoords) setAddressCoords(pendingAddrCoords);
-                setSource("address");
-                setPendingAddrCoords(null);
-              }}
-            >
-              Usar endereço
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </main>
   );
 }
