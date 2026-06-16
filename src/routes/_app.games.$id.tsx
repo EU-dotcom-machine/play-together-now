@@ -40,6 +40,7 @@ function GameDetail() {
   const navigate = useNavigate();
   const [armRaised, setArmRaised] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const prevStatusRef = useRef<string | null>(null);
 
   const { data: game, isLoading } = useQuery({
