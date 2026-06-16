@@ -386,36 +386,6 @@ function NewGame() {
         </button>
 
       </form>
-
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Endereço diferente da sua posição</AlertDialogTitle>
-            <AlertDialogDescription>
-              Você está em outro lugar agora. Usar o endereço digitado como local do jogo?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setSource("gps");
-                setPendingAddrCoords(null);
-              }}
-            >
-              Usar minha posição
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (pendingAddrCoords) setAddressCoords(pendingAddrCoords);
-                setSource("address");
-                setPendingAddrCoords(null);
-              }}
-            >
-              Usar endereço
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </main>
   );
 }
