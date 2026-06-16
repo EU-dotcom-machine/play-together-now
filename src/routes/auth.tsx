@@ -22,6 +22,9 @@ function AuthPage() {
   const [networkError, setNetworkError] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSent, setForgotSent] = useState<string | null>(null);
 
   if (authLoading) return null;
   if (user) return <Navigate to="/discover" replace />;
