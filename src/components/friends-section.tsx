@@ -171,7 +171,7 @@ export function FriendsSection() {
                   key={p.id}
                   className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-[#2A2A2A]"
                 >
-                  <Avatar name={p.display_name} />
+                  <Avatar name={p.display_name} url={p.avatar_url} />
                   <p className="flex-1 text-sm font-semibold text-white">
                     {p.display_name ?? "Sem nome"}
                   </p>
@@ -206,7 +206,7 @@ export function FriendsSection() {
                 key={r.id}
                 className="bg-[#1E1E1E] rounded-2xl p-3 flex items-center gap-3"
               >
-                <Avatar name={p?.display_name} />
+                <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
                   {p?.display_name ?? "Jogador"}
                 </p>
@@ -246,7 +246,7 @@ export function FriendsSection() {
                 key={r.id}
                 className="bg-[#1E1E1E] rounded-2xl p-3 flex items-center gap-3"
               >
-                <Avatar name={p?.display_name} />
+                <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
                   {p?.display_name ?? "Jogador"}
                 </p>
