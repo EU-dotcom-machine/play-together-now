@@ -25,6 +25,7 @@ function AuthPage() {
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState(false);
 
   if (authLoading) return null;
   if (user) return <Navigate to="/discover" replace />;
