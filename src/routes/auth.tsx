@@ -65,6 +65,31 @@ function AuthPage() {
     }
   }
 
+  async function submitForgot(e: React.FormEvent) {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/auth/reset",
+      });
+      if (error) throw error;
+      setForgotSent(email);
+    } catch (err: any) {
+      if (isNetworkError(err)) {
+        toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
+      } else {
+        toast.error(err?.message ?? "Erro ao enviar e-mail");
+      }
+    } finally {
+      setForgotLoading(false);
+    }
+  }
+
+  function backToSignin() {
+    setForgotMode(false);
+    setForgotSent(null);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
