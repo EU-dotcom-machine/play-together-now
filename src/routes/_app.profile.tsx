@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown } from "lucide-react";
+import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { brandGradient } from "@/lib/brands";
@@ -79,6 +79,37 @@ function Profile() {
   const [sponsorOpen, setSponsorOpen] = useState(false);
   const [sportsOpen, setSportsOpen] = useState(false);
   const [bySportOpen, setBySportOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function onAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      // Resize/compress to max 400x400 via canvas
+      const blob = await resizeImage(file, 400);
+      const path = `${user.id}/avatar.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = `${pub.publicUrl}?v=${Date.now()}`;
+      const { error: updErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url } as any)
+        .eq("id", user.id);
+      if (updErr) throw updErr;
+      toast.success("Foto atualizada!");
+      qc.invalidateQueries({ queryKey: ["profile", user.id] });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro ao enviar foto");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   useEffect(() => {
     if (profile && !hydrated) {
@@ -176,8 +207,34 @@ function Profile() {
         style={{ background: brandGradient(selectedBrand.name) }}
       >
         <div className="flex items-center gap-4">
-          <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold">
-            {display?.[0]?.toUpperCase() ?? "?"}
+          <div className="relative size-16 shrink-0">
+            <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold overflow-hidden">
+              {(profile as any)?.avatar_url ? (
+                <img
+                  src={(profile as any).avatar_url}
+                  alt=""
+                  className="size-16 rounded-full object-cover"
+                />
+              ) : (
+                display?.[0]?.toUpperCase() ?? "?"
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              aria-label="Trocar foto"
+              className="absolute -bottom-0.5 -right-0.5 size-5 bg-pop text-[#111] rounded-full p-0.5 cursor-pointer border border-[#111] flex items-center justify-center disabled:opacity-60"
+            >
+              <Camera className="size-3" />
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onAvatarFile}
+            />
           </div>
           <div>
             <p className="text-xs uppercase font-semibold text-[#888]">jogador</p>
@@ -459,4 +516,35 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </label>
   );
+}
+
+async function resizeImage(file: File, max: number): Promise<Blob> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error("image load failed"));
+    i.src = dataUrl;
+  });
+  const scale = Math.min(1, max / Math.max(img.width, img.height));
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return file;
+  ctx.drawImage(img, 0, 0, w, h);
+  return await new Promise<Blob>((resolve) => {
+    canvas.toBlob(
+      (b) => resolve(b ?? file),
+      "image/jpeg",
+      0.85,
+    );
+  });
 }
