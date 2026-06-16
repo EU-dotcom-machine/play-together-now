@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppSportsRouteImport } from './routes/_app.sports'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppNewRouteImport } from './routes/_app.new'
@@ -33,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/reset',
+  path: '/reset',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AppSportsRoute = AppSportsRouteImport.update({
   id: '/sports',
@@ -72,23 +78,25 @@ const AppGamesIdEditRoute = AppGamesIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/discover': typeof AppDiscoverRoute
   '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
+  '/auth/reset': typeof AuthResetRoute
   '/games/$id': typeof AppGamesIdRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/discover': typeof AppDiscoverRoute
   '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRoute
   '/sports': typeof AppSportsRoute
+  '/auth/reset': typeof AuthResetRoute
   '/games/$id': typeof AppGamesIdRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
@@ -96,12 +104,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/_app/discover': typeof AppDiscoverRoute
   '/_app/friends': typeof AppFriendsRoute
   '/_app/new': typeof AppNewRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/sports': typeof AppSportsRoute
+  '/auth/reset': typeof AuthResetRoute
   '/_app/games/$id': typeof AppGamesIdRoute
   '/_app/games_/$id/edit': typeof AppGamesIdEditRoute
 }
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/profile'
     | '/sports'
+    | '/auth/reset'
     | '/games/$id'
     | '/games/$id/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/profile'
     | '/sports'
+    | '/auth/reset'
     | '/games/$id'
     | '/games/$id/edit'
   id:
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_app/new'
     | '/_app/profile'
     | '/_app/sports'
+    | '/auth/reset'
     | '/_app/games/$id'
     | '/_app/games_/$id/edit'
   fileRoutesById: FileRoutesById
@@ -145,7 +157,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -170,6 +182,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_app/sports': {
       id: '/_app/sports'
@@ -245,10 +264,20 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AuthRouteChildren {
+  AuthResetRoute: typeof AuthResetRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthResetRoute: AuthResetRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
