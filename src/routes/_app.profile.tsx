@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +79,42 @@ function Profile() {
   const [sponsorOpen, setSponsorOpen] = useState(false);
   const [sportsOpen, setSportsOpen] = useState(false);
   const [bySportOpen, setBySportOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyTab, setHistoryTab] = useState<"played" | "hosted">("played");
+
+  const { data: played = [] } = useQuery({
+    queryKey: ["history-played", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("game_participants")
+        .select(
+          "game_id, status, created_at, games(id, title, starts_at, status, sports(name, emoji), venues(name))" as any,
+        )
+        .eq("user_id", user!.id)
+        .eq("status" as any, "confirmed")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      return ((data ?? []) as any[])
+        .map((r) => r.games)
+        .filter(Boolean);
+    },
+  });
+
+  const { data: hosted = [] } = useQuery({
+    queryKey: ["history-hosted", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("games")
+        .select("id, title, starts_at, status, sports(name, emoji), venues(name)")
+        .eq("host_id", user!.id)
+        .order("starts_at", { ascending: false })
+        .limit(20);
+      return (data ?? []) as any[];
+    },
+  });
+
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -459,6 +495,54 @@ function Profile() {
         >
           <Save className="size-4" /> Salvar
         </button>
+
+
+        <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
+          <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
+            <span className="text-base font-bold uppercase tracking-wide text-foreground">
+              Histórico
+            </span>
+            <ChevronDown
+              className={cn("size-5 transition-transform duration-200", historyOpen && "rotate-180")}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+            <div className="pt-3 grid gap-3">
+              <div className="flex gap-2 flex-wrap">
+                <span className="px-3 py-1.5 rounded-full bg-pop text-[#111] text-xs font-bold">
+                  Total: {played.length + hosted.length}
+                </span>
+                <span className="px-3 py-1.5 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
+                  Jogador: {played.length}
+                </span>
+                <span className="px-3 py-1.5 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
+                  Organizador: {hosted.length}
+                </span>
+              </div>
+
+              <div className="flex gap-2 bg-[#1E1E1E] p-1 rounded-full">
+                {(["played", "hosted"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setHistoryTab(t)}
+                    className={cn(
+                      "flex-1 px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors",
+                      historyTab === t
+                        ? "bg-pop text-[#111]"
+                        : "text-foreground/70",
+                    )}
+                  >
+                    {t === "played" ? "Jogados" : "Organizados"}
+                  </button>
+                ))}
+              </div>
+
+              <HistoryList items={historyTab === "played" ? played : hosted} />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
         <button
           onClick={signOut}
           className="px-5 py-3 bg-transparent border border-pop text-pop font-bold uppercase rounded-full flex items-center justify-center gap-2"
@@ -547,4 +631,56 @@ async function resizeImage(file: File, max: number): Promise<Blob> {
       0.85,
     );
   });
+}
+
+function HistoryList({ items }: { items: any[] }) {
+  if (!items || items.length === 0) {
+    return (
+      <p className="text-sm text-ink/60 text-center py-4">
+        Nenhum jogo ainda. Que tal criar o primeiro?
+      </p>
+    );
+  }
+  return (
+    <ul className="grid gap-2">
+      {items.map((g) => {
+        const date = g.starts_at
+          ? new Date(g.starts_at).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "—";
+        let label = "Aberto";
+        let chipCls = "bg-pop text-[#111]";
+        if (g.status === "finished") {
+          label = "Concluído";
+          chipCls = "bg-[#2D6A4F] text-white";
+        } else if (g.status === "cancelled") {
+          label = "Cancelado";
+          chipCls = "bg-[#2A2A2A] text-[#888]";
+        }
+        return (
+          <li key={g.id}>
+            <Link
+              to="/games/$id"
+              params={{ id: g.id }}
+              className="flex items-center gap-3 bg-surface rounded-xl p-3 border border-border"
+            >
+              <span className="text-xl">{g.sports?.emoji ?? "🏅"}</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm truncate text-foreground">{g.title}</p>
+                <p className="text-xs text-ink/60 truncate">{g.venues?.name ?? "—"}</p>
+                <p className="text-xs text-ink/60">{date}</p>
+              </div>
+              <span className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase", chipCls)}>
+                {label}
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
