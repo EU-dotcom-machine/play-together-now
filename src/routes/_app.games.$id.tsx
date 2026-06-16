@@ -4,13 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Zap, Send, Loader2, Hourglass, Check, Share2, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCourtImage } from "@/lib/sport-courts";
 import { Reviews } from "@/components/reviews";
 import { CandidatesPanel } from "@/components/candidates-panel";
 import { trackEvent } from "@/lib/posthog";
 import { AddFriendButton } from "@/components/add-friend-button";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/games/$id")({
   head: () => ({ meta: [{ title: "Jogo — Esportes Unidos" }] }),
@@ -30,6 +40,7 @@ function GameDetail() {
   const navigate = useNavigate();
   const [armRaised, setArmRaised] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const prevStatusRef = useRef<string | null>(null);
 
   const { data: game, isLoading } = useQuery({
@@ -245,13 +256,21 @@ function GameDetail() {
             Você é o organizador
           </div>
         ) : myStatus === "confirmed" ? (
-          <button
-            onClick={leave}
-            className="w-full px-5 py-5 font-extrabold text-xl uppercase rounded-full flex items-center justify-center gap-2"
-            style={{ background: "#2D6A4F", color: "#fff" }}
-          >
-            <Check className="size-5" /> Confirmado!
-          </button>
+          <div className="flex flex-col gap-2">
+            <div
+              className="w-full px-5 py-5 font-extrabold text-xl uppercase rounded-full flex items-center justify-center gap-2 cursor-default"
+              style={{ background: "#2D6A4F", color: "#fff" }}
+            >
+              <Check className="size-5" /> Confirmado!
+            </div>
+            <button
+              onClick={() => setShowLeaveDialog(true)}
+              className="w-auto mx-auto px-4 py-2 text-xs font-bold uppercase rounded-full bg-transparent border flex items-center gap-2"
+              style={{ borderColor: "#FF4444", color: "#FF4444" }}
+            >
+              <LogOut className="size-3" /> Sair do jogo
+            </button>
+          </div>
         ) : myStatus === "pending" ? (
           <button
             disabled
@@ -276,6 +295,25 @@ function GameDetail() {
           </p>
         )}
       </div>
+
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent className="bg-[#1A1A1A] border-[#333] text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sair do jogo?</AlertDialogTitle>
+            <AlertDialogDescription className="text-ink/60">
+              Sua vaga será liberada e você perderá acesso ao chat.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowLeaveDialog(false)} className="bg-surface text-white border-none hover:bg-surface/80">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={leave} className="bg-[#FF4444] text-white hover:bg-[#FF4444]/90">
+              Confirmar saída
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {isHost && (
         <CandidatesPanel
