@@ -632,3 +632,55 @@ async function resizeImage(file: File, max: number): Promise<Blob> {
     );
   });
 }
+
+function HistoryList({ items }: { items: any[] }) {
+  if (!items || items.length === 0) {
+    return (
+      <p className="text-sm text-ink/60 text-center py-4">
+        Nenhum jogo ainda. Que tal criar o primeiro?
+      </p>
+    );
+  }
+  return (
+    <ul className="grid gap-2">
+      {items.map((g) => {
+        const date = g.starts_at
+          ? new Date(g.starts_at).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "—";
+        let label = "Aberto";
+        let chipCls = "bg-pop text-[#111]";
+        if (g.status === "finished") {
+          label = "Concluído";
+          chipCls = "bg-[#2D6A4F] text-white";
+        } else if (g.status === "cancelled") {
+          label = "Cancelado";
+          chipCls = "bg-[#2A2A2A] text-[#888]";
+        }
+        return (
+          <li key={g.id}>
+            <Link
+              to="/games/$id"
+              params={{ id: g.id }}
+              className="flex items-center gap-3 bg-surface rounded-xl p-3 border border-border"
+            >
+              <span className="text-xl">{g.sports?.emoji ?? "🏅"}</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm truncate text-foreground">{g.title}</p>
+                <p className="text-xs text-ink/60 truncate">{g.venues?.name ?? "—"}</p>
+                <p className="text-xs text-ink/60">{date}</p>
+              </div>
+              <span className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase", chipCls)}>
+                {label}
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
