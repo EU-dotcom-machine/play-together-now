@@ -31,9 +31,8 @@ function NewGame() {
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
-  const [source, setSource] = useState<"gps" | "address">("gps");
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingAddrCoords, setPendingAddrCoords] = useState<Coords | null>(null);
+  const [addressLabel, setAddressLabel] = useState<string>("");
+  const [noResults, setNoResults] = useState(false);
   const [saving, setSaving] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -47,17 +46,21 @@ function NewGame() {
     );
   }, []);
 
-  // Debounced suggestion fetch (no dialog while typing)
+  // Debounced suggestion fetch
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
     }
+    // User is typing — invalidate any previously selected address coords
+    setAddressCoords(null);
+    setAddressLabel("");
     const addr = venueAddress.trim();
     if (addr.length < 4) {
       setSuggestions([]);
       setShowSuggestions(false);
+      setNoResults(false);
       return;
     }
     suggestTimer.current = setTimeout(async () => {
@@ -70,9 +73,11 @@ function NewGame() {
         if (Array.isArray(data)) {
           setSuggestions(data);
           setShowSuggestions(data.length > 0);
+          setNoResults(data.length === 0);
         }
       } catch {
         setSuggestions([]);
+        setNoResults(true);
       }
     }, 800);
     return () => {
@@ -86,17 +91,10 @@ function NewGame() {
     setVenueAddress(s.display_name);
     setSuggestions([]);
     setShowSuggestions(false);
+    setNoResults(false);
     if (!isFinite(found.lat) || !isFinite(found.lng)) return;
     setAddressCoords(found);
-    if (gpsCoords) {
-      const d = distanceKm(gpsCoords.lat, gpsCoords.lng, found.lat, found.lng);
-      if (d > 0.5) {
-        setPendingAddrCoords(found);
-        setConfirmOpen(true);
-        return;
-      }
-    }
-    setSource("address");
+    setAddressLabel(s.display_name);
   }
 
   const { data: sports } = useQuery({
