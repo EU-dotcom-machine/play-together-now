@@ -25,6 +25,7 @@ function AuthPage() {
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState(false);
 
   if (authLoading) return null;
   if (user) return <Navigate to="/discover" replace />;
@@ -259,14 +260,44 @@ function AuthPage() {
               </button>
             )}
 
+            {mode === "signup" && (
+              <label className="flex items-start gap-2 text-xs text-ink/70 mt-2">
+                <input
+                  type="checkbox"
+                  required
+                  checked={accepted}
+                  onChange={(e) => setAccepted(e.target.checked)}
+                  className="mt-0.5 accent-[#FFD600]"
+                />
+                <span>
+                  Li e aceito os{" "}
+                  <a href="/terms" target="_blank" className="underline text-pop">
+                    Termos de Uso
+                  </a>{" "}
+                  e a{" "}
+                  <a href="/privacy" target="_blank" className="underline text-pop">
+                    Política de Privacidade
+                  </a>
+                  , incluindo o uso da minha localização para encontrar jogos próximos.
+                </span>
+              </label>
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (mode === "signup" && !accepted)}
               className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="size-4 animate-spin" />}
               {mode === "signup" ? "Criar conta" : "Entrar"}
             </button>
+            {mode === "signin" && (
+              <p className="mt-3 text-xs text-ink/60 text-center">
+                <a href="/terms" target="_blank" className="underline">Termos de Uso</a>
+                {" · "}
+                <a href="/privacy" target="_blank" className="underline">Política de Privacidade</a>
+              </p>
+            )}
           </form>
         )}
 
