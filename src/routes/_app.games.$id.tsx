@@ -256,13 +256,21 @@ function GameDetail() {
             Você é o organizador
           </div>
         ) : myStatus === "confirmed" ? (
-          <button
-            onClick={leave}
-            className="w-full px-5 py-5 font-extrabold text-xl uppercase rounded-full flex items-center justify-center gap-2"
-            style={{ background: "#2D6A4F", color: "#fff" }}
-          >
-            <Check className="size-5" /> Confirmado!
-          </button>
+          <div className="flex flex-col gap-2">
+            <div
+              className="w-full px-5 py-5 font-extrabold text-xl uppercase rounded-full flex items-center justify-center gap-2 cursor-default"
+              style={{ background: "#2D6A4F", color: "#fff" }}
+            >
+              <Check className="size-5" /> Confirmado!
+            </div>
+            <button
+              onClick={() => setShowLeaveDialog(true)}
+              className="w-auto mx-auto px-4 py-2 text-xs font-bold uppercase rounded-full bg-transparent border flex items-center gap-2"
+              style={{ borderColor: "#FF4444", color: "#FF4444" }}
+            >
+              <LogOut className="size-3" /> Sair do jogo
+            </button>
+          </div>
         ) : myStatus === "pending" ? (
           <button
             disabled
