@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown } from "lucide-react";
+import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { brandGradient } from "@/lib/brands";
