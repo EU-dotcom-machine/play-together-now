@@ -163,9 +163,37 @@ function GameDetail() {
 
   return (
     <main className="px-5 pt-6 max-w-md mx-auto">
-      <button onClick={() => navigate({ to: "/discover" })} className="brutal-chip bg-paper mb-4">
-        <ArrowLeft className="size-3" /> Voltar
-      </button>
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <button onClick={() => navigate({ to: "/discover" })} className="brutal-chip bg-paper">
+          <ArrowLeft className="size-3" /> Voltar
+        </button>
+        <button
+          onClick={() => {
+            const gameUrl = window.location.href;
+            const date = start.toLocaleDateString("pt-BR", {
+              weekday: "long", day: "2-digit", month: "long",
+            });
+            const time = start.toLocaleTimeString("pt-BR", {
+              hour: "2-digit", minute: "2-digit",
+            });
+            const price = game.price_cents === 0
+              ? "de graça"
+              : "R$ " + (game.price_cents / 100).toFixed(2);
+            const text = encodeURIComponent(
+              `🏅 Bora jogar ${game.sports?.name}!\n\n` +
+              `*${game.title}*\n` +
+              `📍 ${game.venues?.name}\n` +
+              `📅 ${date} às ${time}\n` +
+              `💰 ${price}\n\n` +
+              `Diz EU! e entra no jogo 👇\n${gameUrl}`
+            );
+            window.open(`https://wa.me/?text=${text}`, "_blank");
+          }}
+          className="brutal-chip bg-paper"
+        >
+          <Share2 className="size-3" /> Compartilhar
+        </button>
+      </div>
 
       <div
         className="brutal-card-lg p-5 relative overflow-hidden"
