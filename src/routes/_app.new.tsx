@@ -260,11 +260,19 @@ function NewGame() {
           </div>
         </Field>
 
+        {noResults && (
+          <p className="text-xs text-[#FF4444] -mt-1">
+            Endereço não encontrado. O jogo será mapeado pela sua localização atual.
+          </p>
+        )}
+
         <div className="inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 bg-pop text-[#111] text-xs font-bold uppercase">
           <MapPin className="size-3.5" />
-          {effectiveCoords
-            ? `Localização capturada · ${source === "address" ? "endereço" : "GPS"}`
-            : "Aguardando GPS…"}
+          {effectiveSource === "address" && addressCoords
+            ? `Localização: ${(addressLabel.split(",")[0] || venueName || "endereço selecionado").trim()} (endereço)`
+            : effectiveCoords
+              ? "Localização: GPS do dispositivo"
+              : "Aguardando GPS…"}
         </div>
 
 
