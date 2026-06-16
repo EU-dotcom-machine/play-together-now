@@ -124,7 +124,8 @@ function Discover() {
       const { data: rows, error } = await supabase
         .from("games")
         .select("id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id,host_id,visibility,cep")
-        .gte("starts_at", new Date(Date.now() - 1000 * 60 * 60).toISOString())
+        .in("status", ["open", "full"])
+        .gte("starts_at", new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString())
         .or(orParts.join(","))
         .order("starts_at", { ascending: true })
         .limit(50);
