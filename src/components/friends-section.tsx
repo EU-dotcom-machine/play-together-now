@@ -266,10 +266,14 @@ export function FriendsSection() {
   );
 }
 
-function Avatar({ name }: { name?: string | null }) {
+function Avatar({ name, url }: { name?: string | null; url?: string | null }) {
   return (
-    <div className="size-9 rounded-full bg-pop text-[#111] flex items-center justify-center text-sm font-extrabold">
-      {name?.[0]?.toUpperCase() ?? "?"}
+    <div className="size-9 rounded-full bg-pop text-[#111] flex items-center justify-center text-sm font-extrabold overflow-hidden">
+      {url ? (
+        <img src={url} alt="" className="size-9 rounded-full object-cover" />
+      ) : (
+        name?.[0]?.toUpperCase() ?? "?"
+      )}
     </div>
   );
 }
