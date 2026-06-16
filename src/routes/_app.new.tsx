@@ -115,8 +115,8 @@ function NewGame() {
     })();
   }, [visibility, user, cep]);
 
-  const effectiveCoords: Coords | null =
-    source === "address" && addressCoords ? addressCoords : gpsCoords;
+  const effectiveCoords: Coords | null = addressCoords ?? gpsCoords;
+  const effectiveSource: "address" | "gps" = addressCoords ? "address" : "gps";
 
   async function geocodeOnce(addr: string): Promise<Coords | null> {
     try {
@@ -136,14 +136,20 @@ function NewGame() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    let coords = effectiveCoords;
+    let coords: Coords | null = addressCoords;
+    // If user typed an address but didn't pick a suggestion, try to geocode it once.
     if (!coords && venueAddress.trim().length >= 4) {
       coords = await geocodeOnce(venueAddress.trim());
+      if (!coords && gpsCoords) {
+        toast("Usando sua localização atual como local do jogo.");
+      }
     }
+    if (!coords) coords = gpsCoords;
     if (!coords) {
       toast.error("Precisamos da sua localização pra criar o jogo");
       return;
     }
+
     if (visibility === "cep") {
       const digits = cep.replace(/\D/g, "");
       if (digits.length !== 8) {
