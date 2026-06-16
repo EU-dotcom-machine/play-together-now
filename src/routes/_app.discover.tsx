@@ -150,20 +150,14 @@ function Discover() {
           <h1 className="text-4xl font-extrabold uppercase leading-none">Jogos<span className="text-pop">.</span></h1>
           <p className="mt-1 text-sm text-ink/70">
             {coords
-              ? "Ordenados por distância de você"
+              ? "Jogos acontecendo perto de você"
               : geoDenied
-                ? "Ative a localização pra ver o que tá rolando perto"
+                ? "Ative a localização para ver jogos perto de você"
                 : "Buscando sua localização…"}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <NotificationsBell />
-          <Link
-            to="/new"
-            className="brutal-card-lg px-3 py-2 bg-pop text-[#111] text-xs font-bold uppercase"
-          >
-            + Criar
-          </Link>
         </div>
       </header>
 
