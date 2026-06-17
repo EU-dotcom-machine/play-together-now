@@ -666,7 +666,7 @@ function HistoryList({ items }: { items: any[] }) {
             <Link
               to="/games/$id"
               params={{ id: g.id }}
-              className="flex items-center gap-3 bg-surface rounded-xl p-3 border border-border"
+              className="flex items-center gap-3 bg-surface rounded-xl p-3 border border-border w-full overflow-hidden"
             >
               <span className="text-xl">{g.sports?.emoji ?? "🏅"}</span>
               <div className="flex-1 min-w-0">
