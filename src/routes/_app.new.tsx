@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_app/new")({
 });
 
 type Coords = { lat: number; lng: number };
-type Suggestion = { display_name: string; lat: string; lon: string };
+type Suggestion = { display_name: string; place_id: string };
+
+const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
+
 
 function NewGame() {
   const { user } = useAuth();
