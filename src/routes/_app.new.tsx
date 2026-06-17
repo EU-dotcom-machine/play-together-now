@@ -129,6 +129,7 @@ function NewGame() {
   // Debounced suggestion fetch
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    abortRef.current?.abort();
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
@@ -146,38 +147,48 @@ function NewGame() {
       return;
     }
     suggestTimer.current = setTimeout(async () => {
-      const data = await placesAutocomplete(addr, 5);
-      if (data.length > 0) {
-        setSuggestions(data);
-        setShowSuggestions(true);
-        setNoResults(false);
-        return;
-      }
-      // Retry with simplified city/state query
-      const simplified = simplifyToCityState(addr);
-      if (simplified) {
-        const retry = await placesAutocomplete(simplified, 1);
-        if (retry.length > 0) {
-          const c = await placeDetails(retry[0].place_id);
-          if (c) {
-            setAddressCoords(c);
-            setAddressLabel(simplified.replace(/, Brasil$/, ""));
-            setAddressApprox(true);
-            setSuggestions([]);
-            setShowSuggestions(false);
-            setNoResults(false);
-            return;
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
+      try {
+        const data = await placesAutocomplete(addr, 5, ctrl.signal);
+        if (ctrl.signal.aborted) return;
+        if (data.length > 0) {
+          setSuggestions(data);
+          setShowSuggestions(true);
+          setNoResults(false);
+          return;
+        }
+        // Retry with simplified city/state query
+        const simplified = simplifyToCityState(addr);
+        if (simplified) {
+          const retry = await placesAutocomplete(simplified, 1, ctrl.signal);
+          if (ctrl.signal.aborted) return;
+          if (retry.length > 0) {
+            const c = await placeDetails(retry[0].place_id, ctrl.signal);
+            if (ctrl.signal.aborted) return;
+            if (c) {
+              setAddressCoords(c);
+              setAddressLabel(simplified.replace(/, Brasil$/, ""));
+              setAddressApprox(true);
+              setSuggestions([]);
+              setShowSuggestions(false);
+              setNoResults(false);
+              return;
+            }
           }
         }
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setNoResults(true);
+        setFallbackQuery(simplified.replace(/, Brasil$/, ""));
+      } catch {
+        // AbortError or network error — silently ignore
       }
-      setSuggestions([]);
-      setShowSuggestions(false);
-      setNoResults(true);
-      setFallbackQuery(simplified.replace(/, Brasil$/, ""));
     }, 800);
 
     return () => {
       if (suggestTimer.current) clearTimeout(suggestTimer.current);
+      abortRef.current?.abort();
     };
   }, [venueAddress]);
 
