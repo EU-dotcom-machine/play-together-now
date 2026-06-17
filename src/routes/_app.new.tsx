@@ -50,6 +50,27 @@ function NewGame() {
     );
   }, []);
 
+  function simplifyToCityState(addr: string): string {
+    const cleaned = addr.replace(/[–—]/g, ",").replace(/\d{5}-?\d{3}/g, "");
+    const parts = cleaned.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length === 0) return "";
+    const last = parts.slice(-2);
+    return `${last.join(", ")}, Brasil`;
+  }
+
+  async function nominatimSearch(q: string, limit = 5): Promise<Suggestion[]> {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=${limit}&countrycodes=br`,
+        { headers: { "Accept-Language": "pt-BR" } },
+      );
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
   // Debounced suggestion fetch
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
@@ -60,6 +81,8 @@ function NewGame() {
     // User is typing — invalidate any previously selected address coords
     setAddressCoords(null);
     setAddressLabel("");
+    setAddressApprox(false);
+    setGpsExplicit(false);
     const addr = venueAddress.trim();
     if (addr.length < 4) {
       setSuggestions([]);
@@ -68,21 +91,35 @@ function NewGame() {
       return;
     }
     suggestTimer.current = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=5&countrycodes=br`,
-          { headers: { "Accept-Language": "pt-BR" } },
-        );
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setSuggestions(data);
-          setShowSuggestions(data.length > 0);
-          setNoResults(data.length === 0);
-        }
-      } catch {
-        setSuggestions([]);
-        setNoResults(true);
+      const data = await nominatimSearch(addr, 5);
+      if (data.length > 0) {
+        setSuggestions(data);
+        setShowSuggestions(true);
+        setNoResults(false);
+        return;
       }
+      // Retry with simplified city/state query
+      const simplified = simplifyToCityState(addr);
+      if (simplified) {
+        const retry = await nominatimSearch(simplified, 1);
+        if (retry.length > 0) {
+          const s = retry[0];
+          const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
+          if (isFinite(c.lat) && isFinite(c.lng)) {
+            setAddressCoords(c);
+            setAddressLabel(simplified.replace(/, Brasil$/, ""));
+            setAddressApprox(true);
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setNoResults(false);
+            return;
+          }
+        }
+      }
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setNoResults(true);
+      setFallbackQuery(simplified.replace(/, Brasil$/, ""));
     }, 800);
     return () => {
       if (suggestTimer.current) clearTimeout(suggestTimer.current);
@@ -96,9 +133,41 @@ function NewGame() {
     setSuggestions([]);
     setShowSuggestions(false);
     setNoResults(false);
+    setAddressApprox(false);
+    setGpsExplicit(false);
     if (!isFinite(found.lat) || !isFinite(found.lng)) return;
     setAddressCoords(found);
     setAddressLabel(s.display_name);
+  }
+
+  async function runFallbackSearch() {
+    const q = fallbackQuery.trim();
+    if (!q) return;
+    setFallbackSearching(true);
+    const data = await nominatimSearch(q, 1);
+    setFallbackSearching(false);
+    if (data.length > 0) {
+      const s = data[0];
+      const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
+      if (isFinite(c.lat) && isFinite(c.lng)) {
+        setAddressCoords(c);
+        setAddressLabel(q);
+        setAddressApprox(true);
+        setNoResults(false);
+        setGpsExplicit(false);
+        return;
+      }
+    }
+    toast.error("Ainda não encontramos. Tente só a cidade e estado.");
+  }
+
+  function useGpsAsLocation() {
+    if (!gpsCoords) {
+      toast.error("GPS indisponível. Ative a localização do dispositivo.");
+      return;
+    }
+    setGpsExplicit(true);
+    setNoResults(false);
   }
 
   const { data: sports } = useQuery({
@@ -119,22 +188,28 @@ function NewGame() {
     })();
   }, [visibility, user, cep]);
 
-  const effectiveCoords: Coords | null = addressCoords ?? gpsCoords;
+  const effectiveCoords: Coords | null = addressCoords ?? (gpsExplicit ? gpsCoords : gpsCoords);
   const effectiveSource: "address" | "gps" = addressCoords ? "address" : "gps";
 
   async function geocodeOnce(addr: string): Promise<Coords | null> {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1&countrycodes=br`,
-        { headers: { "Accept-Language": "pt-BR" } },
-      );
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) return null;
+    const data = await nominatimSearch(addr, 1);
+    if (data.length > 0) {
       const c = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-      return isFinite(c.lat) && isFinite(c.lng) ? c : null;
-    } catch {
-      return null;
+      if (isFinite(c.lat) && isFinite(c.lng)) return c;
     }
+    const simplified = simplifyToCityState(addr);
+    if (simplified) {
+      const retry = await nominatimSearch(simplified, 1);
+      if (retry.length > 0) {
+        const c = { lat: parseFloat(retry[0].lat), lng: parseFloat(retry[0].lon) };
+        if (isFinite(c.lat) && isFinite(c.lng)) {
+          setAddressLabel(simplified.replace(/, Brasil$/, ""));
+          setAddressApprox(true);
+          return c;
+        }
+      }
+    }
+    return null;
   }
 
   async function submit(e: React.FormEvent) {
