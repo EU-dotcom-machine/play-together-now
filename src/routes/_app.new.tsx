@@ -243,20 +243,21 @@ function NewGame() {
   const effectiveSource: "address" | "gps" = addressCoords ? "address" : "gps";
 
   async function geocodeOnce(addr: string): Promise<Coords | null> {
-    const data = await nominatimSearch(addr, 1);
+    const data = await placesAutocomplete(addr, 1);
     if (data.length > 0) {
-      const c = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-      if (isFinite(c.lat) && isFinite(c.lng)) return c;
+      const c = await placeDetails(data[0].place_id);
+      if (c) return c;
     }
     const simplified = simplifyToCityState(addr);
     if (simplified) {
-      const retry = await nominatimSearch(simplified, 1);
+      const retry = await placesAutocomplete(simplified, 1);
       if (retry.length > 0) {
-        const c = { lat: parseFloat(retry[0].lat), lng: parseFloat(retry[0].lon) };
-        if (isFinite(c.lat) && isFinite(c.lng)) {
+        const c = await placeDetails(retry[0].place_id);
+        if (c) {
           setAddressLabel(simplified.replace(/, Brasil$/, ""));
           setAddressApprox(true);
           return c;
+
         }
       }
     }
