@@ -354,7 +354,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         <div className="flex items-center gap-2">
           <span className="text-2xl">{game.sports?.emoji ?? "🏅"}</span>
           <div>
-            <p className="uppercase text-white/70" style={{ fontSize: "10px", letterSpacing: "0.06em" }}>
+            <p className="uppercase" style={{ color: borderColor, fontSize: "10px", letterSpacing: "0.06em" }}>
               {game.sports?.name}
             </p>
             <h3 className="text-white font-bold leading-tight inline-flex items-center gap-1.5" style={{ fontSize: "15px" }}>
