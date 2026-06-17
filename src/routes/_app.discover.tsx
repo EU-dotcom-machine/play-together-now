@@ -297,7 +297,33 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
   }));
 }
 
+const sportColor: Record<string, string> = {
+  "Futebol":        "#00b140",
+  "Futsal":         "#00b140",
+  "Society":        "#00b140",
+  "Basquete":       "#ff6b00",
+  "Vôlei":          "#0066cc",
+  "Vôlei de Praia": "#f5a623",
+  "Beach Tennis":   "#f5a623",
+  "Tênis":          "#7bc043",
+  "Padel":          "#00c9a7",
+  "Natação":        "#00aaff",
+  "Corrida":        "#ff4444",
+  "Ciclismo":       "#ff8c00",
+  "Skate":          "#9b59b6",
+  "Surf":           "#00bcd4",
+  "Handebol":       "#e91e63",
+  "Pickleball":     "#cddc39",
+  "MMA / Luta":     "#c0392b",
+  "Golfe":          "#2ecc71",
+  "Tênis de Mesa":  "#3498db",
+  "Badminton":      "#e67e22",
+  "CrossFit":       "#e74c3c",
+  "Yoga":           "#9c27b0",
+};
+
 function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng: number } | null }) {
+  const borderColor = sportColor[game.sports?.name ?? ""] ?? "#FFD600";
   const distKm =
     game.distance_meters != null
       ? game.distance_meters / 1000
@@ -320,7 +346,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "140px",
-        borderLeft: "4px solid #FFD600",
+        borderLeft: `4px solid ${borderColor}`,
         padding: "16px",
       }}
     >
@@ -328,7 +354,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         <div className="flex items-center gap-2">
           <span className="text-2xl">{game.sports?.emoji ?? "🏅"}</span>
           <div>
-            <p className="uppercase text-white/70" style={{ fontSize: "10px", letterSpacing: "0.06em" }}>
+            <p className="uppercase" style={{ color: borderColor, fontSize: "10px", letterSpacing: "0.06em" }}>
               {game.sports?.name}
             </p>
             <h3 className="text-white font-bold leading-tight inline-flex items-center gap-1.5" style={{ fontSize: "15px" }}>
