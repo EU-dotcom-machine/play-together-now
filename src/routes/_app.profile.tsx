@@ -669,7 +669,7 @@ function HistoryList({ items }: { items: any[] }) {
               className="flex items-center gap-3 bg-surface rounded-xl p-3 border border-border w-full overflow-hidden"
             >
               <span className="text-xl">{g.sports?.emoji ?? "🏅"}</span>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 overflow-hidden">
                 <p className="font-bold text-sm truncate text-foreground">{g.title}</p>
                 <p className="text-xs text-ink/60 truncate">{g.venues?.name ?? "—"}</p>
                 <p className="text-xs text-ink/60">{date}</p>
