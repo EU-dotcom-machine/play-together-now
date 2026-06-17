@@ -178,8 +178,7 @@ function NewGame() {
     };
   }, [venueAddress]);
 
-  function selectSuggestion(s: Suggestion) {
-    const found: Coords = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
+  async function selectSuggestion(s: Suggestion) {
     justSelectedRef.current = true;
     setVenueAddress(s.display_name);
     setSuggestions([]);
@@ -187,7 +186,8 @@ function NewGame() {
     setNoResults(false);
     setAddressApprox(false);
     setGpsExplicit(false);
-    if (!isFinite(found.lat) || !isFinite(found.lng)) return;
+    const found = await placeDetails(s.place_id);
+    if (!found) return;
     setAddressCoords(found);
     setAddressLabel(s.display_name);
   }
@@ -196,22 +196,21 @@ function NewGame() {
     const q = fallbackQuery.trim();
     if (!q) return;
     setFallbackSearching(true);
-    const data = await nominatimSearch(q, 1);
+    const data = await placesAutocomplete(q, 1);
+    let c: Coords | null = null;
+    if (data.length > 0) c = await placeDetails(data[0].place_id);
     setFallbackSearching(false);
-    if (data.length > 0) {
-      const s = data[0];
-      const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
-      if (isFinite(c.lat) && isFinite(c.lng)) {
-        setAddressCoords(c);
-        setAddressLabel(q);
-        setAddressApprox(true);
-        setNoResults(false);
-        setGpsExplicit(false);
-        return;
-      }
+    if (c) {
+      setAddressCoords(c);
+      setAddressLabel(q);
+      setAddressApprox(true);
+      setNoResults(false);
+      setGpsExplicit(false);
+      return;
     }
     toast.error("Ainda não encontramos. Tente só a cidade e estado.");
   }
+
 
   function useGpsAsLocation() {
     if (!gpsCoords) {
