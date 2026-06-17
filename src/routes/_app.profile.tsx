@@ -668,13 +668,13 @@ function HistoryList({ items }: { items: any[] }) {
               params={{ id: g.id }}
               className="flex items-center gap-3 bg-surface rounded-xl p-3 border border-border w-full overflow-hidden"
             >
-              <span className="text-xl">{g.sports?.emoji ?? "🏅"}</span>
+              <span className="text-xl shrink-0">{g.sports?.emoji ?? "🏅"}</span>
               <div className="flex-1 min-w-0 overflow-hidden">
-                <p className="font-bold text-sm truncate max-w-full block text-foreground">{g.title}</p>
+                <p className="font-bold text-sm truncate max-w-full block w-full text-foreground">{g.title}</p>
                 <p className="text-xs text-ink/60 truncate">{g.venues?.name ?? "—"}</p>
                 <p className="text-xs text-ink/60">{date}</p>
               </div>
-              <span className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase", chipCls)}>
+              <span className={cn("px-2 py-1 rounded-full text-[10px] font-bold uppercase shrink-0", chipCls)}>
                 {label}
               </span>
             </Link>
