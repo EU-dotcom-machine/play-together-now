@@ -306,7 +306,7 @@ function GameDetail() {
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction onClick={leave} className="bg-[#FF4444] text-white hover:bg-[#FF4444]/90">
-              Confirmar saída
+              Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
