@@ -143,7 +143,7 @@ function NewGame() {
       return;
     }
     suggestTimer.current = setTimeout(async () => {
-      const data = await nominatimSearch(addr, 5);
+      const data = await placesAutocomplete(addr, 5);
       if (data.length > 0) {
         setSuggestions(data);
         setShowSuggestions(true);
@@ -153,11 +153,10 @@ function NewGame() {
       // Retry with simplified city/state query
       const simplified = simplifyToCityState(addr);
       if (simplified) {
-        const retry = await nominatimSearch(simplified, 1);
+        const retry = await placesAutocomplete(simplified, 1);
         if (retry.length > 0) {
-          const s = retry[0];
-          const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
-          if (isFinite(c.lat) && isFinite(c.lng)) {
+          const c = await placeDetails(retry[0].place_id);
+          if (c) {
             setAddressCoords(c);
             setAddressLabel(simplified.replace(/, Brasil$/, ""));
             setAddressApprox(true);
@@ -173,6 +172,7 @@ function NewGame() {
       setNoResults(true);
       setFallbackQuery(simplified.replace(/, Brasil$/, ""));
     }, 800);
+
     return () => {
       if (suggestTimer.current) clearTimeout(suggestTimer.current);
     };
