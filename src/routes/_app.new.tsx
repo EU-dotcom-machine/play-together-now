@@ -66,7 +66,7 @@ function NewGame() {
     return `${last.join(", ")}, Brasil`;
   }
 
-  async function placesAutocomplete(q: string, limit = 5): Promise<Suggestion[]> {
+  async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     if (!GOOGLE_PLACES_KEY) return [];
     try {
       const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
@@ -81,6 +81,7 @@ function NewGame() {
           languageCode: "pt-BR",
           sessionToken: sessionTokenRef.current,
         }),
+        signal,
       });
       if (!res.ok) return [];
       const data = await res.json();
