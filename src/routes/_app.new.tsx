@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_app/new")({
 });
 
 type Coords = { lat: number; lng: number };
-type Suggestion = { display_name: string; lat: string; lon: string };
+type Suggestion = { display_name: string; place_id: string };
+
+const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
+
 
 function NewGame() {
   const { user } = useAuth();
@@ -42,6 +45,10 @@ function NewGame() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const justSelectedRef = useRef(false);
+  const sessionTokenRef = useRef<string>(
+    typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+  );
+
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
@@ -58,18 +65,63 @@ function NewGame() {
     return `${last.join(", ")}, Brasil`;
   }
 
-  async function nominatimSearch(q: string, limit = 5): Promise<Suggestion[]> {
+  async function placesAutocomplete(q: string, limit = 5): Promise<Suggestion[]> {
+    if (!GOOGLE_PLACES_KEY) return [];
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=${limit}&countrycodes=br`,
-        { headers: { "Accept-Language": "pt-BR" } },
-      );
+      const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
+        },
+        body: JSON.stringify({
+          input: q,
+          regionCode: "BR",
+          languageCode: "pt-BR",
+          sessionToken: sessionTokenRef.current,
+        }),
+      });
+      if (!res.ok) return [];
       const data = await res.json();
-      return Array.isArray(data) ? data : [];
+      const items = Array.isArray(data?.suggestions) ? data.suggestions.slice(0, limit) : [];
+      return items
+        .map((it: any) => it?.placePrediction)
+        .filter((p: any) => p && p.placeId)
+        .map((p: any) => ({
+          display_name: p.text?.text ?? p.structuredFormat?.mainText?.text ?? "",
+          place_id: p.placeId as string,
+        }));
     } catch {
       return [];
     }
   }
+
+  async function placeDetails(placeId: string): Promise<Coords | null> {
+    if (!GOOGLE_PLACES_KEY || !placeId) return null;
+    try {
+      const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+        headers: {
+          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
+          "X-Goog-FieldMask": "location,formattedAddress",
+          "Accept-Language": "pt-BR",
+        },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const lat = data?.location?.latitude;
+      const lng = data?.location?.longitude;
+      if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
+        // rotate session token after a billed Details call (Google session lifecycle)
+        sessionTokenRef.current =
+          typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+        return { lat, lng };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
 
   // Debounced suggestion fetch
   useEffect(() => {
@@ -91,7 +143,7 @@ function NewGame() {
       return;
     }
     suggestTimer.current = setTimeout(async () => {
-      const data = await nominatimSearch(addr, 5);
+      const data = await placesAutocomplete(addr, 5);
       if (data.length > 0) {
         setSuggestions(data);
         setShowSuggestions(true);
@@ -101,11 +153,10 @@ function NewGame() {
       // Retry with simplified city/state query
       const simplified = simplifyToCityState(addr);
       if (simplified) {
-        const retry = await nominatimSearch(simplified, 1);
+        const retry = await placesAutocomplete(simplified, 1);
         if (retry.length > 0) {
-          const s = retry[0];
-          const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
-          if (isFinite(c.lat) && isFinite(c.lng)) {
+          const c = await placeDetails(retry[0].place_id);
+          if (c) {
             setAddressCoords(c);
             setAddressLabel(simplified.replace(/, Brasil$/, ""));
             setAddressApprox(true);
@@ -121,13 +172,13 @@ function NewGame() {
       setNoResults(true);
       setFallbackQuery(simplified.replace(/, Brasil$/, ""));
     }, 800);
+
     return () => {
       if (suggestTimer.current) clearTimeout(suggestTimer.current);
     };
   }, [venueAddress]);
 
-  function selectSuggestion(s: Suggestion) {
-    const found: Coords = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
+  async function selectSuggestion(s: Suggestion) {
     justSelectedRef.current = true;
     setVenueAddress(s.display_name);
     setSuggestions([]);
@@ -135,7 +186,8 @@ function NewGame() {
     setNoResults(false);
     setAddressApprox(false);
     setGpsExplicit(false);
-    if (!isFinite(found.lat) || !isFinite(found.lng)) return;
+    const found = await placeDetails(s.place_id);
+    if (!found) return;
     setAddressCoords(found);
     setAddressLabel(s.display_name);
   }
@@ -144,22 +196,21 @@ function NewGame() {
     const q = fallbackQuery.trim();
     if (!q) return;
     setFallbackSearching(true);
-    const data = await nominatimSearch(q, 1);
+    const data = await placesAutocomplete(q, 1);
+    let c: Coords | null = null;
+    if (data.length > 0) c = await placeDetails(data[0].place_id);
     setFallbackSearching(false);
-    if (data.length > 0) {
-      const s = data[0];
-      const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
-      if (isFinite(c.lat) && isFinite(c.lng)) {
-        setAddressCoords(c);
-        setAddressLabel(q);
-        setAddressApprox(true);
-        setNoResults(false);
-        setGpsExplicit(false);
-        return;
-      }
+    if (c) {
+      setAddressCoords(c);
+      setAddressLabel(q);
+      setAddressApprox(true);
+      setNoResults(false);
+      setGpsExplicit(false);
+      return;
     }
     toast.error("Ainda não encontramos. Tente só a cidade e estado.");
   }
+
 
   function useGpsAsLocation() {
     if (!gpsCoords) {
@@ -192,20 +243,21 @@ function NewGame() {
   const effectiveSource: "address" | "gps" = addressCoords ? "address" : "gps";
 
   async function geocodeOnce(addr: string): Promise<Coords | null> {
-    const data = await nominatimSearch(addr, 1);
+    const data = await placesAutocomplete(addr, 1);
     if (data.length > 0) {
-      const c = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-      if (isFinite(c.lat) && isFinite(c.lng)) return c;
+      const c = await placeDetails(data[0].place_id);
+      if (c) return c;
     }
     const simplified = simplifyToCityState(addr);
     if (simplified) {
-      const retry = await nominatimSearch(simplified, 1);
+      const retry = await placesAutocomplete(simplified, 1);
       if (retry.length > 0) {
-        const c = { lat: parseFloat(retry[0].lat), lng: parseFloat(retry[0].lon) };
-        if (isFinite(c.lat) && isFinite(c.lng)) {
+        const c = await placeDetails(retry[0].place_id);
+        if (c) {
           setAddressLabel(simplified.replace(/, Brasil$/, ""));
           setAddressApprox(true);
           return c;
+
         }
       }
     }
