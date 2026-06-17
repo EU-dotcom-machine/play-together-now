@@ -299,10 +299,7 @@ function GameDetail() {
       <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
         <AlertDialogContent className="bg-[#1A1A1A] border-[#333] text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Sair do jogo?</AlertDialogTitle>
-            <AlertDialogDescription className="text-ink/60">
-              Sua vaga será liberada e você perderá acesso ao chat.
-            </AlertDialogDescription>
+            <AlertDialogTitle>Tem certeza que quer sair do jogo?</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowLeaveDialog(false)} className="bg-surface text-white border-none hover:bg-surface/80">
