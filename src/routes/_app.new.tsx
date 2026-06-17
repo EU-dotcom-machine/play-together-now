@@ -98,7 +98,7 @@ function NewGame() {
     }
   }
 
-  async function placeDetails(placeId: string): Promise<Coords | null> {
+  async function placeDetails(placeId: string, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY || !placeId) return null;
     try {
       const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
@@ -107,6 +107,7 @@ function NewGame() {
           "X-Goog-FieldMask": "location,formattedAddress",
           "Accept-Language": "pt-BR",
         },
+        signal,
       });
       if (!res.ok) return null;
       const data = await res.json();
