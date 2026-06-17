@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, AlertTriangle, Search } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
 
 export const Route = createFileRoute("/_app/new")({
@@ -32,7 +32,11 @@ function NewGame() {
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
   const [addressLabel, setAddressLabel] = useState<string>("");
+  const [addressApprox, setAddressApprox] = useState(false);
+  const [gpsExplicit, setGpsExplicit] = useState(false);
   const [noResults, setNoResults] = useState(false);
+  const [fallbackQuery, setFallbackQuery] = useState("");
+  const [fallbackSearching, setFallbackSearching] = useState(false);
   const [saving, setSaving] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -46,6 +50,27 @@ function NewGame() {
     );
   }, []);
 
+  function simplifyToCityState(addr: string): string {
+    const cleaned = addr.replace(/[–—]/g, ",").replace(/\d{5}-?\d{3}/g, "");
+    const parts = cleaned.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length === 0) return "";
+    const last = parts.slice(-2);
+    return `${last.join(", ")}, Brasil`;
+  }
+
+  async function nominatimSearch(q: string, limit = 5): Promise<Suggestion[]> {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=${limit}&countrycodes=br`,
+        { headers: { "Accept-Language": "pt-BR" } },
+      );
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
   // Debounced suggestion fetch
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
@@ -56,6 +81,8 @@ function NewGame() {
     // User is typing — invalidate any previously selected address coords
     setAddressCoords(null);
     setAddressLabel("");
+    setAddressApprox(false);
+    setGpsExplicit(false);
     const addr = venueAddress.trim();
     if (addr.length < 4) {
       setSuggestions([]);
@@ -64,21 +91,35 @@ function NewGame() {
       return;
     }
     suggestTimer.current = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=5&countrycodes=br`,
-          { headers: { "Accept-Language": "pt-BR" } },
-        );
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setSuggestions(data);
-          setShowSuggestions(data.length > 0);
-          setNoResults(data.length === 0);
-        }
-      } catch {
-        setSuggestions([]);
-        setNoResults(true);
+      const data = await nominatimSearch(addr, 5);
+      if (data.length > 0) {
+        setSuggestions(data);
+        setShowSuggestions(true);
+        setNoResults(false);
+        return;
       }
+      // Retry with simplified city/state query
+      const simplified = simplifyToCityState(addr);
+      if (simplified) {
+        const retry = await nominatimSearch(simplified, 1);
+        if (retry.length > 0) {
+          const s = retry[0];
+          const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
+          if (isFinite(c.lat) && isFinite(c.lng)) {
+            setAddressCoords(c);
+            setAddressLabel(simplified.replace(/, Brasil$/, ""));
+            setAddressApprox(true);
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setNoResults(false);
+            return;
+          }
+        }
+      }
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setNoResults(true);
+      setFallbackQuery(simplified.replace(/, Brasil$/, ""));
     }, 800);
     return () => {
       if (suggestTimer.current) clearTimeout(suggestTimer.current);
@@ -92,9 +133,41 @@ function NewGame() {
     setSuggestions([]);
     setShowSuggestions(false);
     setNoResults(false);
+    setAddressApprox(false);
+    setGpsExplicit(false);
     if (!isFinite(found.lat) || !isFinite(found.lng)) return;
     setAddressCoords(found);
     setAddressLabel(s.display_name);
+  }
+
+  async function runFallbackSearch() {
+    const q = fallbackQuery.trim();
+    if (!q) return;
+    setFallbackSearching(true);
+    const data = await nominatimSearch(q, 1);
+    setFallbackSearching(false);
+    if (data.length > 0) {
+      const s = data[0];
+      const c = { lat: parseFloat(s.lat), lng: parseFloat(s.lon) };
+      if (isFinite(c.lat) && isFinite(c.lng)) {
+        setAddressCoords(c);
+        setAddressLabel(q);
+        setAddressApprox(true);
+        setNoResults(false);
+        setGpsExplicit(false);
+        return;
+      }
+    }
+    toast.error("Ainda não encontramos. Tente só a cidade e estado.");
+  }
+
+  function useGpsAsLocation() {
+    if (!gpsCoords) {
+      toast.error("GPS indisponível. Ative a localização do dispositivo.");
+      return;
+    }
+    setGpsExplicit(true);
+    setNoResults(false);
   }
 
   const { data: sports } = useQuery({
@@ -115,22 +188,28 @@ function NewGame() {
     })();
   }, [visibility, user, cep]);
 
-  const effectiveCoords: Coords | null = addressCoords ?? gpsCoords;
+  const effectiveCoords: Coords | null = addressCoords ?? (gpsExplicit ? gpsCoords : gpsCoords);
   const effectiveSource: "address" | "gps" = addressCoords ? "address" : "gps";
 
   async function geocodeOnce(addr: string): Promise<Coords | null> {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1&countrycodes=br`,
-        { headers: { "Accept-Language": "pt-BR" } },
-      );
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) return null;
+    const data = await nominatimSearch(addr, 1);
+    if (data.length > 0) {
       const c = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-      return isFinite(c.lat) && isFinite(c.lng) ? c : null;
-    } catch {
-      return null;
+      if (isFinite(c.lat) && isFinite(c.lng)) return c;
     }
+    const simplified = simplifyToCityState(addr);
+    if (simplified) {
+      const retry = await nominatimSearch(simplified, 1);
+      if (retry.length > 0) {
+        const c = { lat: parseFloat(retry[0].lat), lng: parseFloat(retry[0].lon) };
+        if (isFinite(c.lat) && isFinite(c.lng)) {
+          setAddressLabel(simplified.replace(/, Brasil$/, ""));
+          setAddressApprox(true);
+          return c;
+        }
+      }
+    }
+    return null;
   }
 
   async function submit(e: React.FormEvent) {
@@ -261,19 +340,50 @@ function NewGame() {
         </Field>
 
         {noResults && (
-          <p className="text-xs text-[#FF4444] -mt-1">
-            Endereço não encontrado. O jogo será mapeado pela sua localização atual.
-          </p>
+          <div className="-mt-1 grid gap-2 rounded-[10px] border border-[#2A2A2A] bg-[#1E1E1E] p-3">
+            <p className="text-xs text-[#FF4444]">Endereço não encontrado. Ajuste a busca abaixo:</p>
+            <div className="flex gap-2">
+              <input
+                value={fallbackQuery}
+                onChange={(e) => setFallbackQuery(e.target.value)}
+                className="input-brutal flex-1"
+                placeholder="Cidade, Estado"
+              />
+              <button
+                type="button"
+                onClick={runFallbackSearch}
+                disabled={fallbackSearching}
+                className="rounded-[10px] bg-pop text-[#111] px-3 py-2 text-xs font-bold uppercase inline-flex items-center gap-1 disabled:opacity-60"
+              >
+                {fallbackSearching ? <Loader2 className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
+                Buscar novamente
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={useGpsAsLocation}
+              className="text-xs text-ink/70 underline underline-offset-2 text-left inline-flex items-center gap-1"
+            >
+              <AlertTriangle className="size-3.5 text-[#FFD600]" />
+              Ou usar minha localização atual (você está em outra cidade?)
+            </button>
+          </div>
         )}
 
-        <div className="inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 bg-pop text-[#111] text-xs font-bold uppercase">
-          <MapPin className="size-3.5" />
-          {effectiveSource === "address" && addressCoords
-            ? `Localização: ${(addressLabel.split(",")[0] || venueName || "endereço selecionado").trim()} (endereço)`
-            : effectiveCoords
-              ? "Localização: GPS do dispositivo"
-              : "Aguardando GPS…"}
-        </div>
+        {(addressCoords || gpsExplicit || (!noResults && effectiveCoords)) && (
+          <div
+            className={`inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 text-xs font-bold uppercase ${
+              addressCoords ? "bg-pop text-[#111]" : "bg-[#2A2A2A] text-ink"
+            }`}
+          >
+            {addressCoords ? <MapPin className="size-3.5" /> : <AlertTriangle className="size-3.5 text-[#FFD600]" />}
+            {addressCoords
+              ? `Localização: ${(addressLabel.split(",")[0] || venueName || "endereço selecionado").trim()}${addressApprox ? " (cidade aproximada)" : " (endereço)"}`
+              : effectiveCoords
+                ? "Usando GPS — confira se está na cidade certa"
+                : "Aguardando GPS…"}
+          </div>
+        )}
 
 
         <Field label="Quando">
