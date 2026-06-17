@@ -507,27 +507,27 @@ function Profile() {
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-            <div className="pt-3 grid gap-3">
-              <div className="flex gap-2 flex-wrap">
-                <span className="px-3 py-1.5 rounded-full bg-pop text-[#111] text-xs font-bold">
+            <div className="pt-3 grid gap-3 overflow-hidden w-full px-0">
+              <div className="flex flex-wrap gap-2 w-full">
+                <span className="shrink-0 px-3 py-1 rounded-full bg-pop text-[#111] text-xs font-bold">
                   Total: {played.length + hosted.length}
                 </span>
-                <span className="px-3 py-1.5 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
+                <span className="shrink-0 px-3 py-1 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
                   Jogador: {played.length}
                 </span>
-                <span className="px-3 py-1.5 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
+                <span className="shrink-0 px-3 py-1 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
                   Organizador: {hosted.length}
                 </span>
               </div>
 
-              <div className="flex gap-2 bg-[#1E1E1E] p-1 rounded-full">
+              <div className="grid grid-cols-2 w-full gap-2">
                 {(["played", "hosted"] as const).map((t) => (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setHistoryTab(t)}
                     className={cn(
-                      "flex-1 px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors",
+                      "w-full text-center px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors",
                       historyTab === t
                         ? "bg-pop text-[#111]"
                         : "text-foreground/70",
