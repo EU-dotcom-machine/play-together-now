@@ -346,7 +346,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "140px",
-        borderLeft: "4px solid #FFD600",
+        borderLeft: `4px solid ${borderColor}`,
         padding: "16px",
       }}
     >
