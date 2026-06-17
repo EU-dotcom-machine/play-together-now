@@ -32,7 +32,11 @@ function NewGame() {
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
   const [addressLabel, setAddressLabel] = useState<string>("");
+  const [addressApprox, setAddressApprox] = useState(false);
+  const [gpsExplicit, setGpsExplicit] = useState(false);
   const [noResults, setNoResults] = useState(false);
+  const [fallbackQuery, setFallbackQuery] = useState("");
+  const [fallbackSearching, setFallbackSearching] = useState(false);
   const [saving, setSaving] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
