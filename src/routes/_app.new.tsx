@@ -65,18 +65,63 @@ function NewGame() {
     return `${last.join(", ")}, Brasil`;
   }
 
-  async function nominatimSearch(q: string, limit = 5): Promise<Suggestion[]> {
+  async function placesAutocomplete(q: string, limit = 5): Promise<Suggestion[]> {
+    if (!GOOGLE_PLACES_KEY) return [];
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=${limit}&countrycodes=br`,
-        { headers: { "Accept-Language": "pt-BR" } },
-      );
+      const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
+        },
+        body: JSON.stringify({
+          input: q,
+          regionCode: "BR",
+          languageCode: "pt-BR",
+          sessionToken: sessionTokenRef.current,
+        }),
+      });
+      if (!res.ok) return [];
       const data = await res.json();
-      return Array.isArray(data) ? data : [];
+      const items = Array.isArray(data?.suggestions) ? data.suggestions.slice(0, limit) : [];
+      return items
+        .map((it: any) => it?.placePrediction)
+        .filter((p: any) => p && p.placeId)
+        .map((p: any) => ({
+          display_name: p.text?.text ?? p.structuredFormat?.mainText?.text ?? "",
+          place_id: p.placeId as string,
+        }));
     } catch {
       return [];
     }
   }
+
+  async function placeDetails(placeId: string): Promise<Coords | null> {
+    if (!GOOGLE_PLACES_KEY || !placeId) return null;
+    try {
+      const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+        headers: {
+          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
+          "X-Goog-FieldMask": "location,formattedAddress",
+          "Accept-Language": "pt-BR",
+        },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const lat = data?.location?.latitude;
+      const lng = data?.location?.longitude;
+      if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
+        // rotate session token after a billed Details call (Google session lifecycle)
+        sessionTokenRef.current =
+          typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+        return { lat, lng };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
 
   // Debounced suggestion fetch
   useEffect(() => {
