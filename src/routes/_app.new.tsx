@@ -340,19 +340,50 @@ function NewGame() {
         </Field>
 
         {noResults && (
-          <p className="text-xs text-[#FF4444] -mt-1">
-            Endereço não encontrado. O jogo será mapeado pela sua localização atual.
-          </p>
+          <div className="-mt-1 grid gap-2 rounded-[10px] border border-[#2A2A2A] bg-[#1E1E1E] p-3">
+            <p className="text-xs text-[#FF4444]">Endereço não encontrado. Ajuste a busca abaixo:</p>
+            <div className="flex gap-2">
+              <input
+                value={fallbackQuery}
+                onChange={(e) => setFallbackQuery(e.target.value)}
+                className="input-brutal flex-1"
+                placeholder="Cidade, Estado"
+              />
+              <button
+                type="button"
+                onClick={runFallbackSearch}
+                disabled={fallbackSearching}
+                className="rounded-[10px] bg-pop text-[#111] px-3 py-2 text-xs font-bold uppercase inline-flex items-center gap-1 disabled:opacity-60"
+              >
+                {fallbackSearching ? <Loader2 className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
+                Buscar novamente
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={useGpsAsLocation}
+              className="text-xs text-ink/70 underline underline-offset-2 text-left inline-flex items-center gap-1"
+            >
+              <AlertTriangle className="size-3.5 text-[#FFD600]" />
+              Ou usar minha localização atual (você está em outra cidade?)
+            </button>
+          </div>
         )}
 
-        <div className="inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 bg-pop text-[#111] text-xs font-bold uppercase">
-          <MapPin className="size-3.5" />
-          {effectiveSource === "address" && addressCoords
-            ? `Localização: ${(addressLabel.split(",")[0] || venueName || "endereço selecionado").trim()} (endereço)`
-            : effectiveCoords
-              ? "Localização: GPS do dispositivo"
-              : "Aguardando GPS…"}
-        </div>
+        {(addressCoords || gpsExplicit || (!noResults && effectiveCoords)) && (
+          <div
+            className={`inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 text-xs font-bold uppercase ${
+              addressCoords ? "bg-pop text-[#111]" : "bg-[#2A2A2A] text-ink"
+            }`}
+          >
+            {addressCoords ? <MapPin className="size-3.5" /> : <AlertTriangle className="size-3.5 text-[#FFD600]" />}
+            {addressCoords
+              ? `Localização: ${(addressLabel.split(",")[0] || venueName || "endereço selecionado").trim()}${addressApprox ? " (cidade aproximada)" : " (endereço)"}`
+              : effectiveCoords
+                ? "Usando GPS — confira se está na cidade certa"
+                : "Aguardando GPS…"}
+          </div>
+        )}
 
 
         <Field label="Quando">
