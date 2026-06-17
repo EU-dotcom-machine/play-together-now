@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, AlertTriangle, Search } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
 
 export const Route = createFileRoute("/_app/new")({
