@@ -391,6 +391,10 @@ function Profile() {
             placeholder="00000000"
           />
         </Field>
+        <p className="text-xs text-ink/60 -mt-2">
+          Usado apenas para criar jogos visíveis só para pessoas do seu condomínio,
+          empresa ou espaço privado.
+        </p>
 
 
 
