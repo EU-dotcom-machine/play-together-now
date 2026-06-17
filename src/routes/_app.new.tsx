@@ -45,6 +45,7 @@ function NewGame() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const justSelectedRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
   const sessionTokenRef = useRef<string>(
     typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
   );
@@ -65,7 +66,7 @@ function NewGame() {
     return `${last.join(", ")}, Brasil`;
   }
 
-  async function placesAutocomplete(q: string, limit = 5): Promise<Suggestion[]> {
+  async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     if (!GOOGLE_PLACES_KEY) return [];
     try {
       const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
@@ -80,6 +81,7 @@ function NewGame() {
           languageCode: "pt-BR",
           sessionToken: sessionTokenRef.current,
         }),
+        signal,
       });
       if (!res.ok) return [];
       const data = await res.json();
@@ -96,7 +98,7 @@ function NewGame() {
     }
   }
 
-  async function placeDetails(placeId: string): Promise<Coords | null> {
+  async function placeDetails(placeId: string, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY || !placeId) return null;
     try {
       const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
@@ -105,6 +107,7 @@ function NewGame() {
           "X-Goog-FieldMask": "location,formattedAddress",
           "Accept-Language": "pt-BR",
         },
+        signal,
       });
       if (!res.ok) return null;
       const data = await res.json();
@@ -126,6 +129,7 @@ function NewGame() {
   // Debounced suggestion fetch
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    abortRef.current?.abort();
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
@@ -143,38 +147,48 @@ function NewGame() {
       return;
     }
     suggestTimer.current = setTimeout(async () => {
-      const data = await placesAutocomplete(addr, 5);
-      if (data.length > 0) {
-        setSuggestions(data);
-        setShowSuggestions(true);
-        setNoResults(false);
-        return;
-      }
-      // Retry with simplified city/state query
-      const simplified = simplifyToCityState(addr);
-      if (simplified) {
-        const retry = await placesAutocomplete(simplified, 1);
-        if (retry.length > 0) {
-          const c = await placeDetails(retry[0].place_id);
-          if (c) {
-            setAddressCoords(c);
-            setAddressLabel(simplified.replace(/, Brasil$/, ""));
-            setAddressApprox(true);
-            setSuggestions([]);
-            setShowSuggestions(false);
-            setNoResults(false);
-            return;
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
+      try {
+        const data = await placesAutocomplete(addr, 5, ctrl.signal);
+        if (ctrl.signal.aborted) return;
+        if (data.length > 0) {
+          setSuggestions(data);
+          setShowSuggestions(true);
+          setNoResults(false);
+          return;
+        }
+        // Retry with simplified city/state query
+        const simplified = simplifyToCityState(addr);
+        if (simplified) {
+          const retry = await placesAutocomplete(simplified, 1, ctrl.signal);
+          if (ctrl.signal.aborted) return;
+          if (retry.length > 0) {
+            const c = await placeDetails(retry[0].place_id, ctrl.signal);
+            if (ctrl.signal.aborted) return;
+            if (c) {
+              setAddressCoords(c);
+              setAddressLabel(simplified.replace(/, Brasil$/, ""));
+              setAddressApprox(true);
+              setSuggestions([]);
+              setShowSuggestions(false);
+              setNoResults(false);
+              return;
+            }
           }
         }
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setNoResults(true);
+        setFallbackQuery(simplified.replace(/, Brasil$/, ""));
+      } catch {
+        // AbortError or network error — silently ignore
       }
-      setSuggestions([]);
-      setShowSuggestions(false);
-      setNoResults(true);
-      setFallbackQuery(simplified.replace(/, Brasil$/, ""));
     }, 800);
 
     return () => {
       if (suggestTimer.current) clearTimeout(suggestTimer.current);
+      abortRef.current?.abort();
     };
   }, [venueAddress]);
 
