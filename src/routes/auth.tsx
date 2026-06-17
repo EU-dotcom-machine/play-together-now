@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,8 +154,8 @@ function AuthPage() {
             <h2 className="text-2xl font-extrabold uppercase">Verifique seu e-mail ✉️</h2>
             <p className="mt-3 text-ink/80">
               Enviamos um link de confirmação para{" "}
-              <span className="font-semibold text-ink">{verificationEmail}</span>. Clique nele para
-              ativar sua conta.
+              <span className="font-semibold text-ink">{verificationEmail}</span>. Verifique sua
+              caixa de entrada antes de entrar.
             </p>
             <button
               type="button"
@@ -250,15 +250,6 @@ function AuthPage() {
                 required
               />
             </Field>
-            {mode === "signin" && (
-              <button
-                type="button"
-                onClick={() => setForgotMode(true)}
-                className="-mt-1 text-xs text-ink/60 underline underline-offset-4 justify-self-end"
-              >
-                Esqueci minha senha
-              </button>
-            )}
 
             {mode === "signup" && (
               <label className="flex items-start gap-2 text-xs text-ink/70 mt-2">
@@ -271,14 +262,13 @@ function AuthPage() {
                 />
                 <span>
                   Li e aceito os{" "}
-                  <a href="/terms" target="_blank" className="underline text-pop">
+                  <Link to="/terms" className="underline text-pop">
                     Termos de Uso
-                  </a>{" "}
+                  </Link>{" "}
                   e a{" "}
-                  <a href="/privacy" target="_blank" className="underline text-pop">
+                  <Link to="/privacy" className="underline text-pop">
                     Política de Privacidade
-                  </a>
-                  , incluindo o uso da minha localização para encontrar jogos próximos.
+                  </Link>
                 </span>
               </label>
             )}
@@ -299,6 +289,14 @@ function AuthPage() {
               </p>
             )}
           </form>
+        )}
+        {mode === "signin" && (
+          <Link
+            to="/auth/reset"
+            className="mt-3 text-xs text-ink/60 underline underline-offset-4 block text-center"
+          >
+            Esqueci minha senha
+          </Link>
         )}
 
         {networkError && !verificationEmail && (
