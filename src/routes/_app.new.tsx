@@ -74,9 +74,13 @@ function NewGame() {
       url.searchParams.set("key", GOOGLE_PLACES_KEY);
       url.searchParams.set("language", "pt-BR");
       url.searchParams.set("components", "country:br");
+      const safeUrl = new URL(url);
+      safeUrl.searchParams.set("key", "***");
+      console.log("Autocomplete URL:", safeUrl.toString());
       const res = await fetch(url.toString(), { signal });
-      if (!res.ok) return [];
       const data = await res.json();
+      console.log("Autocomplete response:", data);
+      if (!res.ok) return [];
       if (data.status !== "OK" && data.status !== "ZERO_RESULTS") return [];
       const items = Array.isArray(data?.predictions) ? data.predictions.slice(0, limit) : [];
       return items
