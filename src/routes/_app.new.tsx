@@ -69,29 +69,21 @@ function NewGame() {
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     if (!GOOGLE_PLACES_KEY) return [];
     try {
-      const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
-        },
-        body: JSON.stringify({
-          input: q,
-          regionCode: "BR",
-          languageCode: "pt-BR",
-          sessionToken: sessionTokenRef.current,
-        }),
-        signal,
-      });
+      const url = new URL("https://maps.googleapis.com/maps/api/place/autocomplete/json");
+      url.searchParams.set("input", q);
+      url.searchParams.set("key", GOOGLE_PLACES_KEY);
+      url.searchParams.set("language", "pt-BR");
+      url.searchParams.set("components", "country:br");
+      const res = await fetch(url.toString(), { signal });
       if (!res.ok) return [];
       const data = await res.json();
-      const items = Array.isArray(data?.suggestions) ? data.suggestions.slice(0, limit) : [];
+      if (data.status !== "OK" && data.status !== "ZERO_RESULTS") return [];
+      const items = Array.isArray(data?.predictions) ? data.predictions.slice(0, limit) : [];
       return items
-        .map((it: any) => it?.placePrediction)
-        .filter((p: any) => p && p.placeId)
+        .filter((p: any) => p && p.place_id)
         .map((p: any) => ({
-          display_name: p.text?.text ?? p.structuredFormat?.mainText?.text ?? "",
-          place_id: p.placeId as string,
+          display_name: p.description ?? "",
+          place_id: p.place_id as string,
         }));
     } catch {
       return [];
@@ -101,22 +93,17 @@ function NewGame() {
   async function placeDetails(placeId: string, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY || !placeId) return null;
     try {
-      const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
-        headers: {
-          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
-          "X-Goog-FieldMask": "location,formattedAddress",
-          "Accept-Language": "pt-BR",
-        },
-        signal,
-      });
+      const url = new URL("https://maps.googleapis.com/maps/api/place/details/json");
+      url.searchParams.set("place_id", placeId);
+      url.searchParams.set("fields", "geometry");
+      url.searchParams.set("key", GOOGLE_PLACES_KEY);
+      const res = await fetch(url.toString(), { signal });
       if (!res.ok) return null;
       const data = await res.json();
-      const lat = data?.location?.latitude;
-      const lng = data?.location?.longitude;
+      if (data.status !== "OK") return null;
+      const lat = data?.result?.geometry?.location?.lat;
+      const lng = data?.result?.geometry?.location?.lng;
       if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
-        // rotate session token after a billed Details call (Google session lifecycle)
-        sessionTokenRef.current =
-          typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
         return { lat, lng };
       }
       return null;
