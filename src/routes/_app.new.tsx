@@ -101,25 +101,49 @@ function NewGame() {
   }
 
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
-    if (!GOOGLE_PLACES_KEY) return [];
+    if (!GOOGLE_PLACES_KEY) {
+      console.warn("[placesAutocomplete] Missing GOOGLE_PLACES_KEY");
+      return [];
+    }
     try {
+      console.log("[placesAutocomplete] query:", q, "limit:", limit);
       const google = await loadGoogleMaps();
       if (signal?.aborted) return [];
-      const { AutocompleteSuggestion } = (await google.maps.importLibrary("places")) as any;
+      const placesLib = (await google.maps.importLibrary("places")) as any;
+      console.log("[placesAutocomplete] importLibrary('places') completed. Keys:", Object.keys(placesLib || {}));
+      const { AutocompleteSuggestion } = placesLib;
+      if (!AutocompleteSuggestion) {
+        console.error("[placesAutocomplete] AutocompleteSuggestion is undefined on places library", placesLib);
+        return [];
+      }
       if (signal?.aborted) return [];
-      const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      const request = {
         input: q,
         componentRestrictions: { country: "br" },
         language: "pt-BR",
         sessionToken: sessionTokenRef.current,
-      });
+      };
+      console.log("[placesAutocomplete] request:", request);
+      let response: any;
+      try {
+        response = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+      } catch (err) {
+        console.error("[placesAutocomplete] fetchAutocompleteSuggestions threw:", err);
+        throw err;
+      }
+      console.log("[placesAutocomplete] raw response:", response);
+      const suggestions = response?.suggestions;
+      console.log("[placesAutocomplete] suggestions array:", suggestions, "length:", Array.isArray(suggestions) ? suggestions.length : "n/a");
       if (signal?.aborted) return [];
       const list = Array.isArray(suggestions) ? suggestions : [];
-      return list
+      const mapped = list
         .slice(0, limit)
         .map((s: any) => {
           const pp = s?.placePrediction;
-          if (!pp) return null;
+          if (!pp) {
+            console.warn("[placesAutocomplete] suggestion without placePrediction:", s);
+            return null;
+          }
           const text =
             (typeof pp.text?.toString === "function" ? pp.text.toString() : pp.text) ??
             pp.mainText?.toString?.() ??
@@ -131,7 +155,10 @@ function NewGame() {
           } as Suggestion;
         })
         .filter((x: Suggestion | null): x is Suggestion => !!x && !!x.place_id);
-    } catch {
+      console.log("[placesAutocomplete] mapped result:", mapped);
+      return mapped;
+    } catch (err) {
+      console.error("[placesAutocomplete] exception:", err);
       return [];
     }
   }
