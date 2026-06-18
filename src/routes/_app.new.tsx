@@ -17,6 +17,40 @@ type Suggestion = { display_name: string; place_id: string };
 
 const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
 
+let googleMapsPromise: Promise<any> | null = null;
+function loadGoogleMaps(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  const w = window as any;
+  if (w.google?.maps?.places) return Promise.resolve(w.google);
+  if (googleMapsPromise) return googleMapsPromise;
+  if (!GOOGLE_PLACES_KEY) return Promise.reject(new Error("missing key"));
+  googleMapsPromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>("script[data-google-maps-loader]");
+    const onReady = () => {
+      const g = (window as any).google;
+      if (g?.maps?.places) resolve(g);
+      else reject(new Error("google.maps.places unavailable"));
+    };
+    if (existing) {
+      existing.addEventListener("load", onReady);
+      existing.addEventListener("error", () => reject(new Error("script load error")));
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.googleMapsLoader = "true";
+    script.addEventListener("load", onReady);
+    script.addEventListener("error", () => {
+      googleMapsPromise = null;
+      reject(new Error("script load error"));
+    });
+    document.head.appendChild(script);
+  });
+  return googleMapsPromise;
+}
+
 
 function NewGame() {
   const { user } = useAuth();
@@ -66,26 +100,35 @@ function NewGame() {
     return `${last.join(", ")}, Brasil`;
   }
 
+  const placesServiceRef = useRef<any>(null);
+
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     if (!GOOGLE_PLACES_KEY) return [];
     try {
-      const url = new URL("https://maps.googleapis.com/maps/api/place/autocomplete/json");
-      url.searchParams.set("input", q);
-      url.searchParams.set("key", GOOGLE_PLACES_KEY);
-      url.searchParams.set("language", "pt-BR");
-      url.searchParams.set("components", "country:br");
-      const safeUrl = new URL(url);
-      safeUrl.searchParams.set("key", "***");
-      console.log("Autocomplete URL:", safeUrl.toString());
-      const res = await fetch(url.toString(), { signal });
-      const data = await res.json();
-      console.log("Autocomplete response:", data);
-      if (!res.ok) return [];
-      if (data.status !== "OK" && data.status !== "ZERO_RESULTS") return [];
-      const items = Array.isArray(data?.predictions) ? data.predictions.slice(0, limit) : [];
-      return items
-        .filter((p: any) => p && p.place_id)
-        .map((p: any) => ({
+      const google = await loadGoogleMaps();
+      if (signal?.aborted) return [];
+      const service = new google.maps.places.AutocompleteService();
+      const predictions: any[] = await new Promise((resolve) => {
+        service.getPlacePredictions(
+          {
+            input: q,
+            componentRestrictions: { country: "br" },
+            sessionToken: sessionTokenRef.current,
+          },
+          (preds: any[] | null, status: string) => {
+            if (status !== "OK" && status !== "ZERO_RESULTS") {
+              resolve([]);
+              return;
+            }
+            resolve(Array.isArray(preds) ? preds : []);
+          },
+        );
+      });
+      if (signal?.aborted) return [];
+      return predictions
+        .slice(0, limit)
+        .filter((p) => p && p.place_id)
+        .map((p) => ({
           display_name: p.description ?? "",
           place_id: p.place_id as string,
         }));
@@ -97,20 +140,32 @@ function NewGame() {
   async function placeDetails(placeId: string, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY || !placeId) return null;
     try {
-      const url = new URL("https://maps.googleapis.com/maps/api/place/details/json");
-      url.searchParams.set("place_id", placeId);
-      url.searchParams.set("fields", "geometry");
-      url.searchParams.set("key", GOOGLE_PLACES_KEY);
-      const res = await fetch(url.toString(), { signal });
-      if (!res.ok) return null;
-      const data = await res.json();
-      if (data.status !== "OK") return null;
-      const lat = data?.result?.geometry?.location?.lat;
-      const lng = data?.result?.geometry?.location?.lng;
-      if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
-        return { lat, lng };
+      const google = await loadGoogleMaps();
+      if (signal?.aborted) return null;
+      if (!placesServiceRef.current) {
+        placesServiceRef.current = new google.maps.places.PlacesService(document.createElement("div"));
       }
-      return null;
+      const coords: Coords | null = await new Promise((resolve) => {
+        placesServiceRef.current.getDetails(
+          { placeId, fields: ["geometry"] },
+          (place: any, status: string) => {
+            if (status !== "OK" || !place?.geometry?.location) {
+              resolve(null);
+              return;
+            }
+            const loc = place.geometry.location;
+            const lat = typeof loc.lat === "function" ? loc.lat() : loc.lat;
+            const lng = typeof loc.lng === "function" ? loc.lng() : loc.lng;
+            if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
+              resolve({ lat, lng });
+            } else {
+              resolve(null);
+            }
+          },
+        );
+      });
+      if (signal?.aborted) return null;
+      return coords;
     } catch {
       return null;
     }
