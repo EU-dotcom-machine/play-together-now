@@ -100,72 +100,67 @@ function NewGame() {
     return `${last.join(", ")}, Brasil`;
   }
 
-  const placesServiceRef = useRef<any>(null);
-
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     if (!GOOGLE_PLACES_KEY) return [];
     try {
       const google = await loadGoogleMaps();
       if (signal?.aborted) return [];
-      const service = new google.maps.places.AutocompleteService();
-      const predictions: any[] = await new Promise((resolve) => {
-        service.getPlacePredictions(
-          {
-            input: q,
-            componentRestrictions: { country: "br" },
-            sessionToken: sessionTokenRef.current,
-          },
-          (preds: any[] | null, status: string) => {
-            if (status !== "OK" && status !== "ZERO_RESULTS") {
-              resolve([]);
-              return;
-            }
-            resolve(Array.isArray(preds) ? preds : []);
-          },
-        );
+      const { AutocompleteSuggestion } = (await google.maps.importLibrary("places")) as any;
+      if (signal?.aborted) return [];
+      const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+        input: q,
+        componentRestrictions: { country: "br" },
+        language: "pt-BR",
+        sessionToken: sessionTokenRef.current,
       });
       if (signal?.aborted) return [];
-      return predictions
+      const list = Array.isArray(suggestions) ? suggestions : [];
+      return list
         .slice(0, limit)
-        .filter((p) => p && p.place_id)
-        .map((p) => ({
-          display_name: p.description ?? "",
-          place_id: p.place_id as string,
-        }));
+        .map((s: any) => {
+          const pp = s?.placePrediction;
+          if (!pp) return null;
+          const text =
+            (typeof pp.text?.toString === "function" ? pp.text.toString() : pp.text) ??
+            pp.mainText?.toString?.() ??
+            "";
+          return {
+            display_name: text,
+            place_id: pp.placeId as string,
+            _prediction: pp,
+          } as Suggestion;
+        })
+        .filter((x: Suggestion | null): x is Suggestion => !!x && !!x.place_id);
     } catch {
       return [];
     }
   }
 
-  async function placeDetails(placeId: string, signal?: AbortSignal): Promise<Coords | null> {
-    if (!GOOGLE_PLACES_KEY || !placeId) return null;
+  async function placeDetails(placeIdOrSuggestion: string | Suggestion, signal?: AbortSignal): Promise<Coords | null> {
+    if (!GOOGLE_PLACES_KEY) return null;
     try {
       const google = await loadGoogleMaps();
       if (signal?.aborted) return null;
-      if (!placesServiceRef.current) {
-        placesServiceRef.current = new google.maps.places.PlacesService(document.createElement("div"));
-      }
-      const coords: Coords | null = await new Promise((resolve) => {
-        placesServiceRef.current.getDetails(
-          { placeId, fields: ["geometry"] },
-          (place: any, status: string) => {
-            if (status !== "OK" || !place?.geometry?.location) {
-              resolve(null);
-              return;
-            }
-            const loc = place.geometry.location;
-            const lat = typeof loc.lat === "function" ? loc.lat() : loc.lat;
-            const lng = typeof loc.lng === "function" ? loc.lng() : loc.lng;
-            if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
-              resolve({ lat, lng });
-            } else {
-              resolve(null);
-            }
-          },
-        );
-      });
+      const { Place } = (await google.maps.importLibrary("places")) as any;
       if (signal?.aborted) return null;
-      return coords;
+      let place: any;
+      if (typeof placeIdOrSuggestion === "string") {
+        if (!placeIdOrSuggestion) return null;
+        place = new Place({ id: placeIdOrSuggestion, requestedLanguage: "pt-BR" });
+      } else {
+        const pp = (placeIdOrSuggestion as any)._prediction;
+        place = pp?.toPlace ? pp.toPlace() : new Place({ id: placeIdOrSuggestion.place_id, requestedLanguage: "pt-BR" });
+      }
+      await place.fetchFields({ fields: ["location", "displayName", "formattedAddress"] });
+      if (signal?.aborted) return null;
+      const loc = place.location;
+      if (!loc) return null;
+      const lat = typeof loc.lat === "function" ? loc.lat() : loc.lat;
+      const lng = typeof loc.lng === "function" ? loc.lng() : loc.lng;
+      if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
+        return { lat, lng };
+      }
+      return null;
     } catch {
       return null;
     }
