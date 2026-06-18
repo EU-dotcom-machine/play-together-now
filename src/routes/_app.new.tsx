@@ -17,6 +17,40 @@ type Suggestion = { display_name: string; place_id: string };
 
 const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
 
+let googleMapsPromise: Promise<any> | null = null;
+function loadGoogleMaps(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  const w = window as any;
+  if (w.google?.maps?.places) return Promise.resolve(w.google);
+  if (googleMapsPromise) return googleMapsPromise;
+  if (!GOOGLE_PLACES_KEY) return Promise.reject(new Error("missing key"));
+  googleMapsPromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>("script[data-google-maps-loader]");
+    const onReady = () => {
+      const g = (window as any).google;
+      if (g?.maps?.places) resolve(g);
+      else reject(new Error("google.maps.places unavailable"));
+    };
+    if (existing) {
+      existing.addEventListener("load", onReady);
+      existing.addEventListener("error", () => reject(new Error("script load error")));
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.googleMapsLoader = "true";
+    script.addEventListener("load", onReady);
+    script.addEventListener("error", () => {
+      googleMapsPromise = null;
+      reject(new Error("script load error"));
+    });
+    document.head.appendChild(script);
+  });
+  return googleMapsPromise;
+}
+
 
 function NewGame() {
   const { user } = useAuth();
