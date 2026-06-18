@@ -340,6 +340,7 @@ function NewGame() {
 
   return (
     <main className="px-5 pt-8 max-w-md mx-auto">
+      {/* build trigger */}
       <h1 className="text-4xl font-extrabold uppercase leading-none">
         Criar jogo<span className="text-pop">.</span>
       </h1>
