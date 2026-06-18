@@ -37,7 +37,7 @@ function loadGoogleMaps(): Promise<any> {
       return;
     }
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt-BR&loading=async`;
     script.async = true;
     script.defer = true;
     script.dataset.googleMapsLoader = "true";
