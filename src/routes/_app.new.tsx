@@ -119,8 +119,7 @@ function NewGame() {
       if (signal?.aborted) return [];
       const request = {
         input: q,
-        componentRestrictions: { country: "br" },
-        language: "pt-BR",
+        includedRegionCodes: ["br"],
         sessionToken: sessionTokenRef.current,
       };
       console.log("[placesAutocomplete] request:", request);
