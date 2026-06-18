@@ -108,16 +108,17 @@ function NewGame() {
       if (signal?.aborted) return [];
       const placesLib = (await google.maps.importLibrary("places")) as any;
       console.log("[placesAutocomplete] importLibrary('places') completed. Keys:", Object.keys(placesLib || {}));
-      const { AutocompleteSuggestion } = placesLib;
+      const { AutocompleteSuggestion, AutocompleteSessionToken } = placesLib;
       if (!AutocompleteSuggestion) {
         console.error("[placesAutocomplete] AutocompleteSuggestion is undefined on places library", placesLib);
         return [];
       }
       if (signal?.aborted) return [];
+      const token = new AutocompleteSessionToken();
       const request = {
         input: q,
         includedRegionCodes: ["br"],
-        sessionToken: sessionTokenRef.current,
+        sessionToken: token,
       };
       console.log("[placesAutocomplete] request:", request);
       let response: any;
