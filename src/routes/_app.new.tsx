@@ -75,6 +75,7 @@ function NewGame() {
   const [slots, setSlots] = useState("");
   const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
+  const [durationMinutes, setDurationMinutes] = useState<number>(120);
   const [visibility, setVisibility] = useState<"public" | "friends" | "cep">("public");
   const [cep, setCep] = useState("");
   const [description, setDescription] = useState("");
@@ -435,6 +436,8 @@ function NewGame() {
           title,
           description: description || null,
           starts_at: new Date(startsAt).toISOString(),
+          duration_minutes: durationMinutes,
+          ends_at: new Date(new Date(startsAt).getTime() + durationMinutes * 60_000).toISOString(),
           slots_total: slotsNum,
           price_cents: Math.round(priceNum * 100),
           urgency,
@@ -562,6 +565,33 @@ function NewGame() {
         <Field label="Quando">
           <input required type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="input-brutal" />
         </Field>
+
+        <Field label="Duração">
+          <div className="grid grid-cols-5 gap-2">
+            {([
+              { v: 60, label: "1h" },
+              { v: 90, label: "1h30" },
+              { v: 120, label: "2h" },
+              { v: 150, label: "2h30" },
+              { v: 180, label: "3h" },
+            ] as const).map((opt) => {
+              const isActive = durationMinutes === opt.v;
+              return (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setDurationMinutes(opt.v)}
+                  className={`rounded-[10px] border px-2 py-2 text-xs font-bold uppercase ${
+                    isActive ? "bg-pop text-[#111] border-pop" : "bg-[#1E1E1E] text-ink border-[#2A2A2A]"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Vagas (além de você)">
