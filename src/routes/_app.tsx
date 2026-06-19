@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { BottomNav } from "@/components/bottom-nav";
+import { PostGameReviewGate } from "@/components/post-game-review-modal";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -14,6 +15,7 @@ function AppLayout() {
     <div className="min-h-screen bg-paper pb-20">
       <Outlet />
       <BottomNav />
+      <PostGameReviewGate />
     </div>
   );
 }
