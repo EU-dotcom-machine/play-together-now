@@ -394,31 +394,31 @@ export type Database = {
       }
       sports: {
         Row: {
-          avg_rating: number | null
+          avg_rating: number
           created_at: string
           emoji: string
           id: string
           name: string
           slug: string
-          total_reviews: number | null
+          total_reviews: number
         }
         Insert: {
-          avg_rating?: number | null
+          avg_rating?: number
           created_at?: string
           emoji?: string
           id?: string
           name: string
           slug: string
-          total_reviews?: number | null
+          total_reviews?: number
         }
         Update: {
-          avg_rating?: number | null
+          avg_rating?: number
           created_at?: string
           emoji?: string
           id?: string
           name?: string
           slug?: string
-          total_reviews?: number | null
+          total_reviews?: number
         }
         Relationships: []
       }
@@ -516,6 +516,8 @@ export type Database = {
           visibility: string
         }[]
       }
+      recalc_all_sport_ratings: { Args: never; Returns: undefined }
+      recalc_sport_rating: { Args: { _sport_id: string }; Returns: undefined }
     }
     Enums: {
       game_urgency: "relaxado" | "normal" | "urgente"
