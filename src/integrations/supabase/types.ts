@@ -299,6 +299,7 @@ export type Database = {
           rating: number
           reviewee_id: string
           reviewer_id: string
+          tags: string[]
         }
         Insert: {
           comment?: string | null
@@ -308,6 +309,7 @@ export type Database = {
           rating: number
           reviewee_id: string
           reviewer_id: string
+          tags?: string[]
         }
         Update: {
           comment?: string | null
@@ -317,6 +319,7 @@ export type Database = {
           rating?: number
           reviewee_id?: string
           reviewer_id?: string
+          tags?: string[]
         }
         Relationships: []
       }
