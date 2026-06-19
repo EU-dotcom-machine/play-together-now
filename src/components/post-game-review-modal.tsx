@@ -194,8 +194,11 @@ export function PostGameReviewGate() {
     <ReviewFlow
       game={pending[0]}
       onDone={() => {
-        // Re-check; if no more games pending, modal disappears
-        check();
+        if (mountedRef.current) {
+          skipCheckRef.current = true;
+          setPending([]);
+          navigate({ to: "/agenda" });
+        }
       }}
     />
   );
