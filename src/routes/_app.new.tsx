@@ -92,12 +92,11 @@ function NewGame() {
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const justSelectedRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
-  const placesLibRef = useRef<{
-    AutocompleteSuggestion: any;
-    AutocompleteSessionToken: any;
-    Place: any;
+  const placesServicesRef = useRef<{
+    autocomplete: any;
+    details: any;
+    sessionToken: any;
   } | null>(null);
-  const sessionTokenRef = useRef<any>(null);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
@@ -111,18 +110,17 @@ function NewGame() {
     (async () => {
       try {
         await loadGoogleMaps();
-        const w = window as any;
-        const places = await w.google.maps.importLibrary("places");
         if (cancelled) return;
-        placesLibRef.current = {
-          AutocompleteSuggestion: places.AutocompleteSuggestion,
-          AutocompleteSessionToken: places.AutocompleteSessionToken,
-          Place: places.Place,
+        const g = (window as any).google;
+        const dummy = document.createElement("div");
+        placesServicesRef.current = {
+          autocomplete: new g.maps.places.AutocompleteService(),
+          details: new g.maps.places.PlacesService(dummy),
+          sessionToken: new g.maps.places.AutocompleteSessionToken(),
         };
-        sessionTokenRef.current = new places.AutocompleteSessionToken();
-        console.log("[places] library preloaded");
+        console.log("[places] services ready");
       } catch (err) {
-        console.error("[places] preload failed:", err);
+        console.error("[places] init failed:", err);
       }
     })();
     return () => {
@@ -138,103 +136,100 @@ function NewGame() {
     return `${last.join(", ")}, Brasil`;
   }
 
+  async function ensureServices(signal?: AbortSignal) {
+    if (placesServicesRef.current) return placesServicesRef.current;
+    try {
+      await loadGoogleMaps();
+      if (signal?.aborted) return null;
+      const g = (window as any).google;
+      const dummy = document.createElement("div");
+      placesServicesRef.current = {
+        autocomplete: new g.maps.places.AutocompleteService(),
+        details: new g.maps.places.PlacesService(dummy),
+        sessionToken: new g.maps.places.AutocompleteSessionToken(),
+      };
+      return placesServicesRef.current;
+    } catch (err) {
+      console.error("[places] ensureServices failed:", err);
+      return null;
+    }
+  }
+
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     if (!GOOGLE_PLACES_KEY) {
       console.warn("[placesAutocomplete] Missing GOOGLE_PLACES_KEY");
       return [];
     }
-    try {
-      console.log("[placesAutocomplete] query:", q, "limit:", limit);
-      if (!placesLibRef.current || !sessionTokenRef.current) {
-        console.warn("[placesAutocomplete] Places library not ready, retrying in 1s");
-        await new Promise((r) => setTimeout(r, 1000));
-        if (signal?.aborted) return [];
-        if (!placesLibRef.current || !sessionTokenRef.current) {
-          console.error("[placesAutocomplete] Places library still not ready after retry");
-          return [];
-        }
-      }
-      const { AutocompleteSuggestion } = placesLibRef.current;
-      const token = sessionTokenRef.current;
-      if (signal?.aborted) return [];
-      const request = {
-        input: q,
-        includedRegionCodes: ["br"],
-        sessionToken: token,
-      };
-      console.log("[placesAutocomplete] request:", request);
-      let response: any;
+    const services = await ensureServices(signal);
+    if (!services) return [];
+    if (signal?.aborted) return [];
+    const request: any = {
+      input: q,
+      componentRestrictions: { country: "br" },
+      language: "pt-BR",
+      sessionToken: services.sessionToken,
+    };
+    console.log("[placesAutocomplete] request:", request);
+    return new Promise<Suggestion[]>((resolve) => {
       try {
-        response = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+        services.autocomplete.getPlacePredictions(request, (predictions: any[] | null, status: string) => {
+          console.log("[placesAutocomplete] status:", status, "predictions:", predictions);
+          if (signal?.aborted) return resolve([]);
+          if (!predictions || predictions.length === 0) return resolve([]);
+          const mapped = predictions.slice(0, limit).map((p) => ({
+            display_name: p.description as string,
+            place_id: p.place_id as string,
+            _prediction: p,
+          }));
+          resolve(mapped);
+        });
       } catch (err) {
-        console.error("[placesAutocomplete] fetchAutocompleteSuggestions threw:", err);
-        throw err;
+        console.error("[placesAutocomplete] exception:", err);
+        resolve([]);
       }
-      console.log("[placesAutocomplete] raw response:", response);
-      const suggestions = response?.suggestions;
-      console.log("[placesAutocomplete] suggestions array:", suggestions, "length:", Array.isArray(suggestions) ? suggestions.length : "n/a");
-      if (signal?.aborted) return [];
-      const list = Array.isArray(suggestions) ? suggestions : [];
-      const mapped = list
-        .slice(0, limit)
-        .map((s: any) => {
-          const pp = s?.placePrediction;
-          if (!pp) {
-            console.warn("[placesAutocomplete] suggestion without placePrediction:", s);
-            return null;
-          }
-          const text =
-            (typeof pp.text?.toString === "function" ? pp.text.toString() : pp.text) ??
-            pp.mainText?.toString?.() ??
-            "";
-          return {
-            display_name: text,
-            place_id: pp.placeId as string,
-            _prediction: pp,
-          } as Suggestion;
-        })
-        .filter((x: Suggestion | null): x is Suggestion => !!x && !!x.place_id);
-      console.log("[placesAutocomplete] mapped result:", mapped);
-      return mapped;
-    } catch (err) {
-      console.error("[placesAutocomplete] exception:", err);
-      return [];
-    }
+    });
   }
 
   async function placeDetails(placeIdOrSuggestion: string | Suggestion, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY) return null;
-    try {
-      if (!placesLibRef.current) {
-        await new Promise((r) => setTimeout(r, 1000));
-        if (signal?.aborted) return null;
-        if (!placesLibRef.current) return null;
+    const services = await ensureServices(signal);
+    if (!services) return null;
+    if (signal?.aborted) return null;
+    const placeId = typeof placeIdOrSuggestion === "string"
+      ? placeIdOrSuggestion
+      : placeIdOrSuggestion.place_id;
+    if (!placeId) return null;
+    return new Promise<Coords | null>((resolve) => {
+      try {
+        services.details.getDetails(
+          { placeId, fields: ["geometry", "formatted_address"] },
+          (place: any, status: string) => {
+            if (signal?.aborted) return resolve(null);
+            if (status !== "OK" || !place?.geometry?.location) {
+              console.warn("[placeDetails] status:", status);
+              return resolve(null);
+            }
+            const loc = place.geometry.location;
+            const lat = typeof loc.lat === "function" ? loc.lat() : loc.lat;
+            const lng = typeof loc.lng === "function" ? loc.lng() : loc.lng;
+            if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
+              // Rotate session token after a details fetch (billing best practice)
+              const g = (window as any).google;
+              if (g?.maps?.places?.AutocompleteSessionToken) {
+                services.sessionToken = new g.maps.places.AutocompleteSessionToken();
+              }
+              return resolve({ lat, lng });
+            }
+            resolve(null);
+          },
+        );
+      } catch (err) {
+        console.error("[placeDetails] exception:", err);
+        resolve(null);
       }
-      const { Place } = placesLibRef.current;
-      if (!Place) return null;
-      if (signal?.aborted) return null;
-      let place: any;
-      if (typeof placeIdOrSuggestion === "string") {
-        if (!placeIdOrSuggestion) return null;
-        place = new Place({ id: placeIdOrSuggestion, requestedLanguage: "pt-BR" });
-      } else {
-        const pp = (placeIdOrSuggestion as any)._prediction;
-        place = pp?.toPlace ? pp.toPlace() : new Place({ id: placeIdOrSuggestion.place_id, requestedLanguage: "pt-BR" });
-      }
-      await place.fetchFields({ fields: ["location", "displayName", "formattedAddress"] });
-      if (signal?.aborted) return null;
-      const loc = place.location;
-      if (!loc) return null;
-      const lat = typeof loc.lat === "function" ? loc.lat() : loc.lat;
-      const lng = typeof loc.lng === "function" ? loc.lng() : loc.lng;
-      if (typeof lat === "number" && typeof lng === "number" && isFinite(lat) && isFinite(lng)) {
-        return { lat, lng };
-      }
-      return null;
-    } catch {
-      return null;
-    }
+    });
   }
+
 
 
   // Debounced suggestion fetch
