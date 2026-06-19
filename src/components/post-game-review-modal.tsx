@@ -171,7 +171,7 @@ export function PostGameReviewGate() {
         }),
       });
     }
-    setPending(out);
+    if (mountedRef.current) setPending(out);
   }, [user]);
 
 
