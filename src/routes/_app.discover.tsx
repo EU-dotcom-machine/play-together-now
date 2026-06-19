@@ -158,6 +158,13 @@ function Discover() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <NotificationsBell />
+          <Link
+            to="/new"
+            aria-label="Criar jogo"
+            className="inline-flex items-center justify-center size-10 rounded-full bg-pop text-[#111] active:translate-y-[1px]"
+          >
+            <Plus className="size-5" strokeWidth={3} />
+          </Link>
         </div>
       </header>
 
