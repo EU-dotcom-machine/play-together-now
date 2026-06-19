@@ -216,25 +216,30 @@ function ReviewFlow({ game, onDone }: { game: PendingGame; onDone: () => void })
     }
     if (!user) return;
     setSubmitting(true);
-    const rows = game.coparticipants.map((c) => {
-      const d = drafts[c.user_id];
-      return {
-        game_id: game.game_id,
-        reviewer_id: user.id,
-        reviewee_id: c.user_id,
-        rating: d.rating,
-        tags: Array.from(d.tags),
-        comment: d.comment.trim().slice(0, 300) || null,
-      };
-    });
-    const { error } = await (supabase as any).from("player_reviews").insert(rows);
-    setSubmitting(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const rows = game.coparticipants.map((c) => {
+        const d = drafts[c.user_id];
+        return {
+          game_id: game.game_id,
+          reviewer_id: user.id,
+          reviewee_id: c.user_id,
+          rating: d.rating,
+          tags: Array.from(d.tags),
+          comment: d.comment.trim().slice(0, 300) || null,
+        };
+      });
+      const { error } = await (supabase as any).from("player_reviews").insert(rows);
+      if (error) {
+        toast.error("Erro ao enviar avaliação. Tente novamente.");
+        return;
+      }
+      toast.success("Avaliações enviadas!");
+      onDone();
+    } catch {
+      toast.error("Erro ao enviar avaliação. Tente novamente.");
+    } finally {
+      setSubmitting(false);
     }
-    toast.success("Avaliações enviadas!");
-    onDone();
   }
 
   return (
