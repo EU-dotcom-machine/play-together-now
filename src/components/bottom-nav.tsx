@@ -1,12 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Compass, PlusCircle, User, Users } from "lucide-react";
+import { CalendarDays, Compass, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePendingRequestCount } from "@/components/friends-section";
 
 const items = [
   { to: "/discover", label: "Jogos", icon: Compass },
   { to: "/friends", label: "Amigos", icon: Users },
-  { to: "/new", label: "Criar", icon: PlusCircle },
+  { to: "/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/profile", label: "Perfil", icon: User },
 ] as const;
 

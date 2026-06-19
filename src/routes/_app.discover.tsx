@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import { getCourtImage } from "@/lib/sport-courts";
 import { useAuth } from "@/hooks/use-auth";
-import { MapPin, Zap, Users, Loader2, Star, Lock } from "lucide-react";
+import { MapPin, Zap, Users, Loader2, Star, Lock, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
@@ -158,6 +158,13 @@ function Discover() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <NotificationsBell />
+          <Link
+            to="/new"
+            aria-label="Criar jogo"
+            className="inline-flex items-center justify-center size-10 rounded-full bg-pop text-[#111] active:translate-y-[1px]"
+          >
+            <Plus className="size-5" strokeWidth={3} />
+          </Link>
         </div>
       </header>
 

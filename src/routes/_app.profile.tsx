@@ -79,41 +79,8 @@ function Profile() {
   const [sponsorOpen, setSponsorOpen] = useState(false);
   const [sportsOpen, setSportsOpen] = useState(false);
   const [bySportOpen, setBySportOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [historyTab, setHistoryTab] = useState<"played" | "hosted">("played");
 
-  const { data: played = [] } = useQuery({
-    queryKey: ["history-played", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("game_participants")
-        .select(
-          "game_id, status, created_at, games(id, title, starts_at, status, sports(name, emoji), venues(name))" as any,
-        )
-        .eq("user_id", user!.id)
-        .eq("status" as any, "confirmed")
-        .order("created_at", { ascending: false })
-        .limit(20);
-      return ((data ?? []) as any[])
-        .map((r) => r.games)
-        .filter(Boolean);
-    },
-  });
 
-  const { data: hosted = [] } = useQuery({
-    queryKey: ["history-hosted", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("games")
-        .select("id, title, starts_at, status, sports(name, emoji), venues(name)")
-        .eq("host_id", user!.id)
-        .order("starts_at", { ascending: false })
-        .limit(20);
-      return (data ?? []) as any[];
-    },
-  });
 
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -501,51 +468,7 @@ function Profile() {
         </button>
 
 
-        <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
-          <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
-            <span className="text-base font-bold uppercase tracking-wide text-foreground">
-              Histórico
-            </span>
-            <ChevronDown
-              className={cn("size-5 transition-transform duration-200", historyOpen && "rotate-180")}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-            <div className="pt-3 grid gap-3 overflow-hidden w-full px-0">
-              <div className="flex flex-wrap gap-2 w-full">
-                <span className="shrink-0 px-3 py-1 rounded-full bg-pop text-[#111] text-xs font-bold">
-                  Total: {played.length + hosted.length}
-                </span>
-                <span className="shrink-0 px-3 py-1 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
-                  Jogador: {played.length}
-                </span>
-                <span className="shrink-0 px-3 py-1 rounded-full bg-[#1E1E1E] text-foreground text-xs font-bold">
-                  Organizador: {hosted.length}
-                </span>
-              </div>
 
-              <div className="grid grid-cols-2 w-full gap-2">
-                {(["played", "hosted"] as const).map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setHistoryTab(t)}
-                    className={cn(
-                      "w-full text-center px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors",
-                      historyTab === t
-                        ? "bg-pop text-[#111]"
-                        : "text-foreground/70",
-                    )}
-                  >
-                    {t === "played" ? "Jogados" : "Organizados"}
-                  </button>
-                ))}
-              </div>
-
-              <HistoryList items={historyTab === "played" ? played : hosted} />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
 
         <button
           onClick={signOut}
