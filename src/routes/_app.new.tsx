@@ -80,13 +80,42 @@ function NewGame() {
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const justSelectedRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
-
+  const placesLibRef = useRef<{
+    AutocompleteSuggestion: any;
+    AutocompleteSessionToken: any;
+    Place: any;
+  } | null>(null);
+  const sessionTokenRef = useRef<any>(null);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
       (p) => setGpsCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
       () => {},
     );
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await loadGoogleMaps();
+        const w = window as any;
+        const places = await w.google.maps.importLibrary("places");
+        if (cancelled) return;
+        placesLibRef.current = {
+          AutocompleteSuggestion: places.AutocompleteSuggestion,
+          AutocompleteSessionToken: places.AutocompleteSessionToken,
+          Place: places.Place,
+        };
+        sessionTokenRef.current = new places.AutocompleteSessionToken();
+        console.log("[places] library preloaded");
+      } catch (err) {
+        console.error("[places] preload failed:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function simplifyToCityState(addr: string): string {
@@ -104,20 +133,18 @@ function NewGame() {
     }
     try {
       console.log("[placesAutocomplete] query:", q, "limit:", limit);
-      await loadGoogleMaps();
-      if (signal?.aborted) return [];
-      const w = window as any;
-      if (!w.google?.maps?.places) {
-        console.error("[placesAutocomplete] google.maps.places not available on window");
-        return [];
+      if (!placesLibRef.current || !sessionTokenRef.current) {
+        console.warn("[placesAutocomplete] Places library not ready, retrying in 1s");
+        await new Promise((r) => setTimeout(r, 1000));
+        if (signal?.aborted) return [];
+        if (!placesLibRef.current || !sessionTokenRef.current) {
+          console.error("[placesAutocomplete] Places library still not ready after retry");
+          return [];
+        }
       }
-      const { AutocompleteSuggestion, AutocompleteSessionToken } = w.google.maps.places;
-      if (!AutocompleteSuggestion || !AutocompleteSessionToken) {
-        console.error("[placesAutocomplete] AutocompleteSuggestion/SessionToken missing", Object.keys(w.google.maps.places));
-        return [];
-      }
+      const { AutocompleteSuggestion } = placesLibRef.current;
+      const token = sessionTokenRef.current;
       if (signal?.aborted) return [];
-      const token = new AutocompleteSessionToken();
       const request = {
         input: q,
         includedRegionCodes: ["br"],
@@ -166,11 +193,12 @@ function NewGame() {
   async function placeDetails(placeIdOrSuggestion: string | Suggestion, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY) return null;
     try {
-      await loadGoogleMaps();
-      if (signal?.aborted) return null;
-      const w = window as any;
-      if (!w.google?.maps?.places) return null;
-      const { Place } = w.google.maps.places;
+      if (!placesLibRef.current) {
+        await new Promise((r) => setTimeout(r, 1000));
+        if (signal?.aborted) return null;
+        if (!placesLibRef.current) return null;
+      }
+      const { Place } = placesLibRef.current;
       if (!Place) return null;
       if (signal?.aborted) return null;
       let place: any;
