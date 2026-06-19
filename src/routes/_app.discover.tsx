@@ -53,7 +53,7 @@ function Discover() {
     navigator.geolocation.getCurrentPosition(
       (p) => setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
       () => setGeoDenied(true),
-      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 5000 },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
     );
   }, []);
 
@@ -370,7 +370,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         {distKm != null && (
           <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#FFD600] text-[#111] font-bold">
             <MapPin className="size-3" />
-            {formatDistance(distKm)}
+            {formatDistance(distKm)} · linha reta
           </span>
         )}
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
