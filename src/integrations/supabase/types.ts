@@ -132,6 +132,8 @@ export type Database = {
           created_at: string
           description: string | null
           duration_min: number
+          duration_minutes: number
+          ends_at: string | null
           host_id: string
           id: string
           latitude: number
@@ -152,6 +154,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_min?: number
+          duration_minutes?: number
+          ends_at?: string | null
           host_id: string
           id?: string
           latitude: number
@@ -172,6 +176,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_min?: number
+          duration_minutes?: number
+          ends_at?: string | null
           host_id?: string
           id?: string
           latitude?: number
