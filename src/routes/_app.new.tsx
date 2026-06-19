@@ -18,35 +18,47 @@ type Suggestion = { display_name: string; place_id: string; _prediction?: any };
 const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
 
 let googleMapsPromise: Promise<any> | null = null;
+function waitForPlaces(timeoutMs = 10000): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const iv = setInterval(() => {
+      const g = (window as any).google;
+      if (g?.maps?.places?.AutocompleteService && g?.maps?.places?.PlacesService) {
+        clearInterval(iv);
+        resolve(g);
+        return;
+      }
+      if (Date.now() - start > timeoutMs) {
+        clearInterval(iv);
+        reject(new Error("google.maps.places unavailable (timeout)"));
+      }
+    }, 100);
+  });
+}
 function loadGoogleMaps(): Promise<any> {
   if (typeof window === "undefined") return Promise.reject(new Error("no window"));
   const w = window as any;
-  if (w.google?.maps?.places) return Promise.resolve(w.google);
+  if (w.google?.maps?.places?.AutocompleteService) return Promise.resolve(w.google);
   if (googleMapsPromise) return googleMapsPromise;
   if (!GOOGLE_PLACES_KEY) return Promise.reject(new Error("missing key"));
   googleMapsPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>("script[data-google-maps-loader]");
-    const onReady = () => {
-      const g = (window as any).google;
-      if (g?.maps?.places) resolve(g);
-      else reject(new Error("google.maps.places unavailable"));
-    };
-    if (existing) {
-      existing.addEventListener("load", onReady);
-      existing.addEventListener("error", () => reject(new Error("script load error")));
-      return;
+    if (!existing) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt-BR`;
+      script.async = true;
+      script.defer = true;
+      script.dataset.googleMapsLoader = "true";
+      script.addEventListener("error", () => {
+        googleMapsPromise = null;
+        reject(new Error("script load error"));
+      });
+      document.head.appendChild(script);
     }
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt-BR&loading=async`;
-    script.async = true;
-    script.defer = true;
-    script.dataset.googleMapsLoader = "true";
-    script.addEventListener("load", onReady);
-    script.addEventListener("error", () => {
+    waitForPlaces().then(resolve).catch((err) => {
       googleMapsPromise = null;
-      reject(new Error("script load error"));
+      reject(err);
     });
-    document.head.appendChild(script);
   });
   return googleMapsPromise;
 }
