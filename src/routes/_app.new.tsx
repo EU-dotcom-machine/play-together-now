@@ -566,6 +566,33 @@ function NewGame() {
           <input required type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="input-brutal" />
         </Field>
 
+        <Field label="Duração">
+          <div className="grid grid-cols-5 gap-2">
+            {([
+              { v: 60, label: "1h" },
+              { v: 90, label: "1h30" },
+              { v: 120, label: "2h" },
+              { v: 150, label: "2h30" },
+              { v: 180, label: "3h" },
+            ] as const).map((opt) => {
+              const isActive = durationMinutes === opt.v;
+              return (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setDurationMinutes(opt.v)}
+                  className={`rounded-[10px] border px-2 py-2 text-xs font-bold uppercase ${
+                    isActive ? "bg-pop text-[#111] border-pop" : "bg-[#1E1E1E] text-ink border-[#2A2A2A]"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
+
         <div className="grid grid-cols-2 gap-3">
           <Field label="Vagas (além de você)">
             <input
