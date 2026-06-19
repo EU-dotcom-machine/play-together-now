@@ -133,20 +133,18 @@ function NewGame() {
     }
     try {
       console.log("[placesAutocomplete] query:", q, "limit:", limit);
-      await loadGoogleMaps();
-      if (signal?.aborted) return [];
-      const w = window as any;
-      if (!w.google?.maps?.places) {
-        console.error("[placesAutocomplete] google.maps.places not available on window");
-        return [];
+      if (!placesLibRef.current || !sessionTokenRef.current) {
+        console.warn("[placesAutocomplete] Places library not ready, retrying in 1s");
+        await new Promise((r) => setTimeout(r, 1000));
+        if (signal?.aborted) return [];
+        if (!placesLibRef.current || !sessionTokenRef.current) {
+          console.error("[placesAutocomplete] Places library still not ready after retry");
+          return [];
+        }
       }
-      const { AutocompleteSuggestion, AutocompleteSessionToken } = w.google.maps.places;
-      if (!AutocompleteSuggestion || !AutocompleteSessionToken) {
-        console.error("[placesAutocomplete] AutocompleteSuggestion/SessionToken missing", Object.keys(w.google.maps.places));
-        return [];
-      }
+      const { AutocompleteSuggestion } = placesLibRef.current;
+      const token = sessionTokenRef.current;
       if (signal?.aborted) return [];
-      const token = new AutocompleteSessionToken();
       const request = {
         input: q,
         includedRegionCodes: ["br"],
