@@ -193,11 +193,12 @@ function NewGame() {
   async function placeDetails(placeIdOrSuggestion: string | Suggestion, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY) return null;
     try {
-      await loadGoogleMaps();
-      if (signal?.aborted) return null;
-      const w = window as any;
-      if (!w.google?.maps?.places) return null;
-      const { Place } = w.google.maps.places;
+      if (!placesLibRef.current) {
+        await new Promise((r) => setTimeout(r, 1000));
+        if (signal?.aborted) return null;
+        if (!placesLibRef.current) return null;
+      }
+      const { Place } = placesLibRef.current;
       if (!Place) return null;
       if (signal?.aborted) return null;
       let place: any;
