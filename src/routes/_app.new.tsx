@@ -104,13 +104,16 @@ function NewGame() {
     }
     try {
       console.log("[placesAutocomplete] query:", q, "limit:", limit);
-      const google = await loadGoogleMaps();
+      await loadGoogleMaps();
       if (signal?.aborted) return [];
-      const placesLib = (await google.maps.importLibrary("places")) as any;
-      console.log("[placesAutocomplete] importLibrary('places') completed. Keys:", Object.keys(placesLib || {}));
-      const { AutocompleteSuggestion, AutocompleteSessionToken } = placesLib;
-      if (!AutocompleteSuggestion) {
-        console.error("[placesAutocomplete] AutocompleteSuggestion is undefined on places library", placesLib);
+      const w = window as any;
+      if (!w.google?.maps?.places) {
+        console.error("[placesAutocomplete] google.maps.places not available on window");
+        return [];
+      }
+      const { AutocompleteSuggestion, AutocompleteSessionToken } = w.google.maps.places;
+      if (!AutocompleteSuggestion || !AutocompleteSessionToken) {
+        console.error("[placesAutocomplete] AutocompleteSuggestion/SessionToken missing", Object.keys(w.google.maps.places));
         return [];
       }
       if (signal?.aborted) return [];
@@ -163,9 +166,12 @@ function NewGame() {
   async function placeDetails(placeIdOrSuggestion: string | Suggestion, signal?: AbortSignal): Promise<Coords | null> {
     if (!GOOGLE_PLACES_KEY) return null;
     try {
-      const google = await loadGoogleMaps();
+      await loadGoogleMaps();
       if (signal?.aborted) return null;
-      const { Place } = (await google.maps.importLibrary("places")) as any;
+      const w = window as any;
+      if (!w.google?.maps?.places) return null;
+      const { Place } = w.google.maps.places;
+      if (!Place) return null;
       if (signal?.aborted) return null;
       let place: any;
       if (typeof placeIdOrSuggestion === "string") {
