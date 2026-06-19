@@ -144,7 +144,7 @@ export function PostGameReviewGate() {
     }
 
     if (byGame.size === 0) {
-      setPending([]);
+      if (mountedRef.current) setPending([]);
       return;
     }
 
