@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "@tanstack/react-router";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -50,8 +50,18 @@ function StickFigure({ filled }: { filled: boolean }) {
 export function PostGameReviewGate() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const navigate = useNavigate();
   const [pending, setPending] = useState<PendingGame[]>([]);
   const [checked, setChecked] = useState(false);
+  const mountedRef = useRef(true);
+  const skipCheckRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const check = useCallback(async () => {
     if (!user) return;
@@ -91,7 +101,7 @@ export function PostGameReviewGate() {
       if (isFinished(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
     }
     if (finishedGames.size === 0) {
-      setPending([]);
+      if (mountedRef.current) setPending([]);
       return;
     }
     const gameIds = Array.from(finishedGames.keys());
@@ -134,7 +144,7 @@ export function PostGameReviewGate() {
     }
 
     if (byGame.size === 0) {
-      setPending([]);
+      if (mountedRef.current) setPending([]);
       return;
     }
 
@@ -161,14 +171,21 @@ export function PostGameReviewGate() {
         }),
       });
     }
-    setPending(out);
+    if (mountedRef.current) setPending(out);
   }, [user]);
 
 
   useEffect(() => {
     if (loading || !user) return;
+    if (skipCheckRef.current) {
+      skipCheckRef.current = false;
+      setChecked(true);
+      return;
+    }
     setChecked(false);
-    check().finally(() => setChecked(true));
+    check().finally(() => {
+      if (mountedRef.current) setChecked(true);
+    });
   }, [loading, user, check, router.state.location.pathname]);
 
   if (!checked || pending.length === 0) return null;
@@ -177,8 +194,11 @@ export function PostGameReviewGate() {
     <ReviewFlow
       game={pending[0]}
       onDone={() => {
-        // Re-check; if no more games pending, modal disappears
-        check();
+        if (mountedRef.current) {
+          skipCheckRef.current = true;
+          setPending([]);
+          navigate({ to: "/agenda" });
+        }
       }}
     />
   );
