@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "@tanstack/react-router";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
