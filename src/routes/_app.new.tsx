@@ -436,6 +436,8 @@ function NewGame() {
           title,
           description: description || null,
           starts_at: new Date(startsAt).toISOString(),
+          duration_minutes: durationMinutes,
+          ends_at: new Date(new Date(startsAt).getTime() + durationMinutes * 60_000).toISOString(),
           slots_total: slotsNum,
           price_cents: Math.round(priceNum * 100),
           urgency,
