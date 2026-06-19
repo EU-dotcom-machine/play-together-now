@@ -79,41 +79,8 @@ function Profile() {
   const [sponsorOpen, setSponsorOpen] = useState(false);
   const [sportsOpen, setSportsOpen] = useState(false);
   const [bySportOpen, setBySportOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [historyTab, setHistoryTab] = useState<"played" | "hosted">("played");
 
-  const { data: played = [] } = useQuery({
-    queryKey: ["history-played", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("game_participants")
-        .select(
-          "game_id, status, created_at, games(id, title, starts_at, status, sports(name, emoji), venues(name))" as any,
-        )
-        .eq("user_id", user!.id)
-        .eq("status" as any, "confirmed")
-        .order("created_at", { ascending: false })
-        .limit(20);
-      return ((data ?? []) as any[])
-        .map((r) => r.games)
-        .filter(Boolean);
-    },
-  });
 
-  const { data: hosted = [] } = useQuery({
-    queryKey: ["history-hosted", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("games")
-        .select("id, title, starts_at, status, sports(name, emoji), venues(name)")
-        .eq("host_id", user!.id)
-        .order("starts_at", { ascending: false })
-        .limit(20);
-      return (data ?? []) as any[];
-    },
-  });
 
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
