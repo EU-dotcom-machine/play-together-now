@@ -55,21 +55,46 @@ export function PostGameReviewGate() {
 
   const check = useCallback(async () => {
     if (!user) return;
-    // 1. Confirmed participations of mine with finished games
+    const nowMs = Date.now();
+
+    // Helper: is a game finished (ends_at or starts_at + duration fallback)?
+    const isFinished = (g: any) => {
+      if (!g) return false;
+      if (g.ends_at) return new Date(g.ends_at).getTime() < nowMs;
+      if (g.starts_at) {
+        const dur = g.duration_minutes ?? g.duration_min ?? 120;
+        return new Date(g.starts_at).getTime() + dur * 60_000 < nowMs;
+      }
+      return false;
+    };
+
+    // 1a. Confirmed participations of mine
     const { data: myParts } = await supabase
       .from("game_participants")
-      .select("game_id, games!inner(id,title,ends_at,status)")
+      .select("game_id, games!inner(id,title,starts_at,ends_at,duration_min,duration_minutes,host_id)")
       .eq("user_id", user.id)
       .eq("status", "confirmed");
-    const finished = (myParts ?? []).filter((p: any) => {
+
+    // 1b. Games I hosted (host is implicit confirmed participant, may not be in game_participants)
+    const { data: hosted } = await supabase
+      .from("games")
+      .select("id,title,starts_at,ends_at,duration_min,duration_minutes,host_id")
+      .eq("host_id", user.id);
+
+    type GInfo = { id: string; title: string; host_id: string };
+    const finishedGames = new Map<string, GInfo>();
+    for (const p of (myParts ?? []) as any[]) {
       const g = p.games;
-      return g?.ends_at && new Date(g.ends_at) < new Date();
-    });
-    if (finished.length === 0) {
+      if (g && isFinished(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
+    }
+    for (const g of (hosted ?? []) as any[]) {
+      if (isFinished(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
+    }
+    if (finishedGames.size === 0) {
       setPending([]);
       return;
     }
-    const gameIds = finished.map((p: any) => p.game_id);
+    const gameIds = Array.from(finishedGames.keys());
 
     // 2. Which of these have I already reviewed someone in?
     const { data: myReviews } = await supabase
@@ -83,45 +108,50 @@ export function PostGameReviewGate() {
       reviewedByGame.get(r.game_id)!.add(r.reviewee_id);
     }
 
-    // 3. Get all confirmed co-participants for each finished game
+    // 3. Get all CONFIRMED co-participants for each finished game
     const { data: allParts } = await supabase
       .from("game_participants")
-      .select("game_id, user_id")
+      .select("game_id, user_id, status")
       .in("game_id", gameIds)
       .eq("status", "confirmed");
 
-    // 4. Build pending list: games with at least one co-participant not yet reviewed
-    const byGame = new Map<string, string[]>();
+    // 4. Build pending list — exclude self, include host as implicit confirmed participant
+    const byGame = new Map<string, Set<string>>();
+    const addCandidate = (gameId: string, uid: string) => {
+      if (uid === user.id) return; // exclude self
+      const done = reviewedByGame.get(gameId);
+      if (done?.has(uid)) return;
+      if (!byGame.has(gameId)) byGame.set(gameId, new Set());
+      byGame.get(gameId)!.add(uid);
+    };
+
     for (const p of (allParts ?? []) as any[]) {
-      if (p.user_id === user.id) continue;
-      const done = reviewedByGame.get(p.game_id);
-      if (done?.has(p.user_id)) continue;
-      if (!byGame.has(p.game_id)) byGame.set(p.game_id, []);
-      byGame.get(p.game_id)!.push(p.user_id);
+      addCandidate(p.game_id, p.user_id);
     }
+    // Include host of each finished game as reviewable (if not me)
+    for (const g of finishedGames.values()) {
+      if (g.host_id) addCandidate(g.id, g.host_id);
+    }
+
     if (byGame.size === 0) {
       setPending([]);
       return;
     }
 
     // 5. Fetch co-participant profiles
-    const allUserIds = Array.from(new Set([...byGame.values()].flat()));
+    const allUserIds = Array.from(new Set([...byGame.values()].flatMap((s) => [...s])));
     const { data: profs } = await (supabase as any)
       .from("profiles_public")
       .select("id, display_name, avatar_url")
       .in("id", allUserIds);
     const profMap = new Map<string, any>((profs ?? []).map((p: any) => [p.id, p]));
 
-    const titleMap = new Map<string, string>(
-      finished.map((p: any) => [p.game_id, p.games?.title ?? "Jogo"]),
-    );
-
     const out: PendingGame[] = [];
     for (const [game_id, userIds] of byGame) {
       out.push({
         game_id,
-        game_title: titleMap.get(game_id) ?? "Jogo",
-        coparticipants: userIds.map((uid) => {
+        game_title: finishedGames.get(game_id)?.title ?? "Jogo",
+        coparticipants: Array.from(userIds).map((uid) => {
           const p = profMap.get(uid);
           return {
             user_id: uid,
@@ -133,6 +163,7 @@ export function PostGameReviewGate() {
     }
     setPending(out);
   }, [user]);
+
 
   useEffect(() => {
     if (loading || !user) return;
