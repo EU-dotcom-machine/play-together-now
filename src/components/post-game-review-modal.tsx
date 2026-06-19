@@ -177,8 +177,15 @@ export function PostGameReviewGate() {
 
   useEffect(() => {
     if (loading || !user) return;
+    if (skipCheckRef.current) {
+      skipCheckRef.current = false;
+      setChecked(true);
+      return;
+    }
     setChecked(false);
-    check().finally(() => setChecked(true));
+    check().finally(() => {
+      if (mountedRef.current) setChecked(true);
+    });
   }, [loading, user, check, router.state.location.pathname]);
 
   if (!checked || pending.length === 0) return null;
