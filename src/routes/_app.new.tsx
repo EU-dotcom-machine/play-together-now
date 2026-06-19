@@ -80,13 +80,42 @@ function NewGame() {
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const justSelectedRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
-
+  const placesLibRef = useRef<{
+    AutocompleteSuggestion: any;
+    AutocompleteSessionToken: any;
+    Place: any;
+  } | null>(null);
+  const sessionTokenRef = useRef<any>(null);
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
       (p) => setGpsCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
       () => {},
     );
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await loadGoogleMaps();
+        const w = window as any;
+        const places = await w.google.maps.importLibrary("places");
+        if (cancelled) return;
+        placesLibRef.current = {
+          AutocompleteSuggestion: places.AutocompleteSuggestion,
+          AutocompleteSessionToken: places.AutocompleteSessionToken,
+          Place: places.Place,
+        };
+        sessionTokenRef.current = new places.AutocompleteSessionToken();
+        console.log("[places] library preloaded");
+      } catch (err) {
+        console.error("[places] preload failed:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function simplifyToCityState(addr: string): string {
