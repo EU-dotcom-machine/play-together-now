@@ -101,7 +101,7 @@ export function PostGameReviewGate() {
       if (isFinished(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
     }
     if (finishedGames.size === 0) {
-      setPending([]);
+      if (mountedRef.current) setPending([]);
       return;
     }
     const gameIds = Array.from(finishedGames.keys());
