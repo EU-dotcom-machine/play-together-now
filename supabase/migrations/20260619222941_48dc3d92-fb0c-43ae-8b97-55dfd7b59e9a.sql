@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.award_review_points() FROM PUBLIC, anon, authenticated;
