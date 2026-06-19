@@ -75,6 +75,7 @@ function NewGame() {
   const [slots, setSlots] = useState("");
   const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
+  const [durationMinutes, setDurationMinutes] = useState<number>(120);
   const [visibility, setVisibility] = useState<"public" | "friends" | "cep">("public");
   const [cep, setCep] = useState("");
   const [description, setDescription] = useState("");
