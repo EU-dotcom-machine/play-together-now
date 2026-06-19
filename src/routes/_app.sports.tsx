@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Star } from "lucide-react";
@@ -32,21 +32,24 @@ function SportsList() {
 
       <ul className="mt-6 grid grid-cols-2 gap-3">
         {data?.map((s) => (
-          <li
-            key={s.id}
-            className="relative overflow-hidden bg-surface border border-border rounded-2xl p-4 flex flex-col items-center text-center"
-          >
-            <span className="absolute left-0 top-0 bottom-0 w-1 bg-pop" />
-            <span className="text-4xl">{s.emoji}</span>
-            <span className="mt-2 font-bold uppercase text-sm">{s.name}</span>
-            {s.total_reviews && s.total_reviews > 0 ? (
-              <span className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-foreground/80">
-                <Star className="size-3 fill-pop stroke-pop" />
-                {s.avg_rating?.toFixed(1)} · {s.total_reviews}
-              </span>
-            ) : (
-              <span className="mt-1 text-xs text-[#555]">Sem avaliações</span>
-            )}
+          <li key={s.id}>
+            <Link
+              to="/sports/$slug"
+              params={{ slug: s.slug }}
+              className="relative overflow-hidden bg-surface border border-border rounded-2xl p-4 flex flex-col items-center text-center active:translate-y-[1px]"
+            >
+              <span className="absolute left-0 top-0 bottom-0 w-1 bg-pop" />
+              <span className="text-4xl">{s.emoji}</span>
+              <span className="mt-2 font-bold uppercase text-sm">{s.name}</span>
+              {s.total_reviews && s.total_reviews > 0 ? (
+                <span className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-foreground/80">
+                  <Star className="size-3 fill-pop stroke-pop" />
+                  {s.avg_rating?.toFixed(1)} · {s.total_reviews}
+                </span>
+              ) : (
+                <span className="mt-1 text-xs text-[#555]">Sem avaliações</span>
+              )}
+            </Link>
           </li>
         ))}
       </ul>
