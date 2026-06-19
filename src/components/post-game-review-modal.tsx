@@ -50,8 +50,18 @@ function StickFigure({ filled }: { filled: boolean }) {
 export function PostGameReviewGate() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const navigate = useNavigate();
   const [pending, setPending] = useState<PendingGame[]>([]);
   const [checked, setChecked] = useState(false);
+  const mountedRef = useRef(true);
+  const skipCheckRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const check = useCallback(async () => {
     if (!user) return;
