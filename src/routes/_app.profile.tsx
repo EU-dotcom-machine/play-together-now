@@ -146,17 +146,13 @@ function Profile() {
   }
 
   const cepDigits = cep.replace(/\D/g, "");
-  const cepValid = cepDigits.length === 8;
-  const cepError = !cepValid
-    ? cepDigits.length === 0
-      ? "Informe seu CEP para visualizar jogos de condomínio."
-      : "CEP deve ter 8 dígitos."
-    : null;
+  const cepFormatError =
+    cepDigits.length > 0 && cepDigits.length !== 8 ? "CEP deve ter 8 dígitos." : null;
 
   async function save() {
     if (!user) return;
-    if (!cepValid) {
-      toast.error(cepError ?? "CEP inválido");
+    if (cepFormatError) {
+      toast.error(cepFormatError);
       return;
     }
     const { error } = await supabase
@@ -172,7 +168,7 @@ function Profile() {
         sport_ids: sportIds,
         sport_positions: positions,
         sponsor_brand: brandId === "none" ? null : brandId,
-        cep: cepDigits,
+        cep: cepDigits ? cepDigits : null,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
@@ -360,23 +356,22 @@ function Profile() {
           </Field>
         </div>
 
-        <Field label="CEP *">
+        <Field label="CEP">
           <input
             inputMode="numeric"
             maxLength={8}
             value={cep}
             onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
-            className={cn("input-brutal", cepError && "border-red-500 ring-1 ring-red-500")}
+            className={cn("input-brutal", cepFormatError && "border-red-500 ring-1 ring-red-500")}
             placeholder="00000000"
-            aria-invalid={!!cepError}
+            aria-invalid={!!cepFormatError}
             aria-describedby="cep-help"
-            required
           />
         </Field>
-        <p id="cep-help" className={cn("text-xs -mt-2", cepError ? "text-red-500 font-semibold" : "text-ink/60")}>
-          {cepError
-            ? cepError
-            : "Obrigatório para visualizar jogos de condomínio, empresa ou espaço privado com o mesmo CEP."}
+        <p id="cep-help" className={cn("text-xs -mt-2", cepFormatError ? "text-red-500 font-semibold" : "text-ink/60")}>
+          {cepFormatError
+            ? cepFormatError
+            : "Opcional. Preencha para visualizar jogos de condomínio, empresa ou espaço privado com o mesmo CEP."}
         </p>
 
 
@@ -478,7 +473,7 @@ function Profile() {
 
         <button
           onClick={save}
-          disabled={!cepValid}
+          disabled={!!cepFormatError}
           className="mt-4 px-5 py-4 bg-pop text-[#111] font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         >
           <Save className="size-4" /> Salvar
