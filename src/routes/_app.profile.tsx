@@ -146,17 +146,13 @@ function Profile() {
   }
 
   const cepDigits = cep.replace(/\D/g, "");
-  const cepValid = cepDigits.length === 8;
-  const cepError = !cepValid
-    ? cepDigits.length === 0
-      ? "Informe seu CEP para visualizar jogos de condomínio."
-      : "CEP deve ter 8 dígitos."
-    : null;
+  const cepFormatError =
+    cepDigits.length > 0 && cepDigits.length !== 8 ? "CEP deve ter 8 dígitos." : null;
 
   async function save() {
     if (!user) return;
-    if (!cepValid) {
-      toast.error(cepError ?? "CEP inválido");
+    if (cepFormatError) {
+      toast.error(cepFormatError);
       return;
     }
     const { error } = await supabase
@@ -172,7 +168,7 @@ function Profile() {
         sport_ids: sportIds,
         sport_positions: positions,
         sponsor_brand: brandId === "none" ? null : brandId,
-        cep: cepDigits,
+        cep: cepDigits ? cepDigits : null,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
