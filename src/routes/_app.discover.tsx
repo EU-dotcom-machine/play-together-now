@@ -98,25 +98,34 @@ function Discover() {
 
       // Fallback: load viewer context for visibility filtering
       let friendHostIds: string[] = [];
+      let participantGameIds: string[] = [];
       let viewerCep: string | null = null;
       if (user) {
-        const [friendsRes, profRes] = await Promise.all([
+        const [friendsRes, profRes, partsRes] = await Promise.all([
           supabase
             .from("friendships")
             .select("requester_id,addressee_id")
             .eq("status" as any, "accepted")
             .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
           supabase.from("profiles").select("cep").eq("id", user.id).single(),
+          supabase
+            .from("game_participants")
+            .select("game_id")
+            .eq("user_id", user.id)
+            .eq("status" as any, "confirmed"),
         ]);
         friendHostIds = ((friendsRes.data ?? []) as any[]).map((f) =>
           f.requester_id === user.id ? f.addressee_id : f.requester_id,
         );
         viewerCep = ((profRes.data as any)?.cep ?? null) as string | null;
+        participantGameIds = ((partsRes.data ?? []) as any[]).map((p) => p.game_id);
       }
 
-      // WHERE clause: public OR (host is me) OR (friends + host in my friends) OR (cep + matching cep)
+      // WHERE: public OR host=me OR I'm a confirmed participant OR friends+host-is-friend OR matching cep
       const orParts = ["visibility.eq.public"];
       if (user) orParts.push(`host_id.eq.${user.id}`);
+      if (participantGameIds.length > 0)
+        orParts.push(`id.in.(${participantGameIds.join(",")})`);
       if (friendHostIds.length > 0)
         orParts.push(`and(visibility.eq.friends,host_id.in.(${friendHostIds.join(",")}))`);
       if (viewerCep) orParts.push(`and(visibility.eq.cep,cep.eq.${viewerCep})`);
