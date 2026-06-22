@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import { getCourtImage } from "@/lib/sport-courts";
 import { useAuth } from "@/hooks/use-auth";
-import { MapPin, Zap, Users, Loader2, Star, Lock, Plus } from "lucide-react";
+import { MapPin, Zap, Users, Loader2, Star, Lock, Plus, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
@@ -47,6 +47,17 @@ function Discover() {
       return data ?? [];
     },
   });
+
+  const { data: viewerProfile } = useQuery({
+    queryKey: ["viewer-profile-cep", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("cep").eq("id", user!.id).single();
+      return (data as any) ?? null;
+    },
+  });
+  const viewerCep = ((viewerProfile as any)?.cep ?? "").toString().trim();
+  const hasCep = viewerCep.length > 0;
 
   useEffect(() => {
     if (!navigator.geolocation) return setGeoDenied(true);
@@ -144,8 +155,17 @@ function Discover() {
   });
 
   const games = useMemo(
-    () => (data ?? []).filter((g) => filterSportId === null || g.sport_id === filterSportId),
-    [data, filterSportId],
+    () =>
+      (data ?? [])
+        .filter((g) => filterSportId === null || g.sport_id === filterSportId)
+        .filter((g) => {
+          // Hide 'cep' (condomínio) games when the viewer hasn't filled their CEP,
+          // unless they are the host of that game.
+          if (g.visibility !== "cep") return true;
+          if (hasCep) return true;
+          return false;
+        }),
+    [data, filterSportId, hasCep],
   );
   const selectedSport = useMemo(
     () => sports?.find((s) => s.id === filterSportId),
@@ -199,6 +219,23 @@ function Discover() {
           </div>
         </div>
       )}
+
+      {user && !hasCep && (
+        <div className="mt-4 brutal-card-lg p-3 bg-paper flex items-start gap-2">
+          <AlertTriangle className="size-4 shrink-0 mt-0.5 text-pop" />
+          <div className="text-xs leading-snug">
+            <p className="font-bold uppercase">Preencha seu CEP</p>
+            <p className="text-ink/70 mt-0.5">
+              Jogos de condomínio só aparecem para quem tem o mesmo CEP.{" "}
+              <Link to="/profile" className="underline underline-offset-2 font-bold text-pop">
+                Atualizar perfil
+              </Link>
+            </p>
+          </div>
+        </div>
+      )}
+
+
 
       {sports && sports.length > 0 && (
         <div className="mt-4 -mx-5 px-5">
