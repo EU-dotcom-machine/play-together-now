@@ -220,6 +220,23 @@ function Discover() {
         </div>
       )}
 
+      {user && !hasCep && (
+        <div className="mt-4 brutal-card-lg p-3 bg-paper flex items-start gap-2">
+          <AlertTriangle className="size-4 shrink-0 mt-0.5 text-pop" />
+          <div className="text-xs leading-snug">
+            <p className="font-bold uppercase">Preencha seu CEP</p>
+            <p className="text-ink/70 mt-0.5">
+              Jogos de condomínio só aparecem para quem tem o mesmo CEP.{" "}
+              <Link to="/profile" className="underline underline-offset-2 font-bold text-pop">
+                Atualizar perfil
+              </Link>
+            </p>
+          </div>
+        </div>
+      )}
+
+
+
       {sports && sports.length > 0 && (
         <div className="mt-4 -mx-5 px-5">
           <div className="relative">
