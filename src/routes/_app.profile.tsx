@@ -473,7 +473,7 @@ function Profile() {
 
         <button
           onClick={save}
-          disabled={!cepValid}
+          disabled={!!cepFormatError}
           className="mt-4 px-5 py-4 bg-pop text-[#111] font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         >
           <Save className="size-4" /> Salvar
