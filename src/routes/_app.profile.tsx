@@ -373,7 +373,6 @@ function Profile() {
             ? cepFormatError
             : "Opcional. Preencha para visualizar jogos de condomínio, empresa ou espaço privado com o mesmo CEP."}
         </p>
-        </p>
 
 
 
