@@ -155,8 +155,17 @@ function Discover() {
   });
 
   const games = useMemo(
-    () => (data ?? []).filter((g) => filterSportId === null || g.sport_id === filterSportId),
-    [data, filterSportId],
+    () =>
+      (data ?? [])
+        .filter((g) => filterSportId === null || g.sport_id === filterSportId)
+        .filter((g) => {
+          // Hide 'cep' (condomínio) games when the viewer hasn't filled their CEP,
+          // unless they are the host of that game.
+          if (g.visibility !== "cep") return true;
+          if (hasCep) return true;
+          return false;
+        }),
+    [data, filterSportId, hasCep],
   );
   const selectedSport = useMemo(
     () => sports?.find((s) => s.id === filterSportId),
