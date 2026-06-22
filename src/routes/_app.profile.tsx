@@ -145,8 +145,20 @@ function Profile() {
     setSportIds((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   }
 
+  const cepDigits = cep.replace(/\D/g, "");
+  const cepValid = cepDigits.length === 8;
+  const cepError = !cepValid
+    ? cepDigits.length === 0
+      ? "Informe seu CEP para visualizar jogos de condomínio."
+      : "CEP deve ter 8 dígitos."
+    : null;
+
   async function save() {
     if (!user) return;
+    if (!cepValid) {
+      toast.error(cepError ?? "CEP inválido");
+      return;
+    }
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -160,7 +172,7 @@ function Profile() {
         sport_ids: sportIds,
         sport_positions: positions,
         sponsor_brand: brandId === "none" ? null : brandId,
-        cep: cep.trim() ? cep.replace(/\D/g, "").slice(0, 8) : null,
+        cep: cepDigits,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
@@ -348,19 +360,23 @@ function Profile() {
           </Field>
         </div>
 
-        <Field label="CEP">
+        <Field label="CEP *">
           <input
             inputMode="numeric"
             maxLength={8}
             value={cep}
             onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
-            className="input-brutal"
+            className={cn("input-brutal", cepError && "border-red-500 ring-1 ring-red-500")}
             placeholder="00000000"
+            aria-invalid={!!cepError}
+            aria-describedby="cep-help"
+            required
           />
         </Field>
-        <p className="text-xs text-ink/60 -mt-2">
-          Usado apenas para criar jogos visíveis só para pessoas do seu condomínio,
-          empresa ou espaço privado.
+        <p id="cep-help" className={cn("text-xs -mt-2", cepError ? "text-red-500 font-semibold" : "text-ink/60")}>
+          {cepError
+            ? cepError
+            : "Obrigatório para visualizar jogos de condomínio, empresa ou espaço privado com o mesmo CEP."}
         </p>
 
 
@@ -462,7 +478,8 @@ function Profile() {
 
         <button
           onClick={save}
-          className="mt-4 px-5 py-4 bg-pop text-[#111] font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px]"
+          disabled={!cepValid}
+          className="mt-4 px-5 py-4 bg-pop text-[#111] font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         >
           <Save className="size-4" /> Salvar
         </button>
