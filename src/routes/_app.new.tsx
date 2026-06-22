@@ -670,7 +670,13 @@ function NewGame() {
               );
             })}
           </div>
+          <p className="mt-1.5 text-[11px] text-ink/60 leading-snug">
+            {visibility === "public" && "Qualquer um na sua região vê esse jogo."}
+            {visibility === "friends" && "Só seus amigos enxergam esse jogo no Descobrir."}
+            {visibility === "cep" && "Só pessoas com o mesmo CEP cadastrado enxergam."}
+          </p>
         </Field>
+
 
         {visibility === "cep" && (
           <Field label="CEP do condomínio (8 dígitos)">

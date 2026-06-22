@@ -115,7 +115,9 @@ function Agenda() {
 
 async function fetchAgenda(userId: string, kind: "upcoming" | "past"): Promise<AgendaGame[]> {
   const nowIso = new Date().toISOString();
-  let query = supabase
+
+  // Games where I'm a confirmed participant
+  let partQuery = supabase
     .from("game_participants")
     .select(
       "game_id, games!inner(id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id,visibility,status,sports(name,emoji),venues(name))" as any,
@@ -123,22 +125,49 @@ async function fetchAgenda(userId: string, kind: "upcoming" | "past"): Promise<A
     .eq("user_id", userId)
     .eq("status" as any, "confirmed");
 
+  // Games I host (regardless of visibility) — covers cases where host is not auto-added as participant
+  let hostQuery = supabase
+    .from("games")
+    .select(
+      "id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id,visibility,status,sports(name,emoji),venues(name)" as any,
+    )
+    .eq("host_id", userId);
+
   if (kind === "upcoming") {
-    query = query
+    partQuery = partQuery
       .gte("games.starts_at" as any, nowIso)
       .in("games.status" as any, ["open", "full"])
       .order("games(starts_at)" as any, { ascending: true });
+    hostQuery = hostQuery
+      .gte("starts_at", nowIso)
+      .in("status", ["open", "full"])
+      .order("starts_at", { ascending: true });
   } else {
-    query = query
+    partQuery = partQuery
       .lt("games.starts_at" as any, nowIso)
       .order("games(starts_at)" as any, { ascending: false });
+    hostQuery = hostQuery
+      .lt("starts_at", nowIso)
+      .order("starts_at", { ascending: false });
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
+  const [partRes, hostRes] = await Promise.all([partQuery, hostQuery]);
+  if (partRes.error) throw partRes.error;
+  if (hostRes.error) throw hostRes.error;
 
-  const rows = ((data ?? []) as any[]).map((r) => r.games).filter(Boolean);
+  // Merge & dedupe
+  const partRows = ((partRes.data ?? []) as any[]).map((r) => r.games).filter(Boolean);
+  const hostRows = (hostRes.data ?? []) as any[];
+  const byId = new Map<string, any>();
+  for (const r of [...partRows, ...hostRows]) byId.set(r.id, r);
+  const rows = Array.from(byId.values());
   if (rows.length === 0) return [];
+
+  rows.sort((a, b) =>
+    kind === "upcoming"
+      ? new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+      : new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime(),
+  );
 
   // Hydrate participants_count
   const ids = rows.map((r: any) => r.id);
