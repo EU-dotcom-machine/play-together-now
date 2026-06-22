@@ -360,19 +360,23 @@ function Profile() {
           </Field>
         </div>
 
-        <Field label="CEP">
+        <Field label="CEP *">
           <input
             inputMode="numeric"
             maxLength={8}
             value={cep}
             onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
-            className="input-brutal"
+            className={cn("input-brutal", cepError && "border-red-500 ring-1 ring-red-500")}
             placeholder="00000000"
+            aria-invalid={!!cepError}
+            aria-describedby="cep-help"
+            required
           />
         </Field>
-        <p className="text-xs text-ink/60 -mt-2">
-          Usado apenas para criar jogos visíveis só para pessoas do seu condomínio,
-          empresa ou espaço privado.
+        <p id="cep-help" className={cn("text-xs -mt-2", cepError ? "text-red-500 font-semibold" : "text-ink/60")}>
+          {cepError
+            ? cepError
+            : "Obrigatório para visualizar jogos de condomínio, empresa ou espaço privado com o mesmo CEP."}
         </p>
 
 
