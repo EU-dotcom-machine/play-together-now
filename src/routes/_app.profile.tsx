@@ -145,8 +145,20 @@ function Profile() {
     setSportIds((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   }
 
+  const cepDigits = cep.replace(/\D/g, "");
+  const cepValid = cepDigits.length === 8;
+  const cepError = !cepValid
+    ? cepDigits.length === 0
+      ? "Informe seu CEP para visualizar jogos de condomínio."
+      : "CEP deve ter 8 dígitos."
+    : null;
+
   async function save() {
     if (!user) return;
+    if (!cepValid) {
+      toast.error(cepError ?? "CEP inválido");
+      return;
+    }
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -160,7 +172,7 @@ function Profile() {
         sport_ids: sportIds,
         sport_positions: positions,
         sponsor_brand: brandId === "none" ? null : brandId,
-        cep: cep.trim() ? cep.replace(/\D/g, "").slice(0, 8) : null,
+        cep: cepDigits,
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(error.message);
