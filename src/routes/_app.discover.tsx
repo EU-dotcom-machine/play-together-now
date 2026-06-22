@@ -48,6 +48,17 @@ function Discover() {
     },
   });
 
+  const { data: viewerProfile } = useQuery({
+    queryKey: ["viewer-profile-cep", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("cep").eq("id", user!.id).single();
+      return (data as any) ?? null;
+    },
+  });
+  const viewerCep = ((viewerProfile as any)?.cep ?? "").toString().trim();
+  const hasCep = viewerCep.length > 0;
+
   useEffect(() => {
     if (!navigator.geolocation) return setGeoDenied(true);
     navigator.geolocation.getCurrentPosition(
