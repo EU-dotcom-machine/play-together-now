@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -8,12 +8,16 @@ import { trackEvent } from "@/lib/posthog";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar — Esportes Unidos" }, { name: "robots", content: "noindex" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  }),
   component: AuthPage,
 });
 
 function AuthPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,8 +31,16 @@ function AuthPage() {
   const [forgotSent, setForgotSent] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem("eu_redirect") : null;
+    if (stored) sessionStorage.removeItem("eu_redirect");
+    const target = stored ?? redirect ?? "/discover";
+    navigate({ to: target, replace: true });
+  }, [user, redirect, navigate]);
+
   if (authLoading) return null;
-  if (user) return <Navigate to="/discover" replace />;
+  if (user) return <Navigate to={(redirect ?? "/discover") as string} replace />;
 
   function isNetworkError(err: any) {
     const msg = String(err?.message ?? err ?? "").toLowerCase();
@@ -107,11 +119,12 @@ function AuthPage() {
         });
         if (error) throw error;
         trackEvent("user_signed_up");
+        sessionStorage.setItem("eu_redirect", redirect ?? "/discover");
         setVerificationEmail(email);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/discover" });
+        navigate({ to: (redirect ?? "/discover") as string });
       }
     } catch (err: any) {
       if (isNetworkError(err)) {
