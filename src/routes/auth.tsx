@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -8,6 +8,9 @@ import { trackEvent } from "@/lib/posthog";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar — Esportes Unidos" }, { name: "robots", content: "noindex" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  }),
   component: AuthPage,
 });
 
