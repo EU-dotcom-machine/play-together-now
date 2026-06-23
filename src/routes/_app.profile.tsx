@@ -359,11 +359,17 @@ function Profile() {
         <Field label="CEP">
           <input
             inputMode="numeric"
-            maxLength={8}
-            value={cep}
+            autoComplete="postal-code"
+            maxLength={9}
+            value={cepDigits.length > 5 ? `${cepDigits.slice(0, 5)}-${cepDigits.slice(5)}` : cepDigits}
             onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            onPaste={(e) => {
+              e.preventDefault();
+              const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 8);
+              setCep(pasted);
+            }}
             className={cn("input-brutal", cepFormatError && "border-red-500 ring-1 ring-red-500")}
-            placeholder="00000000"
+            placeholder="00000-000"
             aria-invalid={!!cepFormatError}
             aria-describedby="cep-help"
           />
