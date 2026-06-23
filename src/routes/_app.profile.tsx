@@ -19,11 +19,11 @@ const YEARS = ["<1 ano", "1-3 anos", "3-5 anos", "5-10 anos", "10+ anos"] as con
 const SIDES = ["Destro", "Canhoto", "Ambidestro"] as const;
 const LEVELS = ["Iniciante", "Intermediário", "Avançado", "Profissional"] as const;
 
-const BRANDS: { id: string; name: string; color: string | null }[] = [
+const BRANDS: { id: string; name: string; color: string | null; gradient?: string }[] = [
   { id: "none", name: "Nenhum", color: null },
-  { id: "nike", name: "Nike", color: "#111111" },
-  { id: "adidas", name: "Adidas", color: "#000000" },
-  { id: "puma", name: "Puma", color: "#CC0000" },
+  { id: "nike", name: "Nike", color: "#111111", gradient: "linear-gradient(135deg, #111 0%, #FF5722 100%)" },
+  { id: "adidas", name: "Adidas", color: "#000000", gradient: "linear-gradient(135deg, #000 0%, #3A3A3A 100%)" },
+  { id: "puma", name: "Puma", color: "#CC0000", gradient: "linear-gradient(135deg, #CC0000 0%, #FF6B6B 100%)" },
   { id: "under-armour", name: "Under Armour", color: "#1A1A2E" },
   { id: "new-balance", name: "New Balance", color: "#CF0A2C" },
   { id: "asics", name: "Asics", color: "#1A3A5C" },
@@ -311,7 +311,7 @@ function Profile() {
                         ? "border-[#FFD600] shadow-[0_0_0_2px_rgba(255,214,0,0.25)]"
                         : "border-[#2A2A2A]",
                     )}
-                    style={{ background: b.id === "none" ? "#1E1E1E" : brandGradient(b.name) }}
+                    style={{ background: b.gradient ?? b.color ?? "#1E1E1E" }}
                   >
                     <div
                       className="absolute inset-0"
