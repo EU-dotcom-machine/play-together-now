@@ -311,7 +311,7 @@ function Profile() {
                         ? "border-[#FFD600] shadow-[0_0_0_2px_rgba(255,214,0,0.25)]"
                         : "border-[#2A2A2A]",
                     )}
-                    style={{ background: b.id === "none" ? "#1E1E1E" : brandGradient(b.name) }}
+                    style={{ background: b.gradient ?? b.color ?? "#1E1E1E" }}
                   >
                     <div
                       className="absolute inset-0"
