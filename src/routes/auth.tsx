@@ -119,11 +119,12 @@ function AuthPage() {
         });
         if (error) throw error;
         trackEvent("user_signed_up");
+        sessionStorage.setItem("eu_redirect", redirect ?? "/discover");
         setVerificationEmail(email);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/discover" });
+        navigate({ to: (redirect ?? "/discover") as string });
       }
     } catch (err: any) {
       if (isNetworkError(err)) {
