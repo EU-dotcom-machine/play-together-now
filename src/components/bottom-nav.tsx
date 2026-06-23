@@ -5,8 +5,8 @@ import { usePendingRequestCount } from "@/components/friends-section";
 
 const items = [
   { to: "/discover", label: "Jogos", icon: Compass },
-  { to: "/friends", label: "Amigos", icon: Users },
   { to: "/agenda", label: "Agenda", icon: CalendarDays },
+  { to: "/friends", label: "Amigos", icon: Users },
   { to: "/profile", label: "Perfil", icon: User },
 ] as const;
 
