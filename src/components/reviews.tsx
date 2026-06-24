@@ -34,6 +34,8 @@ export function Reviews({
 
   const myGameReview = gameReviews.find((r) => r.reviewer_id === user?.id);
 
+  const [reviewerProfiles, setReviewerProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
+
   async function load() {
     setLoading(true);
     const [{ data: gr }, { data: pr }] = await Promise.all([
@@ -44,22 +46,29 @@ export function Reviews({
         .order("created_at", { ascending: false }),
       supabase
         .from("player_reviews")
-        .select("id,reviewer_id,reviewee_id,rating,comment,created_at")
-        .eq("game_id", gameId),
+        .select("id,reviewer_id,reviewee_id,rating,comment,tags,created_at")
+        .eq("game_id", gameId)
+        .order("created_at", { ascending: false }),
     ]);
-    const ids = Array.from(new Set((gr ?? []).map((r) => r.reviewer_id)));
-    let names: Record<string, string> = {};
+    const ids = Array.from(
+      new Set([...(gr ?? []).map((r) => r.reviewer_id), ...(pr ?? []).map((r: any) => r.reviewer_id)]),
+    );
+    let profMap: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
     if (ids.length) {
       const { data: profs } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name")
+        .select("id,display_name,avatar_url")
         .in("id", ids);
-      names = Object.fromEntries(((profs ?? []) as any[]).map((p: any) => [p.id, p.display_name]));
+      profMap = Object.fromEntries(
+        ((profs ?? []) as any[]).map((p: any) => [p.id, { display_name: p.display_name, avatar_url: p.avatar_url }]),
+      );
     }
-    setGameReviews((gr ?? []).map((r) => ({ ...r, reviewer_name: names[r.reviewer_id] })));
+    setReviewerProfiles(profMap);
+    setGameReviews((gr ?? []).map((r) => ({ ...r, reviewer_name: profMap[r.reviewer_id]?.display_name })));
     setPlayerReviews(pr ?? []);
     setLoading(false);
   }
+
 
   useEffect(() => {
     load();
