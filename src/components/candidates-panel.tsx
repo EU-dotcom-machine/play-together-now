@@ -82,6 +82,31 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
     },
   });
 
+  const candidateIds = candidates.map((c) => c.user_id);
+  const { data: ratingsMap = {} } = useQuery({
+    enabled: !!sportId && candidateIds.length > 0,
+    queryKey: ["candidate-sport-ratings", gameId, sportId, candidateIds.join(",")],
+    queryFn: async () => {
+      const entries = await Promise.all(
+        candidateIds.map(async (uid) => {
+          const { data, error } = await (supabase as any).rpc("get_player_sport_rating", {
+            player_id: uid,
+            sport_id: sportId,
+          });
+          if (error) return [uid, null] as const;
+          const row = Array.isArray(data) ? data[0] : data;
+          return [uid, (row ?? null) as SportRating | null] as const;
+        }),
+      );
+      return Object.fromEntries(entries) as Record<string, SportRating | null>;
+    },
+  });
+
+  const gameSport = candidates.length > 0 && sportId
+    ? candidates.flatMap((c) => c.sports).find((s: any) => s?.id === sportId) ?? null
+    : null;
+
+
   async function decide(userId: string, status: "confirmed" | "declined") {
     setBusy(userId);
     const { error } = await supabase
