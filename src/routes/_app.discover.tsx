@@ -39,6 +39,9 @@ function Discover() {
   const [geoDenied, setGeoDenied] = useState(false);
   const [radiusKm, setRadiusKm] = useState<number>(10);
   const [filterSportId, setFilterSportId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"jogos" | "estabelecimentos">("jogos");
+  const [filterVenueId, setFilterVenueId] = useState<string | null>(null);
+
 
   const { data: sports } = useQuery({
     queryKey: ["sports"],
