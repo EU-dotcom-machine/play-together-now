@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_app/games/$id")({
 type Participant = {
   user_id: string;
   status: "pending" | "confirmed" | "declined";
-  profiles: { id: string; display_name: string; sponsor_brand?: string | null } | null;
+  profiles: { id: string; display_name: string; sponsor_brand?: string | null; avg_rating?: number | null; total_reviews?: number | null } | null;
 };
 
 function GameDetail() {
