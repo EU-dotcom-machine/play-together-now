@@ -433,31 +433,43 @@ export type Database = {
           address: string | null
           created_at: string
           created_by: string
+          description: string | null
           id: string
+          instagram: string | null
+          is_public: boolean
           latitude: number
           longitude: number
           name: string
           notes: string | null
+          phone: string | null
         }
         Insert: {
           address?: string | null
           created_at?: string
           created_by: string
+          description?: string | null
           id?: string
+          instagram?: string | null
+          is_public?: boolean
           latitude: number
           longitude: number
           name: string
           notes?: string | null
+          phone?: string | null
         }
         Update: {
           address?: string | null
           created_at?: string
           created_by?: string
+          description?: string | null
           id?: string
+          instagram?: string | null
+          is_public?: boolean
           latitude?: number
           longitude?: number
           name?: string
           notes?: string | null
+          phone?: string | null
         }
         Relationships: []
       }

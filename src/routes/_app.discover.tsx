@@ -39,6 +39,9 @@ function Discover() {
   const [geoDenied, setGeoDenied] = useState(false);
   const [radiusKm, setRadiusKm] = useState<number>(10);
   const [filterSportId, setFilterSportId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"jogos" | "estabelecimentos">("jogos");
+  const [filterVenueId, setFilterVenueId] = useState<string | null>(null);
+
 
   const { data: sports } = useQuery({
     queryKey: ["sports"],
@@ -165,6 +168,7 @@ function Discover() {
     () =>
       (data ?? [])
         .filter((g) => filterSportId === null || g.sport_id === filterSportId)
+        .filter((g) => filterVenueId === null || (g as any).venues?.id === filterVenueId || (g as any).venue_id === filterVenueId)
         .filter((g) => {
           // Hide 'cep' (condomínio) games when the viewer hasn't filled their CEP,
           // unless they are the host of that game.
@@ -172,12 +176,75 @@ function Discover() {
           if (hasCep) return true;
           return false;
         }),
-    [data, filterSportId, hasCep],
+    [data, filterSportId, filterVenueId, hasCep],
   );
   const selectedSport = useMemo(
     () => sports?.find((s) => s.id === filterSportId),
     [sports, filterSportId],
   );
+
+  // Build venues from the same visible games (so visibility/RLS already applied)
+  const venuesAgg = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; address: string | null; sports: Set<string>; count: number; latitude?: number | null; longitude?: number | null }>();
+    for (const g of (data ?? [])) {
+      const vid = (g as any).venue_id ?? (g as any).venues?.id;
+      const venue = (g as any).venues;
+      if (!vid || !venue) continue;
+      const entry = map.get(vid) ?? {
+        id: vid,
+        name: venue.name,
+        address: venue.address ?? null,
+        sports: new Set<string>(),
+        count: 0,
+        latitude: venue.latitude ?? null,
+        longitude: venue.longitude ?? null,
+      };
+      entry.count += 1;
+      if (g.sports?.name) entry.sports.add(`${g.sports.emoji ?? ""} ${g.sports.name}`);
+      map.set(vid, entry);
+    }
+    return Array.from(map.values());
+  }, [data]);
+
+  const { data: publicVenues = [] } = useQuery({
+    queryKey: ["public-venues", venuesAgg.map((v) => v.id).join(",")],
+    enabled: venuesAgg.length > 0,
+    queryFn: async () => {
+      const ids = venuesAgg.map((v) => v.id);
+      const { data: rows } = await supabase
+        .from("venues")
+        .select("id,name,address,description,phone,instagram,latitude,longitude,is_public" as any)
+        .in("id", ids)
+        .eq("is_public" as any, true);
+      return (rows ?? []) as any[];
+    },
+  });
+
+  const establishments = useMemo(() => {
+    const publicMap = new Map(publicVenues.map((v: any) => [v.id, v]));
+    return venuesAgg
+      .filter((v) => publicMap.has(v.id))
+      .map((v) => {
+        const pub = publicMap.get(v.id)!;
+        const distKm = coords && pub.latitude != null && pub.longitude != null
+          ? distanceKm(coords.lat, coords.lng, pub.latitude, pub.longitude)
+          : null;
+        return {
+          id: v.id,
+          name: pub.name ?? v.name,
+          address: pub.address ?? v.address,
+          description: pub.description ?? null,
+          phone: pub.phone ?? null,
+          instagram: pub.instagram ?? null,
+          sports: Array.from(v.sports),
+          count: v.count,
+          distKm,
+        };
+      })
+      .sort((a, b) => (a.distKm ?? Infinity) - (b.distKm ?? Infinity));
+  }, [venuesAgg, publicVenues, coords]);
+
+
 
   return (
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
@@ -244,7 +311,28 @@ function Discover() {
 
 
 
-      {sports && sports.length > 0 && (
+      <div className="mt-5 flex gap-2">
+        <button
+          onClick={() => setTab("jogos")}
+          className={cn(
+            "flex-1 brutal-chip justify-center text-xs font-bold uppercase py-2",
+            tab === "jogos" ? "bg-pop text-[#111] border-ink" : "bg-paper",
+          )}
+        >
+          Jogos
+        </button>
+        <button
+          onClick={() => setTab("estabelecimentos")}
+          className={cn(
+            "flex-1 brutal-chip justify-center text-xs font-bold uppercase py-2",
+            tab === "estabelecimentos" ? "bg-pop text-[#111] border-ink" : "bg-paper",
+          )}
+        >
+          Estabelecimentos
+        </button>
+      </div>
+
+      {tab === "jogos" && sports && sports.length > 0 && (
         <div className="mt-4 -mx-5 px-5">
           <div className="relative">
             <div
@@ -282,34 +370,112 @@ function Discover() {
         </div>
       )}
 
-      <div className="mt-6 grid gap-3">
-        {isLoading && (
-          <div className="flex items-center justify-center py-12 text-ink/60">
-            <Loader2 className="size-6 animate-spin" />
-          </div>
-        )}
-        {!isLoading && games.length === 0 && (
-          <div className="brutal-card p-6 text-center">
-            <p className="font-bold uppercase">
-              {selectedSport
-                ? `Nenhum jogo de ${selectedSport.emoji} ${selectedSport.name} perto de você`
-                : "Nenhum jogo rolando"}
-            </p>
-            <p className="text-sm text-ink/70 mt-1">
-              {selectedSport ? (
-                <button onClick={() => setFilterSportId(null)} className="underline underline-offset-2 text-pop">
-                  Limpar filtro
-                </button>
-              ) : (
-                "Que tal criar o primeiro?"
+      {tab === "jogos" && filterVenueId && (
+        <div className="mt-3 flex items-center justify-between brutal-card p-2 bg-paper text-xs">
+          <span className="font-bold uppercase truncate">
+            Filtrando por: {establishments.find((e) => e.id === filterVenueId)?.name ?? "Local"}
+          </span>
+          <button onClick={() => setFilterVenueId(null)} className="font-bold text-pop underline">
+            Limpar
+          </button>
+        </div>
+      )}
+
+      {tab === "jogos" && (
+        <div className="mt-6 grid gap-3">
+          {isLoading && (
+            <div className="flex items-center justify-center py-12 text-ink/60">
+              <Loader2 className="size-6 animate-spin" />
+            </div>
+          )}
+          {!isLoading && games.length === 0 && (
+            <div className="brutal-card p-6 text-center">
+              <p className="font-bold uppercase">
+                {selectedSport
+                  ? `Nenhum jogo de ${selectedSport.emoji} ${selectedSport.name} perto de você`
+                  : "Nenhum jogo rolando"}
+              </p>
+              <p className="text-sm text-ink/70 mt-1">
+                {selectedSport ? (
+                  <button onClick={() => setFilterSportId(null)} className="underline underline-offset-2 text-pop">
+                    Limpar filtro
+                  </button>
+                ) : (
+                  "Que tal criar o primeiro?"
+                )}
+              </p>
+            </div>
+          )}
+          {games.map((g) => (
+            <GameCard key={g.id} game={g} coords={coords} />
+          ))}
+        </div>
+      )}
+
+      {tab === "estabelecimentos" && (
+        <div className="mt-6 grid gap-3">
+          {isLoading && (
+            <div className="flex items-center justify-center py-12 text-ink/60">
+              <Loader2 className="size-6 animate-spin" />
+            </div>
+          )}
+          {!isLoading && establishments.length === 0 && (
+            <div className="brutal-card p-6 text-center">
+              <p className="font-bold uppercase">Nenhum estabelecimento por perto</p>
+              <p className="text-sm text-ink/70 mt-1">
+                Não há jogos abertos em locais públicos no raio selecionado.
+              </p>
+            </div>
+          )}
+          {establishments.map((v) => (
+            <div key={v.id} className="brutal-card p-4 bg-paper">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-base uppercase truncate">{v.name}</h3>
+                  {v.address && (
+                    <p className="text-xs text-ink/70 mt-0.5 flex items-center gap-1">
+                      <MapPin className="size-3 shrink-0" /> {v.address}
+                    </p>
+                  )}
+                </div>
+                {v.distKm != null && (
+                  <span className="shrink-0 text-[11px] font-bold bg-pop text-[#111] px-2 py-0.5 rounded-full">
+                    {formatDistance(v.distKm)}
+                  </span>
+                )}
+              </div>
+              {v.sports.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {v.sports.map((s) => (
+                    <span
+                      key={s}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-ink/20 bg-paper text-ink/80"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
               )}
-            </p>
-          </div>
-        )}
-        {games.map((g) => (
-          <GameCard key={g.id} game={g} coords={coords} />
-        ))}
-      </div>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <p className="text-xs font-bold text-ink/80">
+                  {v.count} {v.count === 1 ? "jogo disponível" : "jogos disponíveis"}
+                </p>
+                <button
+                  onClick={() => {
+                    setFilterVenueId(v.id);
+                    setFilterSportId(null);
+                    setTab("jogos");
+                  }}
+                  className="brutal-chip bg-pop text-[#111] text-xs font-bold px-3 py-1.5"
+                >
+                  Ver jogos
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <InstallPrompt />
     </main>
   );
@@ -326,8 +492,10 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
       ? supabase.from("sports").select("id,name,emoji,avg_rating,total_reviews").in("id", sportIds)
       : Promise.resolve({ data: [] as any[] }),
     venueIds.length
-      ? supabase.from("venues").select("id,name,address").in("id", venueIds)
+      ? supabase.from("venues").select("id,name,address,latitude,longitude")
+          .in("id", venueIds)
       : Promise.resolve({ data: [] as any[] }),
+
     supabase.from("game_participants").select("game_id").in("game_id", gameIds).eq("status" as any, "confirmed"),
   ]);
 
@@ -353,9 +521,11 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
     cep: r.cep ?? null,
     sports: sportsMap.get(r.sport_id) ?? null,
     venues: venuesMap.get(r.venue_id) ?? null,
+    venue_id: r.venue_id ?? null,
     participants_count: counts.get(r.id) ?? 0,
-  }));
+  })) as any;
 }
+
 
 const sportColor: Record<string, string> = {
   "Futebol":        "#00b140",
