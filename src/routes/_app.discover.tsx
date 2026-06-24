@@ -9,6 +9,7 @@ import { MapPin, Zap, Users, Loader2, Star, Lock, Plus, AlertTriangle } from "lu
 import { cn } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { VenueClaimDialog } from "@/components/venue-claim-dialog";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
@@ -41,6 +42,7 @@ function Discover() {
   const [filterSportId, setFilterSportId] = useState<string | null>(null);
   const [tab, setTab] = useState<"jogos" | "estabelecimentos">("jogos");
   const [filterVenueId, setFilterVenueId] = useState<string | null>(null);
+  const [claimVenue, setClaimVenue] = useState<{ id: string; name: string } | null>(null);
 
 
   const { data: sports } = useQuery({
@@ -244,6 +246,31 @@ function Discover() {
       })
       .sort((a, b) => (a.distKm ?? Infinity) - (b.distKm ?? Infinity));
   }, [venuesAgg, publicVenues, coords]);
+
+  const venueIdsKey = establishments.map((e) => e.id).join(",");
+  const { data: myClaims = [] } = useQuery({
+    queryKey: ["my-venue-claims", user?.id, venueIdsKey],
+    enabled: !!user && establishments.length > 0,
+    queryFn: async () => {
+      const ids = establishments.map((e) => e.id);
+      const { data } = await supabase
+        .from("venue_claims" as any)
+        .select("venue_id,status")
+        .eq("claimant_id", user!.id)
+        .in("venue_id", ids);
+      return ((data ?? []) as unknown) as { venue_id: string; status: "pending" | "accepted" | "rejected" }[];
+    },
+  });
+  const claimByVenue = useMemo(() => {
+    const m = new Map<string, "pending" | "accepted" | "rejected">();
+    for (const c of myClaims) {
+      const prev = m.get(c.venue_id);
+      // prefer accepted > pending > rejected
+      const rank = (s: string) => (s === "accepted" ? 3 : s === "pending" ? 2 : 1);
+      if (!prev || rank(c.status) > rank(prev)) m.set(c.venue_id, c.status);
+    }
+    return m;
+  }, [myClaims]);
 
 
 
@@ -473,9 +500,38 @@ function Discover() {
                   Ver jogos
                 </button>
               </div>
+              {(() => {
+                const cs = claimByVenue.get(v.id);
+                const label =
+                  cs === "accepted"
+                    ? "✓ Espaço reivindicado por você"
+                    : cs === "pending"
+                      ? "⏳ Solicitação pendente"
+                      : cs === "rejected"
+                        ? "Reivindicar este espaço (reenviar)"
+                        : "Reivindicar este espaço";
+                return (
+                  <button
+                    onClick={() => setClaimVenue({ id: v.id, name: v.name })}
+                    disabled={cs === "accepted"}
+                    className="mt-2 w-full text-xs font-bold uppercase border border-ink/20 rounded-md py-1.5 hover:bg-ink/5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {label}
+                  </button>
+                );
+              })()}
             </div>
           ))}
         </div>
+      )}
+
+      {claimVenue && (
+        <VenueClaimDialog
+          open={!!claimVenue}
+          onOpenChange={(o) => !o && setClaimVenue(null)}
+          venueId={claimVenue.id}
+          venueName={claimVenue.name}
+        />
       )}
 
       <InstallPrompt />
