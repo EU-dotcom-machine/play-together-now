@@ -428,6 +428,62 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_claims: {
+        Row: {
+          claimant_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          message: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          role_at_venue: string | null
+          status: string
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          claimant_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          role_at_venue?: string | null
+          status?: string
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          claimant_id?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          role_at_venue?: string | null
+          status?: string
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_claims_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venues: {
         Row: {
           address: string | null
