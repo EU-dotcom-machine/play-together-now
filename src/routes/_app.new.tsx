@@ -425,7 +425,8 @@ function NewGame() {
           address: venueAddress || null,
           latitude: coords.lat,
           longitude: coords.lng,
-        })
+          venue_type: selectedPlaceId ? "establishment" : "personal",
+        } as any)
         .select("id")
         .single();
       if (vErr) throw vErr;
