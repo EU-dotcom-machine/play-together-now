@@ -171,7 +171,12 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
               gameLat != null && gameLng != null && p?.latitude != null && p?.longitude != null
                 ? distanceKm(gameLat, gameLng, p.latitude, p.longitude)
                 : null;
+            const rating = (ratingsMap as Record<string, SportRating | null>)[c.user_id] ?? null;
+            const sportTotal = Number(rating?.sport_total ?? 0);
+            const overallTotal = Number(rating?.overall_total ?? 0);
+            const topTags = (rating?.top_tags ?? []).slice(0, 3);
             return (
+
               <li
                 key={c.user_id}
                 className="rounded-xl p-3 border border-border bg-surface border-l-[3px] border-l-pop"
