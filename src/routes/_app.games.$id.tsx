@@ -119,6 +119,9 @@ function GameDetail() {
 
   async function sayEu() {
     if (!user) return;
+    if (game && new Date(game.starts_at) <= new Date()) {
+      return toast.error("Inscrições encerradas");
+    }
     trackEvent("eu_button_clicked", { game_id: id });
     setArmRaised(true);
     setTimeout(() => setArmRaised(false), 1600);
@@ -139,6 +142,7 @@ function GameDetail() {
     toast.success("Pedido enviado! Aguarde a confirmação.");
     qc.invalidateQueries({ queryKey: ["participants", id] });
   }
+
 
   async function leave() {
     if (!user) return;
@@ -162,6 +166,8 @@ function GameDetail() {
   const start = new Date(game.starts_at);
   const free = game.price_cents === 0;
   const full = filled >= slotsTotal;
+  const started = start <= new Date();
+
   const imageUrl = getCourtImage(game.sports?.name);
 
   const slotsLabel = full
@@ -279,6 +285,13 @@ function GameDetail() {
           >
             <Hourglass className="size-5" /> Aguardando confirmação…
           </button>
+        ) : started ? (
+          <div
+            className="w-full px-5 py-5 font-bold text-base uppercase rounded-full flex items-center justify-center gap-2"
+            style={{ background: "#2A2A2A", color: "#888" }}
+          >
+            Jogo iniciado
+          </div>
         ) : (
           <button
             onClick={sayEu}
@@ -289,6 +302,7 @@ function GameDetail() {
             {full ? "Completo" : "EU!"}
           </button>
         )}
+
         {!isHost && myStatus !== "confirmed" && myStatus !== "pending" && (
           <p className="mt-2 text-xs text-ink/60 text-center">
             {game.urgency === "urgente" ? "+5 pontos ao ser confirmado em urgência" : game.urgency === "normal" ? "+3 pontos" : "+1 ponto"}
