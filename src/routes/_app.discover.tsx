@@ -500,9 +500,38 @@ function Discover() {
                   Ver jogos
                 </button>
               </div>
+              {(() => {
+                const cs = claimByVenue.get(v.id);
+                const label =
+                  cs === "accepted"
+                    ? "✓ Espaço reivindicado por você"
+                    : cs === "pending"
+                      ? "⏳ Solicitação pendente"
+                      : cs === "rejected"
+                        ? "Reivindicar este espaço (reenviar)"
+                        : "Reivindicar este espaço";
+                return (
+                  <button
+                    onClick={() => setClaimVenue({ id: v.id, name: v.name })}
+                    disabled={cs === "accepted"}
+                    className="mt-2 w-full text-xs font-bold uppercase border border-ink/20 rounded-md py-1.5 hover:bg-ink/5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {label}
+                  </button>
+                );
+              })()}
             </div>
           ))}
         </div>
+      )}
+
+      {claimVenue && (
+        <VenueClaimDialog
+          open={!!claimVenue}
+          onOpenChange={(o) => !o && setClaimVenue(null)}
+          venueId={claimVenue.id}
+          venueName={claimVenue.name}
+        />
       )}
 
       <InstallPrompt />
