@@ -258,7 +258,7 @@ function Discover() {
         .select("venue_id,status")
         .eq("claimant_id", user!.id)
         .in("venue_id", ids);
-      return (data ?? []) as { venue_id: string; status: "pending" | "accepted" | "rejected" }[];
+      return ((data ?? []) as unknown) as { venue_id: string; status: "pending" | "accepted" | "rejected" }[];
     },
   });
   const claimByVenue = useMemo(() => {
