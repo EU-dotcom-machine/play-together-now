@@ -197,12 +197,37 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                       <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 bg-pop text-[#111]">
                         <Zap className="size-3" /> {p?.points ?? 0} pts
                       </span>
-                      {p?.total_reviews > 0 && (
+                      {p?.total_reviews > 0 && sportTotal === 0 && (
                         <span className="text-[11px] font-bold text-[#FFB400]">
                           ⭐ {Number(p?.avg_rating ?? 0).toFixed(1)} · {p.total_reviews} {p.total_reviews === 1 ? "avaliação" : "avaliações"}
                         </span>
                       )}
                     </div>
+                    {sportTotal > 0 && (
+                      <p className="text-xs mt-1 font-bold text-foreground">
+                        {gameSport?.emoji ?? "🎯"} {gameSport?.name ?? "Esporte"}:{" "}
+                        <span className="text-[#FFB400]">⭐ {Number(rating?.sport_avg ?? 0).toFixed(1)}</span>{" "}
+                        <span className="text-muted-foreground font-normal">· {sportTotal} {sportTotal === 1 ? "jogo" : "jogos"}</span>
+                      </p>
+                    )}
+                    {overallTotal > 0 && (
+                      <p className="text-[11px] mt-0.5 text-muted-foreground">
+                        Geral: ⭐ {Number(rating?.overall_avg ?? 0).toFixed(1)} · {overallTotal} {overallTotal === 1 ? "jogo" : "jogos"}
+                      </p>
+                    )}
+                    {topTags.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {topTags.map((t) => (
+                          <span
+                            key={t}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pop/15 text-foreground border border-pop/30"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {km != null ? (
                       <p className="text-xs mt-1 flex items-center gap-1 text-muted-foreground">
                         <MapPin className="size-3" /> {formatKm(km)}
