@@ -81,6 +81,7 @@ function NewGame() {
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [addressLabel, setAddressLabel] = useState<string>("");
   const [addressApprox, setAddressApprox] = useState(false);
   const [gpsExplicit, setGpsExplicit] = useState(false);
