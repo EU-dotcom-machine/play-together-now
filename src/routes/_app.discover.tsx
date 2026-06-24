@@ -431,11 +431,12 @@ function Discover() {
           {establishments.map((v) => (
             <div key={v.id} className="brutal-card p-4 bg-paper">
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="font-bold text-base uppercase truncate">{v.name}</h3>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-white font-extrabold text-lg uppercase truncate leading-tight">{v.name}</h3>
                   {v.address && (
-                    <p className="text-xs text-ink/70 mt-0.5 flex items-center gap-1">
-                      <MapPin className="size-3 shrink-0" /> {v.address}
+                    <p className="text-xs text-ink/60 mt-1 flex items-center gap-1 truncate">
+                      <MapPin className="size-3 shrink-0" />
+                      <span className="truncate">{v.address}</span>
                     </p>
                   )}
                 </div>
