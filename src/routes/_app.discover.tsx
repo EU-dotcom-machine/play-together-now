@@ -9,6 +9,7 @@ import { MapPin, Zap, Users, Loader2, Star, Lock, Plus, AlertTriangle } from "lu
 import { cn } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { VenueClaimDialog } from "@/components/venue-claim-dialog";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
