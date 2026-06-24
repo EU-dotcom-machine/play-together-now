@@ -79,7 +79,7 @@ function FriendsPage() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name,avatar_url,points")
+        .select("id,display_name,avatar_url,points,avg_rating,total_reviews")
         .in("id", otherIds);
       const map: Record<string, Profile> = {};
       for (const p of (data ?? []) as Profile[]) map[p.id] = p;
