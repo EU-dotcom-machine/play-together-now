@@ -504,6 +504,16 @@ export type Database = {
       }
     }
     Functions: {
+      get_player_sport_rating: {
+        Args: { player_id: string; sport_id: string }
+        Returns: {
+          overall_avg: number
+          overall_total: number
+          sport_avg: number
+          sport_total: number
+          top_tags: string[]
+        }[]
+      }
       is_game_participant: {
         Args: { _game_id: string; _user_id: string }
         Returns: boolean
