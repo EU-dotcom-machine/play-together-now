@@ -244,6 +244,7 @@ function NewGame() {
     }
     // User is typing — invalidate any previously selected address coords
     setAddressCoords(null);
+    setSelectedPlaceId(null);
     setAddressLabel("");
     setAddressApprox(false);
     setGpsExplicit(false);
