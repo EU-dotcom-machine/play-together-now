@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.block_join_after_end() FROM PUBLIC, anon, authenticated;
