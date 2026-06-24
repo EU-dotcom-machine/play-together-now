@@ -221,9 +221,12 @@ function FriendsPage() {
                     <p className="text-sm font-semibold text-white truncate">
                       {p.display_name ?? "Sem nome"}
                     </p>
-                    <p className="text-xs text-[#FFD600] font-bold">
-                      ⚡ {p.points ?? 0} pts
-                    </p>
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <span className="text-xs text-[#FFD600] font-bold">
+                        ⚡ {p.points ?? 0} pts
+                      </span>
+                      <RatingBadge avg={p.avg_rating} total={p.total_reviews} />
+                    </div>
                   </div>
                   <button
                     type="button"
