@@ -96,6 +96,12 @@ function Discover() {
     queryKey: ["games", coords?.lat, coords?.lng, radiusKm, user?.id],
     enabled: coords !== null || geoDenied,
     queryFn: async (): Promise<GameRow[]> => {
+      const nowMs = Date.now();
+      const notEnded = (r: any) => {
+        if (r.ends_at) return new Date(r.ends_at).getTime() > nowMs;
+        return new Date(r.starts_at).getTime() > nowMs;
+      };
+
       // Spatial path: PostGIS nearby_games RPC (server-side visibility filter)
       if (coords) {
         const wkt = `SRID=4326;POINT(${coords.lng} ${coords.lat})`;
@@ -104,7 +110,7 @@ function Discover() {
           radius_meters: radiusKm * 1000,
         });
         if (error) throw error;
-        return await hydrate((rows ?? []) as any[]);
+        return await hydrate(((rows ?? []) as any[]).filter(notEnded));
       }
 
       // Fallback: load viewer context for visibility filtering
@@ -143,15 +149,16 @@ function Discover() {
 
       const { data: rows, error } = await supabase
         .from("games")
-        .select("id,title,starts_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id,host_id,visibility,cep")
+        .select("id,title,starts_at,ends_at,slots_total,price_cents,urgency,latitude,longitude,sport_id,venue_id,host_id,visibility,cep")
         .in("status", ["open", "full"])
-        .gte("starts_at", new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString())
+        .gte("starts_at", new Date().toISOString())
         .or(orParts.join(","))
         .order("starts_at", { ascending: true })
         .limit(50);
       if (error) throw error;
-      return await hydrate((rows ?? []).map((r) => ({ ...r, distance_meters: null })));
+      return await hydrate(((rows ?? []) as any[]).filter(notEnded).map((r) => ({ ...r, distance_meters: null })));
     },
+
   });
 
   const games = useMemo(
