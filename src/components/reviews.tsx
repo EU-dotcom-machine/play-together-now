@@ -128,59 +128,77 @@ export function Reviews({
         </ul>
       )}
 
-      {ended && (
-        <div className="mt-6">
-          <h3 className="text-base font-bold uppercase">Avaliações do jogo</h3>
-          {playerReviews.length === 0 ? (
-            <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">
-              Nenhuma avaliação de jogador ainda.
-            </p>
-          ) : (
-            <ul className="mt-2 grid gap-2">
-              {playerReviews.map((r) => {
-                const prof = reviewerProfiles[r.reviewer_id];
-                const name = prof?.display_name ?? "Jogador";
-                const safe = Math.max(0, Math.min(5, Number(r.rating) || 0));
-                return (
-                  <li key={r.id} className="brutal-card p-3 bg-paper">
-                    <div className="flex items-center gap-3">
-                      {prof?.avatar_url ? (
-                        <img
-                          src={prof.avatar_url}
-                          alt={name}
-                          className="size-9 rounded-full border border-ink/20 object-cover"
-                        />
-                      ) : (
-                        <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-[#111]">
-                          {name[0]?.toUpperCase() ?? "?"}
+      {ended && (() => {
+        const prAvg =
+          playerReviews.length > 0
+            ? (playerReviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / playerReviews.length).toFixed(1)
+            : null;
+        return (
+          <div className="mt-6">
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="text-base font-bold uppercase">Avaliações do jogo</h3>
+              {prAvg && (
+                <span className="brutal-chip bg-zap">
+                  <Star className="size-3 fill-ink" /> {prAvg} · {playerReviews.length}
+                </span>
+              )}
+            </div>
+            {!joined ? (
+              <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">
+                Somente participantes confirmados podem ver as avaliações deste jogo.
+              </p>
+            ) : playerReviews.length === 0 ? (
+              <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">
+                Nenhuma avaliação de jogador ainda.
+              </p>
+            ) : (
+              <ul className="mt-2 grid gap-2">
+                {playerReviews.map((r) => {
+                  const prof = reviewerProfiles[r.reviewer_id];
+                  const name = prof?.display_name ?? "Jogador";
+                  const safe = Math.max(0, Math.min(5, Number(r.rating) || 0));
+                  return (
+                    <li key={r.id} className="brutal-card p-3 bg-paper">
+                      <div className="flex items-center gap-3">
+                        {prof?.avatar_url ? (
+                          <img
+                            src={prof.avatar_url}
+                            alt={name}
+                            className="size-9 rounded-full border border-ink/20 object-cover"
+                          />
+                        ) : (
+                          <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-[#111]">
+                            {name[0]?.toUpperCase() ?? "?"}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm truncate">{name}</p>
+                          <div className="flex items-center gap-0.5 mt-0.5">
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <StickFigure key={n} size={14} filled={Math.max(0, Math.min(1, safe - (n - 1)))} />
+                            ))}
+                          </div>
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm truncate">{name}</p>
-                        <div className="flex items-center gap-0.5 mt-0.5">
-                          {[1, 2, 3, 4, 5].map((n) => (
-                            <StickFigure key={n} size={14} filled={Math.max(0, Math.min(1, safe - (n - 1)))} />
+                      </div>
+                      {Array.isArray(r.tags) && r.tags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {r.tags.map((t: string) => (
+                            <span key={t} className="text-[10px] font-bold uppercase bg-ink/10 text-ink px-1.5 py-0.5 rounded-full">
+                              {t}
+                            </span>
                           ))}
                         </div>
-                      </div>
-                    </div>
-                    {Array.isArray(r.tags) && r.tags.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {r.tags.map((t: string) => (
-                          <span key={t} className="text-[10px] font-bold uppercase bg-ink/10 text-ink px-1.5 py-0.5 rounded-full">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {r.comment && <p className="text-sm mt-2 text-ink/80">{r.comment}</p>}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      )}
+                      )}
+                      {r.comment && <p className="text-sm mt-2 text-ink/80">{r.comment}</p>}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        );
+      })()}
+
     </section>
 
   );
