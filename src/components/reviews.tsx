@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { StickFigure } from "@/components/stick-figure-rating";
+
 
 type Participant = { user_id: string; profiles?: { display_name?: string | null } | null };
 
