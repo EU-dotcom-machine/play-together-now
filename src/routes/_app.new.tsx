@@ -313,6 +313,7 @@ function NewGame() {
     if (!found) return;
     setAddressCoords(found);
     setAddressLabel(s.display_name);
+    setSelectedPlaceId(s.place_id);
   }
 
   async function runFallbackSearch() {
