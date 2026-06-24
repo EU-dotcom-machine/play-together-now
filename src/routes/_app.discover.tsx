@@ -42,6 +42,7 @@ function Discover() {
   const [filterSportId, setFilterSportId] = useState<string | null>(null);
   const [tab, setTab] = useState<"jogos" | "estabelecimentos">("jogos");
   const [filterVenueId, setFilterVenueId] = useState<string | null>(null);
+  const [claimVenue, setClaimVenue] = useState<{ id: string; name: string } | null>(null);
 
 
   const { data: sports } = useQuery({
