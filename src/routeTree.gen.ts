@@ -22,6 +22,7 @@ import { Route as AppFriendsRouteImport } from './routes/_app.friends'
 import { Route as AppDiscoverRouteImport } from './routes/_app.discover'
 import { Route as AppAgendaRouteImport } from './routes/_app.agenda'
 import { Route as AppSportsSlugRouteImport } from './routes/_app.sports.$slug'
+import { Route as AppProfileIdRouteImport } from './routes/_app.profile.$id'
 import { Route as AppGamesIdRouteImport } from './routes/_app.games.$id'
 import { Route as AppGamesIdEditRouteImport } from './routes/_app.games_.$id.edit'
 
@@ -89,6 +90,11 @@ const AppSportsSlugRoute = AppSportsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => AppSportsRoute,
 } as any)
+const AppProfileIdRoute = AppProfileIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppProfileRoute,
+} as any)
 const AppGamesIdRoute = AppGamesIdRouteImport.update({
   id: '/games/$id',
   path: '/games/$id',
@@ -109,10 +115,11 @@ export interface FileRoutesByFullPath {
   '/discover': typeof AppDiscoverRoute
   '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
-  '/profile': typeof AppProfileRoute
+  '/profile': typeof AppProfileRouteWithChildren
   '/sports': typeof AppSportsRouteWithChildren
   '/auth/reset': typeof AuthResetRoute
   '/games/$id': typeof AppGamesIdRoute
+  '/profile/$id': typeof AppProfileIdRoute
   '/sports/$slug': typeof AppSportsSlugRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
@@ -125,10 +132,11 @@ export interface FileRoutesByTo {
   '/discover': typeof AppDiscoverRoute
   '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
-  '/profile': typeof AppProfileRoute
+  '/profile': typeof AppProfileRouteWithChildren
   '/sports': typeof AppSportsRouteWithChildren
   '/auth/reset': typeof AuthResetRoute
   '/games/$id': typeof AppGamesIdRoute
+  '/profile/$id': typeof AppProfileIdRoute
   '/sports/$slug': typeof AppSportsSlugRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
@@ -143,10 +151,11 @@ export interface FileRoutesById {
   '/_app/discover': typeof AppDiscoverRoute
   '/_app/friends': typeof AppFriendsRoute
   '/_app/new': typeof AppNewRoute
-  '/_app/profile': typeof AppProfileRoute
+  '/_app/profile': typeof AppProfileRouteWithChildren
   '/_app/sports': typeof AppSportsRouteWithChildren
   '/auth/reset': typeof AuthResetRoute
   '/_app/games/$id': typeof AppGamesIdRoute
+  '/_app/profile/$id': typeof AppProfileIdRoute
   '/_app/sports/$slug': typeof AppSportsSlugRoute
   '/_app/games_/$id/edit': typeof AppGamesIdEditRoute
 }
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/sports'
     | '/auth/reset'
     | '/games/$id'
+    | '/profile/$id'
     | '/sports/$slug'
     | '/games/$id/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/sports'
     | '/auth/reset'
     | '/games/$id'
+    | '/profile/$id'
     | '/sports/$slug'
     | '/games/$id/edit'
   id:
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/_app/sports'
     | '/auth/reset'
     | '/_app/games/$id'
+    | '/_app/profile/$id'
     | '/_app/sports/$slug'
     | '/_app/games_/$id/edit'
   fileRoutesById: FileRoutesById
@@ -303,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSportsSlugRouteImport
       parentRoute: typeof AppSportsRoute
     }
+    '/_app/profile/$id': {
+      id: '/_app/profile/$id'
+      path: '/$id'
+      fullPath: '/profile/$id'
+      preLoaderRoute: typeof AppProfileIdRouteImport
+      parentRoute: typeof AppProfileRoute
+    }
     '/_app/games/$id': {
       id: '/_app/games/$id'
       path: '/games/$id'
@@ -319,6 +338,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppProfileRouteChildren {
+  AppProfileIdRoute: typeof AppProfileIdRoute
+}
+
+const AppProfileRouteChildren: AppProfileRouteChildren = {
+  AppProfileIdRoute: AppProfileIdRoute,
+}
+
+const AppProfileRouteWithChildren = AppProfileRoute._addFileChildren(
+  AppProfileRouteChildren,
+)
 
 interface AppSportsRouteChildren {
   AppSportsSlugRoute: typeof AppSportsSlugRoute
@@ -337,7 +368,7 @@ interface AppRouteChildren {
   AppDiscoverRoute: typeof AppDiscoverRoute
   AppFriendsRoute: typeof AppFriendsRoute
   AppNewRoute: typeof AppNewRoute
-  AppProfileRoute: typeof AppProfileRoute
+  AppProfileRoute: typeof AppProfileRouteWithChildren
   AppSportsRoute: typeof AppSportsRouteWithChildren
   AppGamesIdRoute: typeof AppGamesIdRoute
   AppGamesIdEditRoute: typeof AppGamesIdEditRoute
@@ -348,7 +379,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDiscoverRoute: AppDiscoverRoute,
   AppFriendsRoute: AppFriendsRoute,
   AppNewRoute: AppNewRoute,
-  AppProfileRoute: AppProfileRoute,
+  AppProfileRoute: AppProfileRouteWithChildren,
   AppSportsRoute: AppSportsRouteWithChildren,
   AppGamesIdRoute: AppGamesIdRoute,
   AppGamesIdEditRoute: AppGamesIdEditRoute,
