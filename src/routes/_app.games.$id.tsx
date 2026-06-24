@@ -355,7 +355,14 @@ function GameDetail() {
               {p.profiles?.display_name?.[0]?.toUpperCase() ?? "?"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold truncate">{p.profiles?.display_name}</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <p className="font-bold truncate">{p.profiles?.display_name}</p>
+                {(p.profiles?.total_reviews ?? 0) > 0 && (
+                  <span className="shrink-0 inline-flex items-center gap-0.5 bg-ink/10 text-ink px-1.5 py-0.5 rounded-full text-[10px] font-bold">
+                    ⭐ {Number(p.profiles?.avg_rating ?? 0).toFixed(1)}
+                  </span>
+                )}
+              </div>
               {p.profiles?.sponsor_brand && (
                 <p className="text-xs text-ink/60">patrocinador: {p.profiles.sponsor_brand}</p>
               )}
