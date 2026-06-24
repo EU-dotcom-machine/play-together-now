@@ -285,6 +285,13 @@ function GameDetail() {
           >
             <Hourglass className="size-5" /> Aguardando confirmação…
           </button>
+        ) : started ? (
+          <div
+            className="w-full px-5 py-5 font-bold text-base uppercase rounded-full flex items-center justify-center gap-2"
+            style={{ background: "#2A2A2A", color: "#888" }}
+          >
+            Jogo iniciado
+          </div>
         ) : (
           <button
             onClick={sayEu}
@@ -295,6 +302,7 @@ function GameDetail() {
             {full ? "Completo" : "EU!"}
           </button>
         )}
+
         {!isHost && myStatus !== "confirmed" && myStatus !== "pending" && (
           <p className="mt-2 text-xs text-ink/60 text-center">
             {game.urgency === "urgente" ? "+5 pontos ao ser confirmado em urgência" : game.urgency === "normal" ? "+3 pontos" : "+1 ponto"}
