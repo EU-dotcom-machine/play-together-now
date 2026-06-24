@@ -123,7 +123,7 @@ function FriendsPage() {
     const timer = setTimeout(async () => {
       const { data } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name,avatar_url,points")
+        .select("id,display_name,avatar_url,points,avg_rating,total_reviews")
         .ilike("display_name", `%${t}%`)
         .neq("id", user?.id ?? "")
         .limit(10);
