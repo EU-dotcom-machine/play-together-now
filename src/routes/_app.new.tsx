@@ -81,6 +81,7 @@ function NewGame() {
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
   const [addressCoords, setAddressCoords] = useState<Coords | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [addressLabel, setAddressLabel] = useState<string>("");
   const [addressApprox, setAddressApprox] = useState(false);
   const [gpsExplicit, setGpsExplicit] = useState(false);
@@ -243,6 +244,7 @@ function NewGame() {
     }
     // User is typing — invalidate any previously selected address coords
     setAddressCoords(null);
+    setSelectedPlaceId(null);
     setAddressLabel("");
     setAddressApprox(false);
     setGpsExplicit(false);
@@ -311,6 +313,7 @@ function NewGame() {
     if (!found) return;
     setAddressCoords(found);
     setAddressLabel(s.display_name);
+    setSelectedPlaceId(s.place_id);
   }
 
   async function runFallbackSearch() {
@@ -422,7 +425,8 @@ function NewGame() {
           address: venueAddress || null,
           latitude: coords.lat,
           longitude: coords.lng,
-        })
+          venue_type: selectedPlaceId ? "establishment" : "personal",
+        } as any)
         .select("id")
         .single();
       if (vErr) throw vErr;

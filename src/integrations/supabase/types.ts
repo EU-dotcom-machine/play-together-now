@@ -442,6 +442,7 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          venue_type: string
         }
         Insert: {
           address?: string | null
@@ -456,6 +457,7 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          venue_type?: string
         }
         Update: {
           address?: string | null
@@ -470,6 +472,7 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          venue_type?: string
         }
         Relationships: []
       }
