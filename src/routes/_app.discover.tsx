@@ -393,8 +393,10 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
       ? supabase.from("sports").select("id,name,emoji,avg_rating,total_reviews").in("id", sportIds)
       : Promise.resolve({ data: [] as any[] }),
     venueIds.length
-      ? supabase.from("venues").select("id,name,address").in("id", venueIds)
+      ? supabase.from("venues").select("id,name,address,latitude,longitude")
+          .in("id", venueIds)
       : Promise.resolve({ data: [] as any[] }),
+
     supabase.from("game_participants").select("game_id").in("game_id", gameIds).eq("status" as any, "confirmed"),
   ]);
 
