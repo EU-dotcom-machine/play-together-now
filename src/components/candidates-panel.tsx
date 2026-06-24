@@ -102,9 +102,15 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
     },
   });
 
-  const gameSport = candidates.length > 0 && sportId
-    ? candidates.flatMap((c) => c.sports).find((s: any) => s?.id === sportId) ?? null
-    : null;
+  const { data: gameSport } = useQuery({
+    enabled: !!sportId,
+    queryKey: ["sport", sportId],
+    queryFn: async () => {
+      const { data } = await supabase.from("sports").select("id,name,emoji").eq("id", sportId!).maybeSingle();
+      return data;
+    },
+  });
+
 
 
   async function decide(userId: string, status: "confirmed" | "declined") {
