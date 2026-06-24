@@ -326,6 +326,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          avg_rating: number
           bio: string | null
           cep: string | null
           city: string | null
@@ -342,12 +343,14 @@ export type Database = {
           sponsor_brand: string | null
           sport_ids: string[]
           sport_positions: Json
+          total_reviews: number
           updated_at: string
           weight_kg: number | null
           years_playing: string | null
         }
         Insert: {
           avatar_url?: string | null
+          avg_rating?: number
           bio?: string | null
           cep?: string | null
           city?: string | null
@@ -364,12 +367,14 @@ export type Database = {
           sponsor_brand?: string | null
           sport_ids?: string[]
           sport_positions?: Json
+          total_reviews?: number
           updated_at?: string
           weight_kg?: number | null
           years_playing?: string | null
         }
         Update: {
           avatar_url?: string | null
+          avg_rating?: number
           bio?: string | null
           cep?: string | null
           city?: string | null
@@ -386,6 +391,7 @@ export type Database = {
           sponsor_brand?: string | null
           sport_ids?: string[]
           sport_positions?: Json
+          total_reviews?: number
           updated_at?: string
           weight_kg?: number | null
           years_playing?: string | null
@@ -460,6 +466,7 @@ export type Database = {
       profiles_public: {
         Row: {
           avatar_url: string | null
+          avg_rating: number | null
           bio: string | null
           display_name: string | null
           id: string | null
@@ -467,9 +474,11 @@ export type Database = {
           skill_level: string | null
           sponsor_brand: string | null
           sport_ids: string[] | null
+          total_reviews: number | null
         }
         Insert: {
           avatar_url?: string | null
+          avg_rating?: number | null
           bio?: string | null
           display_name?: string | null
           id?: string | null
@@ -477,9 +486,11 @@ export type Database = {
           skill_level?: string | null
           sponsor_brand?: string | null
           sport_ids?: string[] | null
+          total_reviews?: number | null
         }
         Update: {
           avatar_url?: string | null
+          avg_rating?: number | null
           bio?: string | null
           display_name?: string | null
           id?: string | null
@@ -487,6 +498,7 @@ export type Database = {
           skill_level?: string | null
           sponsor_brand?: string | null
           sport_ids?: string[] | null
+          total_reviews?: number | null
         }
         Relationships: []
       }
