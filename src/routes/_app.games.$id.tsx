@@ -339,8 +339,10 @@ function GameDetail() {
           gameLng={game.longitude ?? null}
           slotsTotal={slotsTotal}
           gameStatus={game.status}
+          sportId={game.sport_id ?? null}
         />
       )}
+
 
       <div className="mt-8 brutal-card p-3 bg-zap">
         <p className="text-xs font-bold uppercase text-[#111]/70">Criado por</p>
