@@ -119,6 +119,9 @@ function GameDetail() {
 
   async function sayEu() {
     if (!user) return;
+    if (game && new Date(game.starts_at) <= new Date()) {
+      return toast.error("Inscrições encerradas");
+    }
     trackEvent("eu_button_clicked", { game_id: id });
     setArmRaised(true);
     setTimeout(() => setArmRaised(false), 1600);
@@ -139,6 +142,7 @@ function GameDetail() {
     toast.success("Pedido enviado! Aguarde a confirmação.");
     qc.invalidateQueries({ queryKey: ["participants", id] });
   }
+
 
   async function leave() {
     if (!user) return;
