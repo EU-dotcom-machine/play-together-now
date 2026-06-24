@@ -356,13 +356,28 @@ function GameDetail() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
-                <p className="font-bold truncate">{p.profiles?.display_name}</p>
-                {(p.profiles?.total_reviews ?? 0) > 0 && (
-                  <span className="shrink-0 inline-flex items-center gap-0.5 bg-ink/10 text-ink px-1.5 py-0.5 rounded-full text-[10px] font-bold">
+                {p.profiles?.id ? (
+                  <Link
+                    to="/profile/$id"
+                    params={{ id: p.profiles.id }}
+                    className="font-bold truncate hover:underline"
+                  >
+                    {p.profiles?.display_name}
+                  </Link>
+                ) : (
+                  <p className="font-bold truncate">{p.profiles?.display_name}</p>
+                )}
+                {(p.profiles?.total_reviews ?? 0) > 0 && p.profiles?.id && (
+                  <Link
+                    to="/profile/$id"
+                    params={{ id: p.profiles.id }}
+                    className="shrink-0 inline-flex items-center gap-0.5 bg-ink/10 text-ink px-1.5 py-0.5 rounded-full text-[10px] font-bold hover:bg-ink/20"
+                  >
                     ⭐ {Number(p.profiles?.avg_rating ?? 0).toFixed(1)}
-                  </span>
+                  </Link>
                 )}
               </div>
+
               {p.profiles?.sponsor_brand && (
                 <p className="text-xs text-ink/60">patrocinador: {p.profiles.sponsor_brand}</p>
               )}
