@@ -168,6 +168,7 @@ function Discover() {
     () =>
       (data ?? [])
         .filter((g) => filterSportId === null || g.sport_id === filterSportId)
+        .filter((g) => filterVenueId === null || (g as any).venues?.id === filterVenueId || (g as any).venue_id === filterVenueId)
         .filter((g) => {
           // Hide 'cep' (condomínio) games when the viewer hasn't filled their CEP,
           // unless they are the host of that game.
@@ -175,12 +176,75 @@ function Discover() {
           if (hasCep) return true;
           return false;
         }),
-    [data, filterSportId, hasCep],
+    [data, filterSportId, filterVenueId, hasCep],
   );
   const selectedSport = useMemo(
     () => sports?.find((s) => s.id === filterSportId),
     [sports, filterSportId],
   );
+
+  // Build venues from the same visible games (so visibility/RLS already applied)
+  const venuesAgg = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; address: string | null; sports: Set<string>; count: number; latitude?: number | null; longitude?: number | null }>();
+    for (const g of (data ?? [])) {
+      const vid = (g as any).venue_id ?? (g as any).venues?.id;
+      const venue = (g as any).venues;
+      if (!vid || !venue) continue;
+      const entry = map.get(vid) ?? {
+        id: vid,
+        name: venue.name,
+        address: venue.address ?? null,
+        sports: new Set<string>(),
+        count: 0,
+        latitude: venue.latitude ?? null,
+        longitude: venue.longitude ?? null,
+      };
+      entry.count += 1;
+      if (g.sports?.name) entry.sports.add(`${g.sports.emoji ?? ""} ${g.sports.name}`);
+      map.set(vid, entry);
+    }
+    return Array.from(map.values());
+  }, [data]);
+
+  const { data: publicVenues = [] } = useQuery({
+    queryKey: ["public-venues", venuesAgg.map((v) => v.id).join(",")],
+    enabled: venuesAgg.length > 0,
+    queryFn: async () => {
+      const ids = venuesAgg.map((v) => v.id);
+      const { data: rows } = await supabase
+        .from("venues")
+        .select("id,name,address,description,phone,instagram,latitude,longitude,is_public" as any)
+        .in("id", ids)
+        .eq("is_public" as any, true);
+      return (rows ?? []) as any[];
+    },
+  });
+
+  const establishments = useMemo(() => {
+    const publicMap = new Map(publicVenues.map((v: any) => [v.id, v]));
+    return venuesAgg
+      .filter((v) => publicMap.has(v.id))
+      .map((v) => {
+        const pub = publicMap.get(v.id)!;
+        const distKm = coords && pub.latitude != null && pub.longitude != null
+          ? distanceKm(coords.lat, coords.lng, pub.latitude, pub.longitude)
+          : null;
+        return {
+          id: v.id,
+          name: pub.name ?? v.name,
+          address: pub.address ?? v.address,
+          description: pub.description ?? null,
+          phone: pub.phone ?? null,
+          instagram: pub.instagram ?? null,
+          sports: Array.from(v.sports),
+          count: v.count,
+          distKm,
+        };
+      })
+      .sort((a, b) => (a.distKm ?? Infinity) - (b.distKm ?? Infinity));
+  }, [venuesAgg, publicVenues, coords]);
+
+
 
   return (
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
