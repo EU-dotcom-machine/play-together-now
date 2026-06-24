@@ -422,9 +422,11 @@ async function hydrate(rows: any[]): Promise<GameRow[]> {
     cep: r.cep ?? null,
     sports: sportsMap.get(r.sport_id) ?? null,
     venues: venuesMap.get(r.venue_id) ?? null,
+    venue_id: r.venue_id ?? null,
     participants_count: counts.get(r.id) ?? 0,
-  }));
+  })) as any;
 }
+
 
 const sportColor: Record<string, string> = {
   "Futebol":        "#00b140",
