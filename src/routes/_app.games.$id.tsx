@@ -119,8 +119,12 @@ function GameDetail() {
 
   async function sayEu() {
     if (!user) return;
-    if (game && new Date(game.starts_at) <= new Date()) {
-      return toast.error("Inscrições encerradas");
+    if (game) {
+      const _now = new Date();
+      const _end = (game as any).ends_at ? new Date((game as any).ends_at) : (game.duration_min ? new Date(new Date(game.starts_at).getTime() + game.duration_min * 60000) : null);
+      if (new Date(game.starts_at) <= _now || (_end && _end <= _now)) {
+        return toast.error("Inscrições encerradas");
+      }
     }
     trackEvent("eu_button_clicked", { game_id: id });
     setArmRaised(true);
