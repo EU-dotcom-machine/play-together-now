@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { brandGradient } from "@/lib/brands";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { StickFigureRating } from "@/components/stick-figure-rating";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
