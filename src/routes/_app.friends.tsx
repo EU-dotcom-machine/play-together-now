@@ -16,7 +16,18 @@ type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   points: number | null;
+  avg_rating: number | null;
+  total_reviews: number | null;
 };
+
+function RatingBadge({ avg, total }: { avg: number | null | undefined; total: number | null | undefined }) {
+  if (!total || total <= 0) return null;
+  return (
+    <span className="text-xs text-[#FFB400] font-bold">
+      ⭐ {Number(avg ?? 0).toFixed(1)} · {total} {total === 1 ? "avaliação" : "avaliações"}
+    </span>
+  );
+}
 type Friendship = {
   id: string;
   requester_id: string;
@@ -68,7 +79,7 @@ function FriendsPage() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name,avatar_url,points")
+        .select("id,display_name,avatar_url,points,avg_rating,total_reviews")
         .in("id", otherIds);
       const map: Record<string, Profile> = {};
       for (const p of (data ?? []) as Profile[]) map[p.id] = p;
@@ -112,7 +123,7 @@ function FriendsPage() {
     const timer = setTimeout(async () => {
       const { data } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name,avatar_url,points")
+        .select("id,display_name,avatar_url,points,avg_rating,total_reviews")
         .ilike("display_name", `%${t}%`)
         .neq("id", user?.id ?? "")
         .limit(10);
@@ -210,9 +221,12 @@ function FriendsPage() {
                     <p className="text-sm font-semibold text-white truncate">
                       {p.display_name ?? "Sem nome"}
                     </p>
-                    <p className="text-xs text-[#FFD600] font-bold">
-                      ⚡ {p.points ?? 0} pts
-                    </p>
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <span className="text-xs text-[#FFD600] font-bold">
+                        ⚡ {p.points ?? 0} pts
+                      </span>
+                      <RatingBadge avg={p.avg_rating} total={p.total_reviews} />
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -296,13 +310,14 @@ function FriendsPage() {
                   <p className="font-semibold text-white text-sm truncate">
                     {p?.display_name ?? "Jogador"}
                   </p>
-                  <div className="flex items-center gap-3 mt-0.5">
+                  <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="text-xs text-[#FFD600] font-bold">
                       ⚡ {p?.points ?? 0} pts
                     </span>
                     <span className="text-xs text-[#888] font-bold">
                       🎮 {games} jogos
                     </span>
+                    <RatingBadge avg={p?.avg_rating} total={p?.total_reviews} />
                   </div>
                 </div>
                 <button

@@ -49,7 +49,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
       if (ids.length === 0) return [];
       const { data: profsRaw } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name,bio,avatar_url,points,sport_ids")
+        .select("id,display_name,bio,avatar_url,points,sport_ids,avg_rating,total_reviews")
         .in("id", ids);
       const profs = (profsRaw ?? []) as any[];
       const allSportIds = Array.from(
@@ -151,6 +151,11 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                       <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 bg-pop text-[#111]">
                         <Zap className="size-3" /> {p?.points ?? 0} pts
                       </span>
+                      {p?.total_reviews > 0 && (
+                        <span className="text-[11px] font-bold text-[#FFB400]">
+                          ⭐ {Number(p?.avg_rating ?? 0).toFixed(1)} · {p.total_reviews} {p.total_reviews === 1 ? "avaliação" : "avaliações"}
+                        </span>
+                      )}
                     </div>
                     {km != null ? (
                       <p className="text-xs mt-1 flex items-center gap-1 text-muted-foreground">
