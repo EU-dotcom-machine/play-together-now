@@ -12,13 +12,23 @@ type Props = {
   gameLng: number | null;
   slotsTotal: number;
   gameStatus: string;
+  sportId: string | null;
 };
 
 function formatKm(km: number) {
   return km.toFixed(1).replace(".", ",") + " km de distância";
 }
 
-export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStatus }: Props) {
+type SportRating = {
+  sport_avg: number;
+  sport_total: number;
+  top_tags: string[];
+  overall_avg: number;
+  overall_total: number;
+};
+
+export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStatus, sportId }: Props) {
+
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
@@ -71,6 +81,37 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
       });
     },
   });
+
+  const candidateIds = candidates.map((c) => c.user_id);
+  const { data: ratingsMap = {} } = useQuery({
+    enabled: !!sportId && candidateIds.length > 0,
+    queryKey: ["candidate-sport-ratings", gameId, sportId, candidateIds.join(",")],
+    queryFn: async () => {
+      const entries = await Promise.all(
+        candidateIds.map(async (uid) => {
+          const { data, error } = await (supabase as any).rpc("get_player_sport_rating", {
+            player_id: uid,
+            sport_id: sportId,
+          });
+          if (error) return [uid, null] as const;
+          const row = Array.isArray(data) ? data[0] : data;
+          return [uid, (row ?? null) as SportRating | null] as const;
+        }),
+      );
+      return Object.fromEntries(entries) as Record<string, SportRating | null>;
+    },
+  });
+
+  const { data: gameSport } = useQuery({
+    enabled: !!sportId,
+    queryKey: ["sport", sportId],
+    queryFn: async () => {
+      const { data } = await supabase.from("sports").select("id,name,emoji").eq("id", sportId!).maybeSingle();
+      return data;
+    },
+  });
+
+
 
   async function decide(userId: string, status: "confirmed" | "declined") {
     setBusy(userId);
@@ -130,7 +171,12 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
               gameLat != null && gameLng != null && p?.latitude != null && p?.longitude != null
                 ? distanceKm(gameLat, gameLng, p.latitude, p.longitude)
                 : null;
+            const rating = (ratingsMap as Record<string, SportRating | null>)[c.user_id] ?? null;
+            const sportTotal = Number(rating?.sport_total ?? 0);
+            const overallTotal = Number(rating?.overall_total ?? 0);
+            const topTags = (rating?.top_tags ?? []).slice(0, 3);
             return (
+
               <li
                 key={c.user_id}
                 className="rounded-xl p-3 border border-border bg-surface border-l-[3px] border-l-pop"
@@ -151,12 +197,37 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                       <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 bg-pop text-[#111]">
                         <Zap className="size-3" /> {p?.points ?? 0} pts
                       </span>
-                      {p?.total_reviews > 0 && (
+                      {p?.total_reviews > 0 && sportTotal === 0 && (
                         <span className="text-[11px] font-bold text-[#FFB400]">
                           ⭐ {Number(p?.avg_rating ?? 0).toFixed(1)} · {p.total_reviews} {p.total_reviews === 1 ? "avaliação" : "avaliações"}
                         </span>
                       )}
                     </div>
+                    {sportTotal > 0 && (
+                      <p className="text-xs mt-1 font-bold text-foreground">
+                        {gameSport?.emoji ?? "🎯"} {gameSport?.name ?? "Esporte"}:{" "}
+                        <span className="text-[#FFB400]">⭐ {Number(rating?.sport_avg ?? 0).toFixed(1)}</span>{" "}
+                        <span className="text-muted-foreground font-normal">· {sportTotal} {sportTotal === 1 ? "jogo" : "jogos"}</span>
+                      </p>
+                    )}
+                    {overallTotal > 0 && (
+                      <p className="text-[11px] mt-0.5 text-muted-foreground">
+                        Geral: ⭐ {Number(rating?.overall_avg ?? 0).toFixed(1)} · {overallTotal} {overallTotal === 1 ? "jogo" : "jogos"}
+                      </p>
+                    )}
+                    {topTags.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {topTags.map((t) => (
+                          <span
+                            key={t}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pop/15 text-foreground border border-pop/30"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {km != null ? (
                       <p className="text-xs mt-1 flex items-center gap-1 text-muted-foreground">
                         <MapPin className="size-3" /> {formatKm(km)}
