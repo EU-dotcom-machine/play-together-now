@@ -258,8 +258,12 @@ function Profile() {
             <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
           </div>
           {((profile as any)?.total_reviews ?? 0) > 0 && (
-            <div className="inline-flex items-center gap-1.5 bg-black/30 text-white px-3 py-1.5 rounded-full text-xs font-semibold">
-              ⭐ {Number((profile as any).avg_rating ?? 0).toFixed(1)} · {(profile as any).total_reviews} avaliações
+            <div className="inline-flex items-center gap-1.5 bg-black/30 text-white px-3 py-1.5 rounded-full">
+              <StickFigureRating
+                value={Number((profile as any).avg_rating ?? 0)}
+                total={(profile as any).total_reviews}
+                size="sm"
+              />
             </div>
           )}
 
