@@ -166,7 +166,9 @@ function GameDetail() {
   const start = new Date(game.starts_at);
   const free = game.price_cents === 0;
   const full = filled >= slotsTotal;
-  const started = start <= new Date();
+  const now = new Date();
+  const endsAt = (game as any).ends_at ? new Date((game as any).ends_at) : (game.duration_min ? new Date(start.getTime() + game.duration_min * 60000) : null);
+  const started = start <= now || (endsAt ? endsAt <= now : false);
 
   const imageUrl = getCourtImage(game.sports?.name);
 
