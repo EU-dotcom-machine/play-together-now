@@ -75,7 +75,7 @@ function GameDetail() {
       if (ids.length === 0) return [];
       const { data: profs } = await (supabase as any)
         .from("profiles_public")
-        .select("id,display_name,sponsor_brand")
+        .select("id,display_name,sponsor_brand,avg_rating,total_reviews")
         .in("id", ids);
       return rows.map((p) => ({
         user_id: p.user_id,
