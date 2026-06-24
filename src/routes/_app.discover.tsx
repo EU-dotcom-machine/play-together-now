@@ -213,9 +213,10 @@ function Discover() {
       const ids = venuesAgg.map((v) => v.id);
       const { data: rows } = await supabase
         .from("venues")
-        .select("id,name,address,description,phone,instagram,latitude,longitude,is_public" as any)
+        .select("id,name,address,description,phone,instagram,latitude,longitude,is_public,venue_type" as any)
         .in("id", ids)
-        .eq("is_public" as any, true);
+        .eq("is_public" as any, true)
+        .eq("venue_type" as any, "establishment");
       return (rows ?? []) as any[];
     },
   });
