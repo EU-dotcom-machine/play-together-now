@@ -12,13 +12,23 @@ type Props = {
   gameLng: number | null;
   slotsTotal: number;
   gameStatus: string;
+  sportId: string | null;
 };
 
 function formatKm(km: number) {
   return km.toFixed(1).replace(".", ",") + " km de distância";
 }
 
-export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStatus }: Props) {
+type SportRating = {
+  sport_avg: number;
+  sport_total: number;
+  top_tags: string[];
+  overall_avg: number;
+  overall_total: number;
+};
+
+export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStatus, sportId }: Props) {
+
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
