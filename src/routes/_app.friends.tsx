@@ -16,7 +16,18 @@ type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   points: number | null;
+  avg_rating: number | null;
+  total_reviews: number | null;
 };
+
+function RatingBadge({ avg, total }: { avg: number | null | undefined; total: number | null | undefined }) {
+  if (!total || total <= 0) return null;
+  return (
+    <span className="text-xs text-[#FFB400] font-bold">
+      ⭐ {Number(avg ?? 0).toFixed(1)} · {total} {total === 1 ? "avaliação" : "avaliações"}
+    </span>
+  );
+}
 type Friendship = {
   id: string;
   requester_id: string;
