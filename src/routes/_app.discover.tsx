@@ -311,7 +311,28 @@ function Discover() {
 
 
 
-      {sports && sports.length > 0 && (
+      <div className="mt-5 flex gap-2">
+        <button
+          onClick={() => setTab("jogos")}
+          className={cn(
+            "flex-1 brutal-chip justify-center text-xs font-bold uppercase py-2",
+            tab === "jogos" ? "bg-pop text-[#111] border-ink" : "bg-paper",
+          )}
+        >
+          Jogos
+        </button>
+        <button
+          onClick={() => setTab("estabelecimentos")}
+          className={cn(
+            "flex-1 brutal-chip justify-center text-xs font-bold uppercase py-2",
+            tab === "estabelecimentos" ? "bg-pop text-[#111] border-ink" : "bg-paper",
+          )}
+        >
+          Estabelecimentos
+        </button>
+      </div>
+
+      {tab === "jogos" && sports && sports.length > 0 && (
         <div className="mt-4 -mx-5 px-5">
           <div className="relative">
             <div
@@ -349,34 +370,112 @@ function Discover() {
         </div>
       )}
 
-      <div className="mt-6 grid gap-3">
-        {isLoading && (
-          <div className="flex items-center justify-center py-12 text-ink/60">
-            <Loader2 className="size-6 animate-spin" />
-          </div>
-        )}
-        {!isLoading && games.length === 0 && (
-          <div className="brutal-card p-6 text-center">
-            <p className="font-bold uppercase">
-              {selectedSport
-                ? `Nenhum jogo de ${selectedSport.emoji} ${selectedSport.name} perto de você`
-                : "Nenhum jogo rolando"}
-            </p>
-            <p className="text-sm text-ink/70 mt-1">
-              {selectedSport ? (
-                <button onClick={() => setFilterSportId(null)} className="underline underline-offset-2 text-pop">
-                  Limpar filtro
-                </button>
-              ) : (
-                "Que tal criar o primeiro?"
+      {tab === "jogos" && filterVenueId && (
+        <div className="mt-3 flex items-center justify-between brutal-card p-2 bg-paper text-xs">
+          <span className="font-bold uppercase truncate">
+            Filtrando por: {establishments.find((e) => e.id === filterVenueId)?.name ?? "Local"}
+          </span>
+          <button onClick={() => setFilterVenueId(null)} className="font-bold text-pop underline">
+            Limpar
+          </button>
+        </div>
+      )}
+
+      {tab === "jogos" && (
+        <div className="mt-6 grid gap-3">
+          {isLoading && (
+            <div className="flex items-center justify-center py-12 text-ink/60">
+              <Loader2 className="size-6 animate-spin" />
+            </div>
+          )}
+          {!isLoading && games.length === 0 && (
+            <div className="brutal-card p-6 text-center">
+              <p className="font-bold uppercase">
+                {selectedSport
+                  ? `Nenhum jogo de ${selectedSport.emoji} ${selectedSport.name} perto de você`
+                  : "Nenhum jogo rolando"}
+              </p>
+              <p className="text-sm text-ink/70 mt-1">
+                {selectedSport ? (
+                  <button onClick={() => setFilterSportId(null)} className="underline underline-offset-2 text-pop">
+                    Limpar filtro
+                  </button>
+                ) : (
+                  "Que tal criar o primeiro?"
+                )}
+              </p>
+            </div>
+          )}
+          {games.map((g) => (
+            <GameCard key={g.id} game={g} coords={coords} />
+          ))}
+        </div>
+      )}
+
+      {tab === "estabelecimentos" && (
+        <div className="mt-6 grid gap-3">
+          {isLoading && (
+            <div className="flex items-center justify-center py-12 text-ink/60">
+              <Loader2 className="size-6 animate-spin" />
+            </div>
+          )}
+          {!isLoading && establishments.length === 0 && (
+            <div className="brutal-card p-6 text-center">
+              <p className="font-bold uppercase">Nenhum estabelecimento por perto</p>
+              <p className="text-sm text-ink/70 mt-1">
+                Não há jogos abertos em locais públicos no raio selecionado.
+              </p>
+            </div>
+          )}
+          {establishments.map((v) => (
+            <div key={v.id} className="brutal-card p-4 bg-paper">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-base uppercase truncate">{v.name}</h3>
+                  {v.address && (
+                    <p className="text-xs text-ink/70 mt-0.5 flex items-center gap-1">
+                      <MapPin className="size-3 shrink-0" /> {v.address}
+                    </p>
+                  )}
+                </div>
+                {v.distKm != null && (
+                  <span className="shrink-0 text-[11px] font-bold bg-pop text-[#111] px-2 py-0.5 rounded-full">
+                    {formatDistance(v.distKm)}
+                  </span>
+                )}
+              </div>
+              {v.sports.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {v.sports.map((s) => (
+                    <span
+                      key={s}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-ink/20 bg-paper text-ink/80"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
               )}
-            </p>
-          </div>
-        )}
-        {games.map((g) => (
-          <GameCard key={g.id} game={g} coords={coords} />
-        ))}
-      </div>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <p className="text-xs font-bold text-ink/80">
+                  {v.count} {v.count === 1 ? "jogo disponível" : "jogos disponíveis"}
+                </p>
+                <button
+                  onClick={() => {
+                    setFilterVenueId(v.id);
+                    setFilterSportId(null);
+                    setTab("jogos");
+                  }}
+                  className="brutal-chip bg-pop text-[#111] text-xs font-bold px-3 py-1.5"
+                >
+                  Ver jogos
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <InstallPrompt />
     </main>
   );
