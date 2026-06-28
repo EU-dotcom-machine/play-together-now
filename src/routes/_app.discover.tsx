@@ -56,6 +56,8 @@ function Discover() {
     if (search.venueId) setFilterVenueId(search.venueId);
   }, [search.tab, search.venueId]);
 
+  const [autoOpenedClaim, setAutoOpenedClaim] = useState(false);
+
 
   const { data: sports } = useQuery({
     queryKey: ["sports"],
