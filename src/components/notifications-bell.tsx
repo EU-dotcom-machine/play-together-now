@@ -101,6 +101,11 @@ export function NotificationsBell() {
     setOpen(false);
     if (n.type === "friend_request") {
       navigate({ to: "/friends" });
+    } else if (n.type === "venue_claim_accepted" || n.type === "venue_claim_rejected") {
+      navigate({
+        to: "/discover",
+        search: { tab: "estabelecimentos" as const, venueId: n.data?.venue_id },
+      });
     } else if (n.data?.game_id) {
       navigate({ to: "/games/$id", params: { id: n.data.game_id } });
     }
