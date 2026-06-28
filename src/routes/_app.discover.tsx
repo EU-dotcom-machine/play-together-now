@@ -13,6 +13,10 @@ import { VenueClaimDialog } from "@/components/venue-claim-dialog";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: search.tab === "estabelecimentos" ? ("estabelecimentos" as const) : undefined,
+    venueId: typeof search.venueId === "string" ? search.venueId : undefined,
+  }),
   component: Discover,
 });
 
