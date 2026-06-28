@@ -514,6 +514,15 @@ function Profile() {
 
 
 
+        {acceptedClaim && (
+          <Link
+            to="/venue-panel"
+            className="px-5 py-3 bg-paper border-2 border-ink text-ink font-bold uppercase rounded-full flex items-center justify-center gap-2"
+          >
+            <MapPin className="size-4" /> Painel do Espaço
+          </Link>
+        )}
+
         <button
           onClick={signOut}
           className="px-5 py-3 bg-transparent border border-pop text-pop font-bold uppercase rounded-full flex items-center justify-center gap-2"
