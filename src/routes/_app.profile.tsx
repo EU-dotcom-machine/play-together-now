@@ -65,6 +65,21 @@ function Profile() {
     },
   });
 
+  const { data: acceptedClaim } = useQuery({
+    queryKey: ["my-accepted-claim", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("venue_claims")
+        .select("id")
+        .eq("claimant_id", user!.id)
+        .eq("status", "accepted")
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const [display, setDisplay] = useState("");
   const [bio, setBio] = useState("");
   const [weight, setWeight] = useState<string>("");
