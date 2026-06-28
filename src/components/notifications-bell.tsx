@@ -9,10 +9,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 type NotificationRow = {
   id: string;
   user_id: string;
-  type: "game_confirmed" | "game_declined" | "friend_request" | "game_nearby";
+  type:
+    | "game_confirmed"
+    | "game_declined"
+    | "friend_request"
+    | "game_nearby"
+    | "venue_claim_accepted"
+    | "venue_claim_rejected";
   title: string;
   body: string;
-  data: { game_id?: string; requester_id?: string } | null;
+  data: { game_id?: string; requester_id?: string; venue_id?: string; claim_id?: string } | null;
   read: boolean;
   created_at: string;
 };
