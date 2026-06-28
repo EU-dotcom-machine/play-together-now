@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -6,8 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Users, CalendarDays } from "lucide-react";
 
 export const Route = createFileRoute("/_app/venue-panel")({
+  ssr: false,
   head: () => ({ meta: [{ title: "Painel do Espaço — Esportes Unidos" }] }),
   component: VenuePanel,
+  beforeLoad: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw redirect({ to: "/auth" });
+    const { data: claim } = await supabase
+      .from("venue_claims")
+      .select("id")
+      .eq("claimant_id", user.id)
+      .eq("status", "accepted")
+      .maybeSingle();
+    if (!claim) throw redirect({ to: "/profile" });
+  },
 });
 
 function VenuePanel() {
