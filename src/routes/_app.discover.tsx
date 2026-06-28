@@ -40,13 +40,21 @@ type GameRow = {
 
 function Discover() {
   const { user } = useAuth();
+  const search = Route.useSearch();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDenied, setGeoDenied] = useState(false);
   const [radiusKm, setRadiusKm] = useState<number>(10);
   const [filterSportId, setFilterSportId] = useState<string | null>(null);
-  const [tab, setTab] = useState<"jogos" | "estabelecimentos">("jogos");
-  const [filterVenueId, setFilterVenueId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"jogos" | "estabelecimentos">(
+    search.tab === "estabelecimentos" ? "estabelecimentos" : "jogos",
+  );
+  const [filterVenueId, setFilterVenueId] = useState<string | null>(search.venueId ?? null);
   const [claimVenue, setClaimVenue] = useState<{ id: string; name: string } | null>(null);
+
+  useEffect(() => {
+    if (search.tab === "estabelecimentos") setTab("estabelecimentos");
+    if (search.venueId) setFilterVenueId(search.venueId);
+  }, [search.tab, search.venueId]);
 
 
   const { data: sports } = useQuery({
