@@ -259,6 +259,11 @@ function GameDetail() {
 
           <div className="mt-4 grid gap-2 text-sm">
             <Row icon={MapPin} text={`${game.venues?.name ?? "—"}${game.venues?.address ? " · " + game.venues.address : ""}`} />
+            {myVenueClaim && (
+              <Link to="/venue-panel" className="text-xs font-bold text-ink/60 hover:text-ink hover:underline">
+                Ver painel do espaço →
+              </Link>
+            )}
             <Row icon={Users} text={slotsLabel} />
             <div className="flex gap-2 flex-wrap">
               <span className="brutal-chip bg-paper">
