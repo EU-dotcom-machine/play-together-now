@@ -13,6 +13,10 @@ import { VenueClaimDialog } from "@/components/venue-claim-dialog";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: search.tab === "estabelecimentos" ? ("estabelecimentos" as const) : undefined,
+    venueId: typeof search.venueId === "string" ? search.venueId : undefined,
+  }),
   component: Discover,
 });
 
@@ -36,13 +40,23 @@ type GameRow = {
 
 function Discover() {
   const { user } = useAuth();
+  const search = Route.useSearch();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDenied, setGeoDenied] = useState(false);
   const [radiusKm, setRadiusKm] = useState<number>(10);
   const [filterSportId, setFilterSportId] = useState<string | null>(null);
-  const [tab, setTab] = useState<"jogos" | "estabelecimentos">("jogos");
-  const [filterVenueId, setFilterVenueId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"jogos" | "estabelecimentos">(
+    search.tab === "estabelecimentos" ? "estabelecimentos" : "jogos",
+  );
+  const [filterVenueId, setFilterVenueId] = useState<string | null>(search.venueId ?? null);
   const [claimVenue, setClaimVenue] = useState<{ id: string; name: string } | null>(null);
+
+  useEffect(() => {
+    if (search.tab === "estabelecimentos") setTab("estabelecimentos");
+    if (search.venueId) setFilterVenueId(search.venueId);
+  }, [search.tab, search.venueId]);
+
+  const [autoOpenedClaim, setAutoOpenedClaim] = useState(false);
 
 
   const { data: sports } = useQuery({
@@ -246,6 +260,16 @@ function Discover() {
       })
       .sort((a, b) => (a.distKm ?? Infinity) - (b.distKm ?? Infinity));
   }, [venuesAgg, publicVenues, coords]);
+
+  useEffect(() => {
+    if (autoOpenedClaim) return;
+    if (!search.venueId || search.tab !== "estabelecimentos") return;
+    const v = establishments.find((e) => e.id === search.venueId);
+    if (v) {
+      setClaimVenue({ id: v.id, name: v.name });
+      setAutoOpenedClaim(true);
+    }
+  }, [autoOpenedClaim, search.venueId, search.tab, establishments]);
 
   const venueIdsKey = establishments.map((e) => e.id).join(",");
   const { data: myClaims = [] } = useQuery({

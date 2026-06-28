@@ -9,10 +9,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 type NotificationRow = {
   id: string;
   user_id: string;
-  type: "game_confirmed" | "game_declined" | "friend_request" | "game_nearby";
+  type:
+    | "game_confirmed"
+    | "game_declined"
+    | "friend_request"
+    | "game_nearby"
+    | "venue_claim_accepted"
+    | "venue_claim_rejected";
   title: string;
   body: string;
-  data: { game_id?: string; requester_id?: string } | null;
+  data: { game_id?: string; requester_id?: string; venue_id?: string; claim_id?: string } | null;
   read: boolean;
   created_at: string;
 };
@@ -32,6 +38,8 @@ function iconFor(type: NotificationRow["type"]) {
   if (type === "game_confirmed") return <Check className="size-5 text-[#FFD600]" />;
   if (type === "game_declined") return <XIcon className="size-5 text-[#FF6B6B]" />;
   if (type === "friend_request") return <UserPlus className="size-5 text-[#FFD600]" />;
+  if (type === "venue_claim_accepted") return <Check className="size-5 text-[#FFD600]" />;
+  if (type === "venue_claim_rejected") return <XIcon className="size-5 text-[#FF6B6B]" />;
   return <MapPin className="size-5 text-[#FFD600]" />;
 }
 
@@ -93,6 +101,11 @@ export function NotificationsBell() {
     setOpen(false);
     if (n.type === "friend_request") {
       navigate({ to: "/friends" });
+    } else if (n.type === "venue_claim_accepted" || n.type === "venue_claim_rejected") {
+      navigate({
+        to: "/discover",
+        search: { tab: "estabelecimentos" as const, venueId: n.data?.venue_id },
+      });
     } else if (n.data?.game_id) {
       navigate({ to: "/games/$id", params: { id: n.data.game_id } });
     }
