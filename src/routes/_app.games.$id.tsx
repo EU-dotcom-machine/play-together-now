@@ -48,7 +48,7 @@ function GameDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
-        .select("*,sports(name,emoji),venues(name,address),place_id")
+        .select("*,sports(name,emoji),venues(name,address)")
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;
