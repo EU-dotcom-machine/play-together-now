@@ -85,6 +85,23 @@ function GameDetail() {
     },
   });
 
+  const { data: myVenueClaim } = useQuery({
+    queryKey: ["venue_claim_game", user?.id, (game as any)?.venue_id],
+    queryFn: async () => {
+      if (!user || !(game as any)?.venue_id) return null;
+      const { data, error } = await supabase
+        .from("venue_claims")
+        .select("id")
+        .eq("claimant_id", user.id)
+        .eq("venue_id", (game as any).venue_id)
+        .eq("status", "accepted")
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && !!(game as any)?.venue_id,
+  });
+
   // Realtime: refresh participants on any change
   useEffect(() => {
     const channel = supabase
