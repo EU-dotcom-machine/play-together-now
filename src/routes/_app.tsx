@@ -11,7 +11,7 @@ function AppLayout() {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return null;
-  if (!user) return <Navigate to="/auth" search={{ redirect: location.pathname }} replace />;
+  if (!user) return <Navigate to="/auth" search={{ redirect: `${location.pathname}${location.searchStr ?? ""}` }} replace />;
   return (
     <div className="min-h-screen bg-paper pb-20">
       <Outlet />

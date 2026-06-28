@@ -35,12 +35,16 @@ function AuthPage() {
     if (!user) return;
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("eu_redirect") : null;
     if (stored) sessionStorage.removeItem("eu_redirect");
-    const target = stored ?? redirect ?? "/discover";
+    const candidate = stored ?? redirect;
+    const target = candidate && candidate.startsWith("/") ? candidate : "/discover";
     navigate({ to: target, replace: true });
   }, [user, redirect, navigate]);
 
   if (authLoading) return null;
-  if (user) return <Navigate to={(redirect ?? "/discover") as string} replace />;
+  if (user) {
+    const safe = redirect && redirect.startsWith("/") ? redirect : "/discover";
+    return <Navigate to={safe} replace />;
+  }
 
   function isNetworkError(err: any) {
     const msg = String(err?.message ?? err ?? "").toLowerCase();
@@ -119,12 +123,14 @@ function AuthPage() {
         });
         if (error) throw error;
         trackEvent("user_signed_up");
-        sessionStorage.setItem("eu_redirect", redirect ?? "/discover");
+        const safeSignup = redirect && redirect.startsWith("/") ? redirect : "/discover";
+        sessionStorage.setItem("eu_redirect", safeSignup);
         setVerificationEmail(email);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: (redirect ?? "/discover") as string });
+        const safeSignin = redirect && redirect.startsWith("/") ? redirect : "/discover";
+        navigate({ to: safeSignin, replace: true });
       }
     } catch (err: any) {
       if (isNetworkError(err)) {
