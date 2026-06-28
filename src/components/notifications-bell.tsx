@@ -38,6 +38,8 @@ function iconFor(type: NotificationRow["type"]) {
   if (type === "game_confirmed") return <Check className="size-5 text-[#FFD600]" />;
   if (type === "game_declined") return <XIcon className="size-5 text-[#FF6B6B]" />;
   if (type === "friend_request") return <UserPlus className="size-5 text-[#FFD600]" />;
+  if (type === "venue_claim_accepted") return <Check className="size-5 text-[#FFD600]" />;
+  if (type === "venue_claim_rejected") return <XIcon className="size-5 text-[#FF6B6B]" />;
   return <MapPin className="size-5 text-[#FFD600]" />;
 }
 
