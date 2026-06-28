@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
+import { Route as AppVenuePanelRouteImport } from './routes/_app.venue-panel'
 import { Route as AppSportsRouteImport } from './routes/_app.sports'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppNewRouteImport } from './routes/_app.new'
@@ -54,6 +55,11 @@ const AuthResetRoute = AuthResetRouteImport.update({
   id: '/reset',
   path: '/reset',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppVenuePanelRoute = AppVenuePanelRouteImport.update({
+  id: '/venue-panel',
+  path: '/venue-panel',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSportsRoute = AppSportsRouteImport.update({
   id: '/sports',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRouteWithChildren
   '/sports': typeof AppSportsRouteWithChildren
+  '/venue-panel': typeof AppVenuePanelRoute
   '/auth/reset': typeof AuthResetRoute
   '/games/$id': typeof AppGamesIdRoute
   '/profile/$id': typeof AppProfileIdRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/new': typeof AppNewRoute
   '/profile': typeof AppProfileRouteWithChildren
   '/sports': typeof AppSportsRouteWithChildren
+  '/venue-panel': typeof AppVenuePanelRoute
   '/auth/reset': typeof AuthResetRoute
   '/games/$id': typeof AppGamesIdRoute
   '/profile/$id': typeof AppProfileIdRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/_app/new': typeof AppNewRoute
   '/_app/profile': typeof AppProfileRouteWithChildren
   '/_app/sports': typeof AppSportsRouteWithChildren
+  '/_app/venue-panel': typeof AppVenuePanelRoute
   '/auth/reset': typeof AuthResetRoute
   '/_app/games/$id': typeof AppGamesIdRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/profile'
     | '/sports'
+    | '/venue-panel'
     | '/auth/reset'
     | '/games/$id'
     | '/profile/$id'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/profile'
     | '/sports'
+    | '/venue-panel'
     | '/auth/reset'
     | '/games/$id'
     | '/profile/$id'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/_app/new'
     | '/_app/profile'
     | '/_app/sports'
+    | '/_app/venue-panel'
     | '/auth/reset'
     | '/_app/games/$id'
     | '/_app/profile/$id'
@@ -265,6 +277,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/reset'
       preLoaderRoute: typeof AuthResetRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/_app/venue-panel': {
+      id: '/_app/venue-panel'
+      path: '/venue-panel'
+      fullPath: '/venue-panel'
+      preLoaderRoute: typeof AppVenuePanelRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/sports': {
       id: '/_app/sports'
@@ -370,6 +389,7 @@ interface AppRouteChildren {
   AppNewRoute: typeof AppNewRoute
   AppProfileRoute: typeof AppProfileRouteWithChildren
   AppSportsRoute: typeof AppSportsRouteWithChildren
+  AppVenuePanelRoute: typeof AppVenuePanelRoute
   AppGamesIdRoute: typeof AppGamesIdRoute
   AppGamesIdEditRoute: typeof AppGamesIdEditRoute
 }
@@ -381,6 +401,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppNewRoute: AppNewRoute,
   AppProfileRoute: AppProfileRouteWithChildren,
   AppSportsRoute: AppSportsRouteWithChildren,
+  AppVenuePanelRoute: AppVenuePanelRoute,
   AppGamesIdRoute: AppGamesIdRoute,
   AppGamesIdEditRoute: AppGamesIdEditRoute,
 }
