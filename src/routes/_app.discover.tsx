@@ -261,6 +261,16 @@ function Discover() {
       .sort((a, b) => (a.distKm ?? Infinity) - (b.distKm ?? Infinity));
   }, [venuesAgg, publicVenues, coords]);
 
+  useEffect(() => {
+    if (autoOpenedClaim) return;
+    if (!search.venueId || search.tab !== "estabelecimentos") return;
+    const v = establishments.find((e) => e.id === search.venueId);
+    if (v) {
+      setClaimVenue({ id: v.id, name: v.name });
+      setAutoOpenedClaim(true);
+    }
+  }, [autoOpenedClaim, search.venueId, search.tab, establishments]);
+
   const venueIdsKey = establishments.map((e) => e.id).join(",");
   const { data: myClaims = [] } = useQuery({
     queryKey: ["my-venue-claims", user?.id, venueIdsKey],
