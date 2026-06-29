@@ -338,6 +338,7 @@ export type Database = {
           id: string
           latitude: number | null
           longitude: number | null
+          onboarding_completed: boolean
           points: number
           skill_level: string | null
           sponsor_brand: string | null
@@ -362,6 +363,7 @@ export type Database = {
           id: string
           latitude?: number | null
           longitude?: number | null
+          onboarding_completed?: boolean
           points?: number
           skill_level?: string | null
           sponsor_brand?: string | null
@@ -386,6 +388,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          onboarding_completed?: boolean
           points?: number
           skill_level?: string | null
           sponsor_brand?: string | null
@@ -427,6 +430,35 @@ export type Database = {
           total_reviews?: number
         }
         Relationships: []
+      }
+      user_sport_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          sport_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sport_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sport_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sport_preferences_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       venue_claims: {
         Row: {
