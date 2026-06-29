@@ -57,14 +57,25 @@ function Onboarding() {
     if (!user) return;
     setSaving(true);
     try {
-      if (askLocation && typeof navigator !== "undefined" && navigator.geolocation) {
-        await new Promise<void>((resolve) => {
-          navigator.geolocation.getCurrentPosition(
-            () => resolve(),
-            () => resolve(),
-            { maximumAge: 0, timeout: 8000 },
-          );
-        });
+      if (askLocation) {
+        if (typeof navigator !== "undefined" && navigator.geolocation) {
+          await new Promise<void>((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+              () => resolve(),
+              (err) => {
+                if (err?.code === err?.PERMISSION_DENIED) {
+                  toast.info("Tudo bem, você pode ativar depois nas configurações.");
+                } else {
+                  toast.info("Não conseguimos sua localização agora, seguindo mesmo assim.");
+                }
+                resolve();
+              },
+              { maximumAge: 0, timeout: 8000 },
+            );
+          });
+        } else {
+          toast.info("Geolocalização indisponível neste dispositivo.");
+        }
       }
       const { error } = await supabase
         .from("profiles")
