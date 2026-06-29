@@ -18,6 +18,7 @@ import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppVenuePanelRouteImport } from './routes/_app.venue-panel'
 import { Route as AppSportsRouteImport } from './routes/_app.sports'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppOnboardingRouteImport } from './routes/_app.onboarding'
 import { Route as AppNewRouteImport } from './routes/_app.new'
 import { Route as AppFriendsRouteImport } from './routes/_app.friends'
 import { Route as AppDiscoverRouteImport } from './routes/_app.discover'
@@ -71,6 +72,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
+const AppOnboardingRoute = AppOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppNewRoute = AppNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/discover': typeof AppDiscoverRoute
   '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
+  '/onboarding': typeof AppOnboardingRoute
   '/profile': typeof AppProfileRouteWithChildren
   '/sports': typeof AppSportsRouteWithChildren
   '/venue-panel': typeof AppVenuePanelRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/discover': typeof AppDiscoverRoute
   '/friends': typeof AppFriendsRoute
   '/new': typeof AppNewRoute
+  '/onboarding': typeof AppOnboardingRoute
   '/profile': typeof AppProfileRouteWithChildren
   '/sports': typeof AppSportsRouteWithChildren
   '/venue-panel': typeof AppVenuePanelRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/_app/discover': typeof AppDiscoverRoute
   '/_app/friends': typeof AppFriendsRoute
   '/_app/new': typeof AppNewRoute
+  '/_app/onboarding': typeof AppOnboardingRoute
   '/_app/profile': typeof AppProfileRouteWithChildren
   '/_app/sports': typeof AppSportsRouteWithChildren
   '/_app/venue-panel': typeof AppVenuePanelRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/friends'
     | '/new'
+    | '/onboarding'
     | '/profile'
     | '/sports'
     | '/venue-panel'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/friends'
     | '/new'
+    | '/onboarding'
     | '/profile'
     | '/sports'
     | '/venue-panel'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/_app/discover'
     | '/_app/friends'
     | '/_app/new'
+    | '/_app/onboarding'
     | '/_app/profile'
     | '/_app/sports'
     | '/_app/venue-panel'
@@ -297,6 +309,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/onboarding': {
+      id: '/_app/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AppOnboardingRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/new': {
@@ -387,6 +406,7 @@ interface AppRouteChildren {
   AppDiscoverRoute: typeof AppDiscoverRoute
   AppFriendsRoute: typeof AppFriendsRoute
   AppNewRoute: typeof AppNewRoute
+  AppOnboardingRoute: typeof AppOnboardingRoute
   AppProfileRoute: typeof AppProfileRouteWithChildren
   AppSportsRoute: typeof AppSportsRouteWithChildren
   AppVenuePanelRoute: typeof AppVenuePanelRoute
@@ -399,6 +419,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDiscoverRoute: AppDiscoverRoute,
   AppFriendsRoute: AppFriendsRoute,
   AppNewRoute: AppNewRoute,
+  AppOnboardingRoute: AppOnboardingRoute,
   AppProfileRoute: AppProfileRouteWithChildren,
   AppSportsRoute: AppSportsRouteWithChildren,
   AppVenuePanelRoute: AppVenuePanelRoute,
