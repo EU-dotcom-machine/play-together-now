@@ -49,6 +49,29 @@ function StickFigure({ filled }: { filled: boolean }) {
   );
 }
 
+const SKIPPED_STORAGE_KEY = "eu_skipped_reviews";
+
+function loadSkippedFromStorage(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.sessionStorage.getItem(SKIPPED_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function persistSkipped(set: Set<string>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(SKIPPED_STORAGE_KEY, JSON.stringify([...set]));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function PostGameReviewGate() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -57,7 +80,7 @@ export function PostGameReviewGate() {
   const [checked, setChecked] = useState(false);
   const mountedRef = useRef(true);
   const skipCheckRef = useRef(false);
-  const skippedGamesRef = useRef<Set<string>>(new Set());
+  const skippedGamesRef = useRef<Set<string>>(loadSkippedFromStorage());
 
   useEffect(() => {
     mountedRef.current = true;
@@ -65,6 +88,7 @@ export function PostGameReviewGate() {
       mountedRef.current = false;
     };
   }, []);
+
 
   const check = useCallback(async () => {
     if (!user) return;
@@ -214,8 +238,9 @@ export function PostGameReviewGate() {
         }
       }}
       onSkipGame={() => {
-        // Mark this game as skipped locally and advance to the next pending game (if any)
+        // Mark this game as skipped locally (persist across reloads) and advance.
         skippedGamesRef.current.add(current.game_id);
+        persistSkipped(skippedGamesRef.current);
         if (mountedRef.current) {
           const remaining = pending.slice(1);
           setPending(remaining);
@@ -225,6 +250,7 @@ export function PostGameReviewGate() {
           }
         }
       }}
+
     />
   );
 }
@@ -271,18 +297,42 @@ function ReviewFlow({
     if (!user) return;
     setSubmitting(true);
     try {
-      const rows = game.coparticipants.map((c) => {
-        const d = drafts[c.user_id];
-        return {
-          game_id: game.game_id,
-          reviewer_id: user.id,
-          reviewee_id: c.user_id,
-          rating: d.rating,
-          tags: Array.from(d.tags),
-          comment: d.comment.trim().slice(0, 300) || null,
-        };
-      });
-      const { error } = await (supabase as any).from("player_reviews").insert(rows);
+      // Fetch already-reviewed reviewees for this game so we don't re-send them.
+      const { data: existing } = await (supabase as any)
+        .from("player_reviews")
+        .select("reviewee_id")
+        .eq("reviewer_id", user.id)
+        .eq("game_id", game.game_id);
+      const alreadyReviewed = new Set<string>(
+        ((existing ?? []) as any[]).map((r) => r.reviewee_id),
+      );
+
+      const rows = game.coparticipants
+        .filter((c) => !alreadyReviewed.has(c.user_id))
+        .map((c) => {
+          const d = drafts[c.user_id];
+          return {
+            game_id: game.game_id,
+            reviewer_id: user.id,
+            reviewee_id: c.user_id,
+            rating: d.rating,
+            tags: Array.from(d.tags),
+            comment: d.comment.trim().slice(0, 300) || null,
+          };
+        });
+
+      if (rows.length === 0) {
+        // Nothing new to submit — treat as success.
+        onDone();
+        return;
+      }
+
+      const { error } = await (supabase as any)
+        .from("player_reviews")
+        .upsert(rows, {
+          onConflict: "game_id,reviewer_id,reviewee_id",
+          ignoreDuplicates: true,
+        });
       if (error) {
         // Never trap the user: skip this game locally and advance.
         setFailedAttempts((n) => n + 1);
@@ -290,6 +340,7 @@ function ReviewFlow({
         onSkipGame();
         return;
       }
+
       toast.success("Avaliações enviadas!");
       onDone();
     } catch {
