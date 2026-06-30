@@ -238,8 +238,9 @@ export function PostGameReviewGate() {
         }
       }}
       onSkipGame={() => {
-        // Mark this game as skipped locally and advance to the next pending game (if any)
+        // Mark this game as skipped locally (persist across reloads) and advance.
         skippedGamesRef.current.add(current.game_id);
+        persistSkipped(skippedGamesRef.current);
         if (mountedRef.current) {
           const remaining = pending.slice(1);
           setPending(remaining);
@@ -249,6 +250,7 @@ export function PostGameReviewGate() {
           }
         }
       }}
+
     />
   );
 }
