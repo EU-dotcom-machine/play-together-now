@@ -238,6 +238,7 @@ export function VenueClaimDialog({ open, onOpenChange, venueId, venueName }: Pro
             </DialogFooter>
           </form>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );
