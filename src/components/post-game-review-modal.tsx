@@ -10,6 +10,8 @@ const TAG_ROWS = [
   ["Trabalho em equipe", "Voltaria a jogar", "Organizado", "Deixou o espaço limpo"],
 ];
 
+const MAX_AGE_MS = 48 * 60 * 60 * 1000; // 48 hours
+
 type Coparticipant = {
   user_id: string;
   display_name: string;
@@ -55,6 +57,7 @@ export function PostGameReviewGate() {
   const [checked, setChecked] = useState(false);
   const mountedRef = useRef(true);
   const skipCheckRef = useRef(false);
+  const skippedGamesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     mountedRef.current = true;
@@ -67,15 +70,19 @@ export function PostGameReviewGate() {
     if (!user) return;
     const nowMs = Date.now();
 
-    // Helper: is a game finished (ends_at or starts_at + duration fallback)?
-    const isFinished = (g: any) => {
+    // Helper: is a game finished AND within the 48h review window?
+    const isFinishedRecent = (g: any) => {
       if (!g) return false;
-      if (g.ends_at) return new Date(g.ends_at).getTime() < nowMs;
-      if (g.starts_at) {
+      let endedAtMs: number | null = null;
+      if (g.ends_at) endedAtMs = new Date(g.ends_at).getTime();
+      else if (g.starts_at) {
         const dur = g.duration_minutes ?? g.duration_min ?? 120;
-        return new Date(g.starts_at).getTime() + dur * 60_000 < nowMs;
+        endedAtMs = new Date(g.starts_at).getTime() + dur * 60_000;
       }
-      return false;
+      if (endedAtMs == null) return false;
+      if (endedAtMs >= nowMs) return false; // not finished yet
+      if (nowMs - endedAtMs > MAX_AGE_MS) return false; // too old
+      return true;
     };
 
     // 1a. Confirmed participations of mine
@@ -95,11 +102,14 @@ export function PostGameReviewGate() {
     const finishedGames = new Map<string, GInfo>();
     for (const p of (myParts ?? []) as any[]) {
       const g = p.games;
-      if (g && isFinished(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
+      if (g && isFinishedRecent(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
     }
     for (const g of (hosted ?? []) as any[]) {
-      if (isFinished(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
+      if (isFinishedRecent(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
     }
+    // Filter out games the user skipped locally during this session
+    for (const id of skippedGamesRef.current) finishedGames.delete(id);
+
     if (finishedGames.size === 0) {
       if (mountedRef.current) setPending([]);
       return;
@@ -190,9 +200,12 @@ export function PostGameReviewGate() {
 
   if (!checked || pending.length === 0) return null;
 
+  const current = pending[0];
+
   return (
     <ReviewFlow
-      game={pending[0]}
+      key={current.game_id}
+      game={current}
       onDone={() => {
         if (mountedRef.current) {
           skipCheckRef.current = true;
@@ -200,11 +213,31 @@ export function PostGameReviewGate() {
           navigate({ to: "/agenda" });
         }
       }}
+      onSkipGame={() => {
+        // Mark this game as skipped locally and advance to the next pending game (if any)
+        skippedGamesRef.current.add(current.game_id);
+        if (mountedRef.current) {
+          const remaining = pending.slice(1);
+          setPending(remaining);
+          if (remaining.length === 0) {
+            skipCheckRef.current = true;
+            navigate({ to: "/discover" });
+          }
+        }
+      }}
     />
   );
 }
 
-function ReviewFlow({ game, onDone }: { game: PendingGame; onDone: () => void }) {
+function ReviewFlow({
+  game,
+  onDone,
+  onSkipGame,
+}: {
+  game: PendingGame;
+  onDone: () => void;
+  onSkipGame: () => void;
+}) {
   const { user } = useAuth();
   const [idx, setIdx] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, Draft>>(() =>
@@ -213,6 +246,7 @@ function ReviewFlow({ game, onDone }: { game: PendingGame; onDone: () => void })
     ),
   );
   const [submitting, setSubmitting] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
   const current = game.coparticipants[idx];
   const draft = drafts[current.user_id];
@@ -250,13 +284,18 @@ function ReviewFlow({ game, onDone }: { game: PendingGame; onDone: () => void })
       });
       const { error } = await (supabase as any).from("player_reviews").insert(rows);
       if (error) {
-        toast.error("Erro ao enviar avaliação. Tente novamente.");
+        // Never trap the user: skip this game locally and advance.
+        setFailedAttempts((n) => n + 1);
+        toast.error("Não foi possível enviar a avaliação. Pulando este jogo.");
+        onSkipGame();
         return;
       }
       toast.success("Avaliações enviadas!");
       onDone();
     } catch {
-      toast.error("Erro ao enviar avaliação. Tente novamente.");
+      setFailedAttempts((n) => n + 1);
+      toast.error("Erro ao enviar avaliação. Pulando este jogo.");
+      onSkipGame();
     } finally {
       setSubmitting(false);
     }
@@ -344,6 +383,17 @@ function ReviewFlow({ game, onDone }: { game: PendingGame; onDone: () => void })
           >
             {submitting ? "Enviando..." : isLast ? "Enviar avaliações ✓" : "Próximo →"}
           </button>
+
+          {/* Last-resort skip after a failed attempt */}
+          {failedAttempts >= 1 && (
+            <button
+              type="button"
+              onClick={onSkipGame}
+              className="w-full py-2 text-xs font-bold text-ink/60 underline"
+            >
+              Pular avaliação e continuar
+            </button>
+          )}
         </div>
       </div>
     </div>
