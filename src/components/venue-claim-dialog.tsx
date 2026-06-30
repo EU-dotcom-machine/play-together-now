@@ -138,14 +138,15 @@ export function VenueClaimDialog({ open, onOpenChange, venueId, venueName }: Pro
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="uppercase">Reivindicar este espaço</DialogTitle>
-          <DialogDescription>
-            {venueName} — envie seus dados para nossa equipe verificar a titularidade.
-          </DialogDescription>
-        </DialogHeader>
+        <div className="overflow-y-auto max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="uppercase">Reivindicar este espaço</DialogTitle>
+            <DialogDescription>
+              {venueName} — envie seus dados para nossa equipe verificar a titularidade.
+            </DialogDescription>
+          </DialogHeader>
 
-        {isLoading ? (
+          {isLoading ? (
           <div className="flex justify-center py-6">
             <Loader2 className="size-5 animate-spin" />
           </div>
@@ -237,6 +238,7 @@ export function VenueClaimDialog({ open, onOpenChange, venueId, venueName }: Pro
             </DialogFooter>
           </form>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );
