@@ -105,7 +105,7 @@ function VenuePanel() {
   const venueName = (claim as any).venues?.name ?? "Seu espaço";
 
   return (
-    <main className="px-5 py-6 max-w-3xl mx-auto">
+    <main className="px-5 py-6 max-w-3xl mx-auto overflow-y-auto max-h-screen">
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-wider text-ink/60">Painel do Espaço</p>
         <h1 className="text-3xl font-extrabold uppercase leading-tight">{venueName}</h1>
