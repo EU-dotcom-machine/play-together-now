@@ -49,6 +49,29 @@ function StickFigure({ filled }: { filled: boolean }) {
   );
 }
 
+const SKIPPED_STORAGE_KEY = "eu_skipped_reviews";
+
+function loadSkippedFromStorage(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.sessionStorage.getItem(SKIPPED_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function persistSkipped(set: Set<string>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(SKIPPED_STORAGE_KEY, JSON.stringify([...set]));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function PostGameReviewGate() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -57,7 +80,7 @@ export function PostGameReviewGate() {
   const [checked, setChecked] = useState(false);
   const mountedRef = useRef(true);
   const skipCheckRef = useRef(false);
-  const skippedGamesRef = useRef<Set<string>>(new Set());
+  const skippedGamesRef = useRef<Set<string>>(loadSkippedFromStorage());
 
   useEffect(() => {
     mountedRef.current = true;
@@ -65,6 +88,7 @@ export function PostGameReviewGate() {
       mountedRef.current = false;
     };
   }, []);
+
 
   const check = useCallback(async () => {
     if (!user) return;
