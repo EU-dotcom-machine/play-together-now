@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/_app/onboarding")({
 function Onboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -82,6 +83,7 @@ function Onboarding() {
         .update({ onboarding_completed: true })
         .eq("id", user.id);
       if (error) throw error;
+      queryClient.setQueryData(["onboarding-completed", user.id], true);
       navigate({ to: "/discover", replace: true });
     } catch (err: any) {
       toast.error(err?.message ?? "Erro ao concluir onboarding");
