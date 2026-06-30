@@ -297,18 +297,42 @@ function ReviewFlow({
     if (!user) return;
     setSubmitting(true);
     try {
-      const rows = game.coparticipants.map((c) => {
-        const d = drafts[c.user_id];
-        return {
-          game_id: game.game_id,
-          reviewer_id: user.id,
-          reviewee_id: c.user_id,
-          rating: d.rating,
-          tags: Array.from(d.tags),
-          comment: d.comment.trim().slice(0, 300) || null,
-        };
-      });
-      const { error } = await (supabase as any).from("player_reviews").insert(rows);
+      // Fetch already-reviewed reviewees for this game so we don't re-send them.
+      const { data: existing } = await (supabase as any)
+        .from("player_reviews")
+        .select("reviewee_id")
+        .eq("reviewer_id", user.id)
+        .eq("game_id", game.game_id);
+      const alreadyReviewed = new Set<string>(
+        ((existing ?? []) as any[]).map((r) => r.reviewee_id),
+      );
+
+      const rows = game.coparticipants
+        .filter((c) => !alreadyReviewed.has(c.user_id))
+        .map((c) => {
+          const d = drafts[c.user_id];
+          return {
+            game_id: game.game_id,
+            reviewer_id: user.id,
+            reviewee_id: c.user_id,
+            rating: d.rating,
+            tags: Array.from(d.tags),
+            comment: d.comment.trim().slice(0, 300) || null,
+          };
+        });
+
+      if (rows.length === 0) {
+        // Nothing new to submit — treat as success.
+        onDone();
+        return;
+      }
+
+      const { error } = await (supabase as any)
+        .from("player_reviews")
+        .upsert(rows, {
+          onConflict: "game_id,reviewer_id,reviewee_id",
+          ignoreDuplicates: true,
+        });
       if (error) {
         // Never trap the user: skip this game locally and advance.
         setFailedAttempts((n) => n + 1);
@@ -316,6 +340,7 @@ function ReviewFlow({
         onSkipGame();
         return;
       }
+
       toast.success("Avaliações enviadas!");
       onDone();
     } catch {
