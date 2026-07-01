@@ -273,6 +273,10 @@ function ReviewFlow({
   );
   const [submitting, setSubmitting] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "loading" | "error" | "success";
+    message: string;
+  } | null>(null);
 
   const current = game.coparticipants[idx];
   const draft = drafts[current.user_id];
@@ -296,6 +300,7 @@ function ReviewFlow({
     }
     if (!user) return;
     setSubmitting(true);
+    setSubmitStatus({ type: "loading", message: "Salvando suas avaliações..." });
     try {
       // Fetch already-reviewed reviewees for this game so we don't re-send them.
       const { data: existing } = await (supabase as any)
@@ -323,6 +328,7 @@ function ReviewFlow({
 
       if (rows.length === 0) {
         // Nothing new to submit — treat as success.
+        setSubmitStatus({ type: "success", message: "Avaliações já registradas. Continuando..." });
         onDone();
         return;
       }
@@ -336,17 +342,26 @@ function ReviewFlow({
       if (error) {
         // Never trap the user: skip this game locally and advance.
         setFailedAttempts((n) => n + 1);
+        setSubmitStatus({
+          type: "error",
+          message: "Não foi possível salvar agora. Vamos pular este jogo para não travar você.",
+        });
         toast.error("Não foi possível enviar a avaliação. Pulando este jogo.");
-        onSkipGame();
+        window.setTimeout(onSkipGame, 900);
         return;
       }
 
+      setSubmitStatus({ type: "success", message: "Avaliações enviadas!" });
       toast.success("Avaliações enviadas!");
       onDone();
     } catch {
       setFailedAttempts((n) => n + 1);
+      setSubmitStatus({
+        type: "error",
+        message: "Erro ao enviar. Vamos seguir mesmo assim para não bloquear o app.",
+      });
       toast.error("Erro ao enviar avaliação. Pulando este jogo.");
-      onSkipGame();
+      window.setTimeout(onSkipGame, 900);
     } finally {
       setSubmitting(false);
     }
@@ -425,6 +440,22 @@ function ReviewFlow({
             className="w-full border-2 border-ink rounded-lg p-3 text-sm bg-paper resize-none focus:outline-none focus:ring-2 focus:ring-zap"
           />
 
+          {submitStatus && (
+            <div
+              role="status"
+              aria-live="polite"
+              className={`rounded-lg border-2 border-ink px-3 py-2 text-xs font-bold ${
+                submitStatus.type === "error"
+                  ? "bg-red-50 text-red-700"
+                  : submitStatus.type === "success"
+                    ? "bg-green-50 text-green-700"
+                    : "bg-zap/20 text-ink"
+              }`}
+            >
+              {submitStatus.message}
+            </div>
+          )}
+
           {/* Submit */}
           <button
             type="button"
@@ -432,7 +463,7 @@ function ReviewFlow({
             onClick={handleNext}
             className="w-full py-3 bg-zap border-2 border-ink rounded-lg font-bold text-ink disabled:opacity-40 disabled:cursor-not-allowed active:translate-y-0.5 shadow-brutal"
           >
-            {submitting ? "Enviando..." : isLast ? "Enviar avaliações ✓" : "Próximo →"}
+            {submitting ? "Salvando..." : isLast ? "Enviar avaliações ✓" : "Próximo →"}
           </button>
 
           {/* Last-resort skip after a failed attempt */}
