@@ -14,6 +14,9 @@ export default defineTool({
     }
     const sb = supabaseForUser(ctx);
     const userId = ctx.getUserId();
+    if (!userId) {
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    }
     const nowIso = new Date().toISOString();
 
     const [hostedRes, participatingRes] = await Promise.all([
