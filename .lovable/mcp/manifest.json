@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://wizbworxoggkmtyrxudx.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "esportes-unidos-mcp",
+      "version": "0.1.0",
+      "title": "Esportes Unidos"
+    },
+    "tools": [
+      {
+        "name": "list_sports",
+        "title": "List sports",
+        "description": "List every sport available on Esportes Unidos with its slug and emoji.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_upcoming_games",
+        "title": "Search upcoming games",
+        "description": "Search upcoming public games on Esportes Unidos. Optionally filter by sport slug. Returns up to `limit` games ordered by start time.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sport_slug": {
+              "description": "Filter by sport slug, e.g. 'futebol'.",
+              "type": "string",
+              "minLength": 1
+            },
+            "limit": {
+              "description": "Max games to return (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_game",
+        "title": "Get game details",
+        "description": "Fetch full details for a single game by its UUID, including participants count.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "game_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Game UUID."
+            }
+          },
+          "required": [
+            "game_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "my_agenda",
+        "title": "My upcoming games",
+        "description": "List the signed-in user's upcoming games — both games they host and games they've joined as a participant.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
