@@ -137,7 +137,7 @@ function NewGame() {
           details: new g.maps.places.PlacesService(dummy),
           sessionToken: new g.maps.places.AutocompleteSessionToken(),
         };
-        console.log("[places] services ready");
+        
       } catch (err) {
         console.error("[places] init failed:", err);
       }
