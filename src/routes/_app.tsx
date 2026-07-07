@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/bottom-nav";
 import { PostGameReviewGate } from "@/components/post-game-review-modal";
+import { useNearbyGameAlerts } from "@/hooks/use-nearby-game-alerts";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/_app")({
 function AppLayout() {
   const { user, loading } = useAuth();
   const location = useLocation();
+  useNearbyGameAlerts();
 
   const { data: onboardingFlag, isLoading: flagLoading } = useQuery({
     queryKey: ["onboarding-completed", user?.id],
