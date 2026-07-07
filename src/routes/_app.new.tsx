@@ -137,7 +137,7 @@ function NewGame() {
           details: new g.maps.places.PlacesService(dummy),
           sessionToken: new g.maps.places.AutocompleteSessionToken(),
         };
-        console.log("[places] services ready");
+        
       } catch (err) {
         console.error("[places] init failed:", err);
       }
@@ -177,7 +177,7 @@ function NewGame() {
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     const key = await fetchGooglePlacesKey();
     if (!key) {
-      console.warn("[placesAutocomplete] Missing Google API key");
+      
       return [];
     }
 
@@ -190,11 +190,11 @@ function NewGame() {
       language: "pt-BR",
       sessionToken: services.sessionToken,
     };
-    console.log("[placesAutocomplete] request:", request);
+    
     return new Promise<Suggestion[]>((resolve) => {
       try {
         services.autocomplete.getPlacePredictions(request, (predictions: any[] | null, status: string) => {
-          console.log("[placesAutocomplete] status:", status, "predictions:", predictions);
+          
           if (signal?.aborted) return resolve([]);
           if (!predictions || predictions.length === 0) return resolve([]);
           const mapped = predictions.slice(0, limit).map((p) => ({
@@ -227,7 +227,7 @@ function NewGame() {
           (place: any, status: string) => {
             if (signal?.aborted) return resolve(null);
             if (status !== "OK" || !place?.geometry?.location) {
-              console.warn("[placeDetails] status:", status);
+              
               return resolve(null);
             }
             const loc = place.geometry.location;
