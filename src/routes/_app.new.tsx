@@ -190,7 +190,7 @@ function NewGame() {
       language: "pt-BR",
       sessionToken: services.sessionToken,
     };
-    console.log("[placesAutocomplete] request:", request);
+    
     return new Promise<Suggestion[]>((resolve) => {
       try {
         services.autocomplete.getPlacePredictions(request, (predictions: any[] | null, status: string) => {
