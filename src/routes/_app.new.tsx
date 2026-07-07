@@ -177,7 +177,7 @@ function NewGame() {
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
     const key = await fetchGooglePlacesKey();
     if (!key) {
-      console.warn("[placesAutocomplete] Missing Google API key");
+      
       return [];
     }
 
