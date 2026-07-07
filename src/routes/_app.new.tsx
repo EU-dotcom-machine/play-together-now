@@ -227,7 +227,7 @@ function NewGame() {
           (place: any, status: string) => {
             if (signal?.aborted) return resolve(null);
             if (status !== "OK" || !place?.geometry?.location) {
-              console.warn("[placeDetails] status:", status);
+              
               return resolve(null);
             }
             const loc = place.geometry.location;
