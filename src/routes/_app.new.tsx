@@ -194,7 +194,7 @@ function NewGame() {
     return new Promise<Suggestion[]>((resolve) => {
       try {
         services.autocomplete.getPlacePredictions(request, (predictions: any[] | null, status: string) => {
-          console.log("[placesAutocomplete] status:", status, "predictions:", predictions);
+          
           if (signal?.aborted) return resolve([]);
           if (!predictions || predictions.length === 0) return resolve([]);
           const mapped = predictions.slice(0, limit).map((p) => ({
