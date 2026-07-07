@@ -53,28 +53,32 @@ function loadGoogleMaps(): Promise<any> {
   const w = window as any;
   if (w.google?.maps?.places?.AutocompleteService) return Promise.resolve(w.google);
   if (googleMapsPromise) return googleMapsPromise;
-  if (!GOOGLE_PLACES_KEY) return Promise.reject(new Error("missing key"));
-  googleMapsPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>("script[data-google-maps-loader]");
-    if (!existing) {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt-BR`;
-      script.async = true;
-      script.defer = true;
-      script.dataset.googleMapsLoader = "true";
-      script.addEventListener("error", () => {
+  googleMapsPromise = (async () => {
+    const key = await fetchGooglePlacesKey();
+    if (!key) throw new Error("missing key");
+    return new Promise<any>((resolve, reject) => {
+      const existing = document.querySelector<HTMLScriptElement>("script[data-google-maps-loader]");
+      if (!existing) {
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&language=pt-BR`;
+        script.async = true;
+        script.defer = true;
+        script.dataset.googleMapsLoader = "true";
+        script.addEventListener("error", () => {
+          googleMapsPromise = null;
+          reject(new Error("script load error"));
+        });
+        document.head.appendChild(script);
+      }
+      waitForPlaces().then(resolve).catch((err) => {
         googleMapsPromise = null;
-        reject(new Error("script load error"));
+        reject(err);
       });
-      document.head.appendChild(script);
-    }
-    waitForPlaces().then(resolve).catch((err) => {
-      googleMapsPromise = null;
-      reject(err);
     });
-  });
+  })();
   return googleMapsPromise;
 }
+
 
 
 function NewGame() {
