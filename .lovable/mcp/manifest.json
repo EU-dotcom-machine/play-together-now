@@ -101,6 +101,33 @@
           "properties": {}
         },
         "outputSchema": null
+      },
+      {
+        "name": "my_notifications",
+        "title": "My recent notifications",
+        "description": "List the signed-in user's most recent notifications (invites, game updates, friend requests, etc.). Optionally filter to unread only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "unread_only": {
+              "description": "If true, return only unread notifications. Defaults to false.",
+              "type": "boolean"
+            },
+            "limit": {
+              "description": "Max notifications to return (1-50). Defaults to 20.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
       }
     ]
   }
