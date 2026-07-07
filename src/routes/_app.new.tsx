@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, MapPin, AlertTriangle, Search } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
+import { getGooglePlacesKey } from "@/lib/google-places.functions";
 
 export const Route = createFileRoute("/_app/new")({
   head: () => ({ meta: [{ title: "Criar jogo — Esportes Unidos" }] }),
@@ -15,7 +16,19 @@ export const Route = createFileRoute("/_app/new")({
 type Coords = { lat: number; lng: number };
 type Suggestion = { display_name: string; place_id: string; _prediction?: any };
 
-const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
+let cachedKey: string | null = null;
+async function fetchGooglePlacesKey(): Promise<string | null> {
+  if (cachedKey) return cachedKey;
+  try {
+    const { key } = await getGooglePlacesKey();
+    cachedKey = key;
+    return key;
+  } catch (err) {
+    console.error("[places] failed to fetch key:", err);
+    return null;
+  }
+}
+
 
 let googleMapsPromise: Promise<any> | null = null;
 function waitForPlaces(timeoutMs = 10000): Promise<any> {
