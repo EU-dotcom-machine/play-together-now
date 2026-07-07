@@ -212,7 +212,7 @@ function NewGame() {
   }
 
   async function placeDetails(placeIdOrSuggestion: string | Suggestion, signal?: AbortSignal): Promise<Coords | null> {
-    if (!GOOGLE_PLACES_KEY) return null;
+    if (!(await fetchGooglePlacesKey())) return null;
     const services = await ensureServices(signal);
     if (!services) return null;
     if (signal?.aborted) return null;
