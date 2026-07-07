@@ -49,6 +49,16 @@ export function NotificationsBell() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const nearbyUnseen = useSyncExternalStore(
+    nearbyAlertsStore.subscribe,
+    nearbyAlertsStore.getSnapshot,
+    nearbyAlertsStore.getServerSnapshot,
+  );
+
+  function handleOpen(next: boolean) {
+    setOpen(next);
+    if (next) nearbyAlertsStore.reset();
+  }
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications", user?.id],
