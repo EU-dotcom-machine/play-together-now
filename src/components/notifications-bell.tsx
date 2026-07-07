@@ -127,19 +127,21 @@ export function NotificationsBell() {
       <button
         type="button"
         aria-label="Notificações"
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpen(true)}
         className="relative brutal-card-lg p-2 bg-paper shrink-0"
       >
         <Bell className="size-5" />
-        {unread > 0 && (
+        {(unread > 0 || nearbyUnseen > 0) && (
           <span
-            className="absolute top-1 right-1 block rounded-full"
-            style={{ width: 10, height: 10, backgroundColor: "#FFD600", boxShadow: "0 0 0 2px #111" }}
-          />
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-extrabold flex items-center justify-center"
+            style={{ backgroundColor: "#FFD600", color: "#111", boxShadow: "0 0 0 2px #111" }}
+          >
+            {unread + nearbyUnseen}
+          </span>
         )}
       </button>
 
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={open} onOpenChange={handleOpen}>
         <SheetContent
           side="bottom"
           className="rounded-t-2xl border-0 p-0 max-h-[85vh] overflow-y-auto"
