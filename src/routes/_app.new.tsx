@@ -175,10 +175,12 @@ function NewGame() {
   }
 
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
-    if (!GOOGLE_PLACES_KEY) {
-      console.warn("[placesAutocomplete] Missing GOOGLE_PLACES_KEY");
+    const key = await fetchGooglePlacesKey();
+    if (!key) {
+      console.warn("[placesAutocomplete] Missing Google API key");
       return [];
     }
+
     const services = await ensureServices(signal);
     if (!services) return [];
     if (signal?.aborted) return [];
