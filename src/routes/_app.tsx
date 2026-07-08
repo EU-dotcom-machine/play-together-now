@@ -21,7 +21,7 @@ function AppLayout() {
         .from("profiles")
         .select("onboarding_completed")
         .eq("id", user!.id)
-        .single();
+        .maybeSingle();
       return (data as any)?.onboarding_completed ?? false;
     },
   });
