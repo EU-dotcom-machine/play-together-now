@@ -44,8 +44,8 @@ function Onboarding() {
       const rows = Array.from(selected).map((sport_id) => ({ user_id: user.id, sport_id }));
       const { error } = await supabase
         .from("user_sport_preferences")
-        .upsert(rows, { onConflict: "user_id,sport_id" });
-      if (error) throw error;
+        .insert(rows, { count: "exact" });
+      if (error && error.code !== "23505") throw error;
       setStep(3);
     } catch (err: any) {
       toast.error(err?.message ?? "Erro ao salvar preferências");
