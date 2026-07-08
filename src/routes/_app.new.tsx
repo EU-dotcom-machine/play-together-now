@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, MapPin, AlertTriangle, Search } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
+import { getGooglePlacesKey } from "@/lib/google-places.functions";
 
 export const Route = createFileRoute("/_app/new")({
   head: () => ({ meta: [{ title: "Criar jogo — Esportes Unidos" }] }),
@@ -15,7 +16,19 @@ export const Route = createFileRoute("/_app/new")({
 type Coords = { lat: number; lng: number };
 type Suggestion = { display_name: string; place_id: string; _prediction?: any };
 
-const GOOGLE_PLACES_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
+let cachedKey: string | null = null;
+async function fetchGooglePlacesKey(): Promise<string | null> {
+  if (cachedKey) return cachedKey;
+  try {
+    const { key } = await getGooglePlacesKey();
+    cachedKey = key;
+    return key;
+  } catch (err) {
+    console.error("[places] failed to fetch key:", err);
+    return null;
+  }
+}
+
 
 let googleMapsPromise: Promise<any> | null = null;
 function waitForPlaces(timeoutMs = 10000): Promise<any> {
@@ -40,28 +53,32 @@ function loadGoogleMaps(): Promise<any> {
   const w = window as any;
   if (w.google?.maps?.places?.AutocompleteService) return Promise.resolve(w.google);
   if (googleMapsPromise) return googleMapsPromise;
-  if (!GOOGLE_PLACES_KEY) return Promise.reject(new Error("missing key"));
-  googleMapsPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>("script[data-google-maps-loader]");
-    if (!existing) {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_KEY}&libraries=places&language=pt-BR`;
-      script.async = true;
-      script.defer = true;
-      script.dataset.googleMapsLoader = "true";
-      script.addEventListener("error", () => {
+  googleMapsPromise = (async () => {
+    const key = await fetchGooglePlacesKey();
+    if (!key) throw new Error("missing key");
+    return new Promise<any>((resolve, reject) => {
+      const existing = document.querySelector<HTMLScriptElement>("script[data-google-maps-loader]");
+      if (!existing) {
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&language=pt-BR`;
+        script.async = true;
+        script.defer = true;
+        script.dataset.googleMapsLoader = "true";
+        script.addEventListener("error", () => {
+          googleMapsPromise = null;
+          reject(new Error("script load error"));
+        });
+        document.head.appendChild(script);
+      }
+      waitForPlaces().then(resolve).catch((err) => {
         googleMapsPromise = null;
-        reject(new Error("script load error"));
+        reject(err);
       });
-      document.head.appendChild(script);
-    }
-    waitForPlaces().then(resolve).catch((err) => {
-      googleMapsPromise = null;
-      reject(err);
     });
-  });
+  })();
   return googleMapsPromise;
 }
+
 
 
 function NewGame() {
@@ -158,10 +175,12 @@ function NewGame() {
   }
 
   async function placesAutocomplete(q: string, limit = 5, signal?: AbortSignal): Promise<Suggestion[]> {
-    if (!GOOGLE_PLACES_KEY) {
-      console.warn("[placesAutocomplete] Missing GOOGLE_PLACES_KEY");
+    const key = await fetchGooglePlacesKey();
+    if (!key) {
+      console.warn("[placesAutocomplete] Missing Google API key");
       return [];
     }
+
     const services = await ensureServices(signal);
     if (!services) return [];
     if (signal?.aborted) return [];
@@ -193,7 +212,7 @@ function NewGame() {
   }
 
   async function placeDetails(placeIdOrSuggestion: string | Suggestion, signal?: AbortSignal): Promise<Coords | null> {
-    if (!GOOGLE_PLACES_KEY) return null;
+    if (!(await fetchGooglePlacesKey())) return null;
     const services = await ensureServices(signal);
     if (!services) return null;
     if (signal?.aborted) return null;
