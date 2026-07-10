@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDateDisplay } from "@/lib/utils";
 
 const claimSchema = z.object({
   contact_name: z.string().trim().min(2, "Informe seu nome").max(100),
@@ -153,10 +154,10 @@ export function VenueClaimDialog({ open, onOpenChange, venueId, venueName }: Pro
         ) : existing && existing.status !== "rejected" ? (
           <div className="space-y-3 py-2">
             {statusBadge}
-            <p className="text-sm text-muted-foreground">
-              Sua solicitação foi enviada em{" "}
-              {new Date(existing.created_at).toLocaleDateString("pt-BR")}.
-            </p>
+              <p className="text-sm text-muted-foreground">
+                Sua solicitação foi enviada em{" "}
+                {formatDateDisplay(existing.created_at, { day: "2-digit", month: "2-digit", year: "numeric" })}.
+              </p>
             {existing.status === "pending" && (
               <Button
                 variant="outline"

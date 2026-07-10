@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDateDisplay } from "@/lib/utils";
 import { MapPin, Users, CalendarDays } from "lucide-react";
 
 export const Route = createFileRoute("/_app/venue-panel")({
@@ -132,7 +133,7 @@ function VenuePanel() {
           <div className="grid gap-3">
             {games!.map((g: any) => {
               const confirmed = (g.participants ?? []).filter((p: any) => p.status === "confirmed").length;
-              const date = new Date(g.starts_at).toLocaleString("pt-BR", {
+              const date = formatDateDisplay(g.starts_at, {
                 day: "2-digit",
                 month: "2-digit",
                 hour: "2-digit",

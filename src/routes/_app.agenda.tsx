@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { getCourtImage } from "@/lib/sport-courts";
 import { MapPin, Users, Loader2, Lock, Zap } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDateDisplay } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/agenda")({
   head: () => ({ meta: [{ title: "Agenda — Esportes Unidos" }] }),
@@ -201,8 +201,7 @@ function groupByDate(games: AgendaGame[]): [string, AgendaGame[]][] {
   const map = new Map<string, AgendaGame[]>();
   for (const g of games) {
     const d = new Date(g.starts_at);
-    const key = d
-      .toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })
+    const key = formatDateDisplay(d, { weekday: "short", day: "2-digit", month: "short" })
       .replace(/\./g, "")
       .toUpperCase();
     if (!map.has(key)) map.set(key, []);
@@ -285,8 +284,8 @@ function GameCard({ game }: { game: AgendaGame }) {
           {game.venues?.name ?? "Sem local"}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
-          {start.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
-          {start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          {formatDateDisplay(start, { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
+          {formatDateDisplay(start, { hour: "2-digit", minute: "2-digit" })}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
           <Users className="size-3" />
