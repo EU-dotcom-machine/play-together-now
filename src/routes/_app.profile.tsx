@@ -625,7 +625,7 @@ function HistoryList({ items }: { items: any[] }) {
     <ul className="grid gap-2">
       {items.map((g) => {
         const date = g.starts_at
-          ? new Date(g.starts_at).toLocaleDateString("pt-BR", {
+          ? formatDateDisplay(g.starts_at, {
               day: "2-digit",
               month: "short",
               hour: "2-digit",

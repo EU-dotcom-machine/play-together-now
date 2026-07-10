@@ -210,10 +210,10 @@ function GameDetail() {
         <button
           onClick={() => {
             const gameUrl = window.location.href;
-            const date = start.toLocaleDateString("pt-BR", {
+            const date = formatDateDisplay(start, {
               weekday: "long", day: "2-digit", month: "long",
             });
-            const time = start.toLocaleTimeString("pt-BR", {
+            const time = formatDateDisplay(start, {
               hour: "2-digit", minute: "2-digit",
             });
             const price = game.price_cents === 0
@@ -267,10 +267,10 @@ function GameDetail() {
             <Row icon={Users} text={slotsLabel} />
             <div className="flex gap-2 flex-wrap">
               <span className="brutal-chip bg-paper">
-                {start.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
+                {formatDateDisplay(start, { weekday: "long", day: "2-digit", month: "long" })}
               </span>
               <span className="brutal-chip bg-paper">
-                {start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                {formatDateDisplay(start, { hour: "2-digit", minute: "2-digit" })}
               </span>
               <span className={cn("brutal-chip", free ? "bg-zap text-[#111]" : "bg-paper")}>
                 {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}

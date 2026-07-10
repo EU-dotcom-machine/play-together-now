@@ -690,8 +690,8 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
           {game.venues?.name ?? "Sem local"}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
-          {start.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
-          {start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          {formatDateDisplay(start, { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
+          {formatDateDisplay(start, { hour: "2-digit", minute: "2-digit" })}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
           <Users className="size-3" />
