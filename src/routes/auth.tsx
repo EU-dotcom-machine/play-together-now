@@ -6,6 +6,16 @@ import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
 
+function getPasswordErrors(password: string) {
+  const errors: string[] = [];
+  if (password.length < 8) errors.push("8 caracteres");
+  if (!/[A-Z]/.test(password)) errors.push("letra maiúscula");
+  if (!/\d/.test(password)) errors.push("número");
+  if (!/[^A-Za-z0-9]/.test(password)) errors.push("caractere especial");
+  return errors;
+}
+
+
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar — Esportes Unidos" }, { name: "robots", content: "noindex" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
