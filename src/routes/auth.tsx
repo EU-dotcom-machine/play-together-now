@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
 
 function getPasswordErrors(password: string) {
@@ -31,6 +31,7 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [networkError, setNetworkError] = useState(false);
@@ -275,15 +276,25 @@ function AuthPage() {
               />
             </Field>
             <Field label="Senha">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
-                placeholder="••••••••"
-                minLength={8}
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20 pr-11"
+                  placeholder="••••••••"
+                  minLength={8}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/60 hover:text-ink focus:text-ink"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
               <p className="text-xs text-ink/60 leading-relaxed">
                 At least 8 characters, including uppercase letters, numbers and special characters
               </p>
