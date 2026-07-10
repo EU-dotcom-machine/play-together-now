@@ -6,7 +6,7 @@ import { distanceKm, formatDistance } from "@/lib/geo";
 import { getCourtImage } from "@/lib/sport-courts";
 import { useAuth } from "@/hooks/use-auth";
 import { MapPin, Zap, Users, Loader2, Star, Lock, Plus, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDateDisplay } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { VenueClaimDialog } from "@/components/venue-claim-dialog";

@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown, Camera } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDateDisplay } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { brandGradient } from "@/lib/brands";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
