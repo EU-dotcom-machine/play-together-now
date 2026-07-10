@@ -123,6 +123,12 @@ function AuthPage() {
     setNetworkError(false);
     try {
       if (mode === "signup") {
+        const missingPassword = getPasswordErrors(password);
+        if (missingPassword.length > 0) {
+          toast.error(`A senha precisa ter: ${missingPassword.join(", ")}.`);
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -278,6 +284,9 @@ function AuthPage() {
                 minLength={8}
                 required
               />
+              <p className="text-xs text-ink/60 leading-relaxed">
+                At least 8 characters, including uppercase letters, numbers and special characters
+              </p>
             </Field>
 
             {mode === "signup" && (
