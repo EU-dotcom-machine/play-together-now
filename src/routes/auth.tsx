@@ -6,6 +6,16 @@ import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
 
+function getPasswordErrors(password: string) {
+  const errors: string[] = [];
+  if (password.length < 8) errors.push("8 caracteres");
+  if (!/[A-Z]/.test(password)) errors.push("letra maiúscula");
+  if (!/\d/.test(password)) errors.push("número");
+  if (!/[^A-Za-z0-9]/.test(password)) errors.push("caractere especial");
+  return errors;
+}
+
+
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar — Esportes Unidos" }, { name: "robots", content: "noindex" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
@@ -113,6 +123,12 @@ function AuthPage() {
     setNetworkError(false);
     try {
       if (mode === "signup") {
+        const missingPassword = getPasswordErrors(password);
+        if (missingPassword.length > 0) {
+          toast.error(`A senha precisa ter: ${missingPassword.join(", ")}.`);
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -268,6 +284,9 @@ function AuthPage() {
                 minLength={8}
                 required
               />
+              <p className="text-xs text-ink/60 leading-relaxed">
+                At least 8 characters, including uppercase letters, numbers and special characters
+              </p>
             </Field>
 
             {mode === "signup" && (
