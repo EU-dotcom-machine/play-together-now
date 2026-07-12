@@ -85,6 +85,19 @@ export function NotificationsBell() {
     };
   }, [user, qc]);
 
+  // Auto-mark game_nearby notifications as read when opening the bell
+  useEffect(() => {
+    if (!open || !user) return;
+    const ids = notifications
+      .filter((n) => n.type === "game_nearby" && !n.read)
+      .map((n) => n.id);
+    if (ids.length === 0) return;
+    (async () => {
+      await supabase.from("notifications" as any).update({ read: true }).in("id", ids);
+      qc.invalidateQueries({ queryKey: ["notifications", user.id] });
+    })();
+  }, [open, user, notifications, qc]);
+
   const unread = notifications.filter((n) => !n.read).length;
 
   async function markRead(n: NotificationRow) {
