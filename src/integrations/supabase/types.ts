@@ -641,6 +641,19 @@ export type Database = {
           visibility: string
         }[]
       }
+      nearby_users_for_sport: {
+        Args: {
+          _exclude_user: string
+          _lat: number
+          _lng: number
+          _radius_meters?: number
+          _sport_id: string
+        }
+        Returns: {
+          distance_meters: number
+          user_id: string
+        }[]
+      }
       recalc_all_sport_ratings: { Args: never; Returns: undefined }
       recalc_sport_rating: { Args: { _sport_id: string }; Returns: undefined }
     }
