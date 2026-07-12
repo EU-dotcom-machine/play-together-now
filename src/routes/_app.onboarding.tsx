@@ -120,7 +120,7 @@ function Onboarding() {
                 Quais esportes você pratica?
               </h1>
               <p className="mt-2 text-ink/70">
-                Você vai ver jogos desses esportes primeiro.
+                Você vai ver atividades desses esportes primeiro.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -164,7 +164,7 @@ function Onboarding() {
             <h1 className="text-3xl font-extrabold uppercase leading-tight">
               Ative sua localização
             </h1>
-            <p className="text-ink/70">Para encontrar jogos perto de você.</p>
+            <p className="text-ink/70">Para encontrar atividades perto de você.</p>
             <div className="w-full grid gap-3 mt-4">
               <button
                 type="button"

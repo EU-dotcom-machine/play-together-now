@@ -208,7 +208,7 @@ export function FriendsSection() {
               >
                 <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
-                  {p?.display_name ?? "Jogador"}
+                  {p?.display_name ?? "Atleta"}
                 </p>
                 <button
                   type="button"
@@ -248,7 +248,7 @@ export function FriendsSection() {
               >
                 <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
-                  {p?.display_name ?? "Jogador"}
+                  {p?.display_name ?? "Atleta"}
                 </p>
                 <button
                   type="button"

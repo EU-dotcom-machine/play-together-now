@@ -52,7 +52,7 @@ function Agenda() {
         <h1 className="text-4xl font-extrabold uppercase leading-none">
           Agenda<span className="text-pop">.</span>
         </h1>
-        <p className="mt-1 text-sm text-ink/70">Seus jogos confirmados</p>
+        <p className="mt-1 text-sm text-ink/70">Suas atividades confirmadas</p>
       </header>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
@@ -80,7 +80,7 @@ function Agenda() {
               </div>
             )}
             {!loadingUp && upcoming.length === 0 && (
-              <EmptyState text="Sem jogos confirmados. Encontre um em Jogos!" />
+              <EmptyState text="Sem atividades confirmadas. Encontre uma em Atividades!" />
             )}
             {upcomingGrouped.map(([date, games]) => (
               <section key={date} className="grid gap-3">
@@ -101,7 +101,7 @@ function Agenda() {
               </div>
             )}
             {!loadingPast && past.length === 0 && (
-              <EmptyState text="Ainda nada por aqui. Seus jogos passados aparecerão aqui." />
+              <EmptyState text="Ainda nada por aqui. Suas atividades passadas aparecerão aqui." />
             )}
             {past.map((g) => (
               <GameCard key={g.id} game={g} />

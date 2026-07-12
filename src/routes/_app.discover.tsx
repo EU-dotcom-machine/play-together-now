@@ -12,7 +12,7 @@ import { NotificationsBell } from "@/components/notifications-bell";
 import { VenueClaimDialog } from "@/components/venue-claim-dialog";
 
 export const Route = createFileRoute("/_app/discover")({
-  head: () => ({ meta: [{ title: "Jogos perto de você — Esportes Unidos" }] }),
+  head: () => ({ meta: [{ title: "Atividades perto de você — Esportes Unidos" }] }),
   validateSearch: (search: Record<string, unknown>) => ({
     tab: search.tab === "estabelecimentos" ? ("estabelecimentos" as const) : undefined,
     venueId: typeof search.venueId === "string" ? search.venueId : undefined,
@@ -302,12 +302,12 @@ function Discover() {
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
       <header className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-4xl font-extrabold uppercase leading-none">Jogos<span className="text-pop">.</span></h1>
+          <h1 className="text-4xl font-extrabold uppercase leading-none">Atividades<span className="text-pop">.</span></h1>
           <p className="mt-1 text-sm text-ink/70">
             {coords
-              ? "Jogos acontecendo perto de você"
+              ? "Atividades acontecendo perto de você"
               : geoDenied
-                ? "Ative a localização para ver jogos perto de você"
+                ? "Ative a localização para ver atividades perto de você"
                 : "Buscando sua localização…"}
           </p>
         </div>
@@ -315,7 +315,7 @@ function Discover() {
           <NotificationsBell />
           <Link
             to="/new"
-            aria-label="Criar jogo"
+            aria-label="Criar atividade"
             className="inline-flex items-center justify-center size-10 rounded-full bg-pop text-[#111] active:translate-y-[1px]"
           >
             <Plus className="size-5" strokeWidth={3} />
@@ -352,7 +352,7 @@ function Discover() {
           <div className="text-xs leading-snug">
             <p className="font-bold uppercase">Preencha seu CEP</p>
             <p className="text-ink/70 mt-0.5">
-              Jogos de condomínio só aparecem para quem tem o mesmo CEP.{" "}
+              Atividades de condomínio só aparecem para quem tem o mesmo CEP.{" "}
               <Link to="/profile" className="underline underline-offset-2 font-bold text-pop">
                 Atualizar perfil
               </Link>
@@ -371,7 +371,7 @@ function Discover() {
             tab === "jogos" ? "bg-pop text-[#111] border-ink" : "bg-paper",
           )}
         >
-          Jogos
+          Atividades
         </button>
         <button
           onClick={() => setTab("estabelecimentos")}
@@ -444,8 +444,8 @@ function Discover() {
             <div className="brutal-card p-6 text-center">
               <p className="font-bold uppercase">
                 {selectedSport
-                  ? `Nenhum jogo de ${selectedSport.emoji} ${selectedSport.name} perto de você`
-                  : "Nenhum jogo rolando"}
+                  ? `Nenhuma atividade de ${selectedSport.emoji} ${selectedSport.name} perto de você`
+                  : "Nenhuma atividade rolando"}
               </p>
               <p className="text-sm text-ink/70 mt-1">
                 {selectedSport ? (

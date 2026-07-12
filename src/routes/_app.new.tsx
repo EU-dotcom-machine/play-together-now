@@ -9,7 +9,7 @@ import { trackEvent } from "@/lib/posthog";
 import { getGooglePlacesKey } from "@/lib/google-places.functions";
 
 export const Route = createFileRoute("/_app/new")({
-  head: () => ({ meta: [{ title: "Criar jogo — Esportes Unidos" }] }),
+  head: () => ({ meta: [{ title: "Criar atividade — Esportes Unidos" }] }),
   component: NewGame,
 });
 
@@ -415,12 +415,12 @@ function NewGame() {
     if (!coords && venueAddress.trim().length >= 4) {
       coords = await geocodeOnce(venueAddress.trim());
       if (!coords && gpsCoords) {
-        toast("Usando sua localização atual como local do jogo.");
+        toast("Usando sua localização atual como local da atividade.");
       }
     }
     if (!coords) coords = gpsCoords;
     if (!coords) {
-      toast.error("Precisamos da sua localização pra criar o jogo");
+      toast.error("Precisamos da sua localização pra criar a atividade");
       return;
     }
 
@@ -473,7 +473,7 @@ function NewGame() {
         .single();
       if (gErr) throw gErr;
 
-      toast.success("Jogo criado!");
+      toast.success("Atividade criada!");
       trackEvent("game_created", { game_id: game.id });
       navigate({ to: "/games/$id", params: { id: game.id } });
     } catch (err: any) {
@@ -487,7 +487,7 @@ function NewGame() {
     <main className="px-5 pt-8 max-w-md mx-auto">
       {/* build trigger */}
       <h1 className="text-4xl font-extrabold uppercase leading-none">
-        Criar jogo<span className="text-pop">.</span>
+        Criar atividade<span className="text-pop">.</span>
       </h1>
       <p className="mt-1 text-sm text-ink/70">Preencha rapidinho. Quem tá perto vai ver.</p>
 
@@ -694,8 +694,8 @@ function NewGame() {
             })}
           </div>
           <p className="mt-1.5 text-[11px] text-ink/60 leading-snug">
-            {visibility === "public" && "Qualquer um na sua região vê esse jogo."}
-            {visibility === "friends" && "Só seus amigos enxergam esse jogo no Descobrir."}
+            {visibility === "public" && "Qualquer um na sua região vê essa atividade."}
+            {visibility === "friends" && "Só seus amigos enxergam essa atividade no Descobrir."}
             {visibility === "cep" && "Só pessoas com o mesmo CEP cadastrado enxergam."}
           </p>
         </Field>
@@ -724,7 +724,7 @@ function NewGame() {
           className="btn-primary-pill mt-2 flex items-center justify-center gap-2 active:opacity-90 disabled:opacity-60"
         >
           {saving && <Loader2 className="size-4 animate-spin" />}
-          Publicar jogo
+          Publicar atividade
         </button>
 
       </form>

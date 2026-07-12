@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/games_/$id/edit")({
-  head: () => ({ meta: [{ title: "Editar jogo — Esportes Unidos" }] }),
+  head: () => ({ meta: [{ title: "Editar atividade — Esportes Unidos" }] }),
   component: EditGame,
 });
 
@@ -75,7 +75,7 @@ function EditGame() {
       .eq("id", id);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Jogo atualizado!");
+    toast.success("Atividade atualizada!");
     qc.invalidateQueries({ queryKey: ["game", id] });
     qc.invalidateQueries({ queryKey: ["games"] });
     navigate({ to: "/games/$id", params: { id } });
@@ -99,7 +99,7 @@ function EditGame() {
       </button>
 
       <h1 className="text-4xl font-extrabold uppercase leading-none">
-        Editar jogo<span className="text-pop">.</span>
+        Editar atividade<span className="text-pop">.</span>
       </h1>
 
       <form onSubmit={submit} className="mt-6 grid gap-3">

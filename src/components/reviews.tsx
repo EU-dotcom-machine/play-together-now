@@ -92,7 +92,7 @@ export function Reviews({
 
       {!ended && (
         <p className="brutal-card mt-2 p-3 bg-paper text-sm text-ink/70">
-          Avaliações liberam quando o jogo terminar ({formatDateDisplay(endsAt, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}).
+          Avaliações liberam quando a atividade terminar ({formatDateDisplay(endsAt, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}).
         </p>
       )}
 
@@ -119,7 +119,7 @@ export function Reviews({
           {gameReviews.map((r) => (
             <li key={r.id} className="brutal-card p-3 bg-paper">
               <div className="flex items-center justify-between">
-                <p className="font-bold text-sm">{r.reviewer_name ?? "Jogador"}</p>
+                <p className="font-bold text-sm">{r.reviewer_name ?? "Atleta"}</p>
                 <Stars value={r.rating} />
               </div>
               {r.comment && <p className="text-sm mt-1 text-ink/80">{r.comment}</p>}
@@ -136,7 +136,7 @@ export function Reviews({
         return (
           <div className="mt-6">
             <div className="flex items-baseline justify-between gap-2">
-              <h3 className="text-base font-bold uppercase">Avaliações do jogo</h3>
+              <h3 className="text-base font-bold uppercase">Avaliações da atividade</h3>
               {prAvg && (
                 <span className="brutal-chip bg-zap">
                   <Star className="size-3 fill-ink" /> {prAvg} · {playerReviews.length}
@@ -145,7 +145,7 @@ export function Reviews({
             </div>
             {!joined ? (
               <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">
-                Somente participantes confirmados podem ver as avaliações deste jogo.
+                Somente participantes confirmados podem ver as avaliações desta atividade.
               </p>
             ) : playerReviews.length === 0 ? (
               <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">
@@ -155,7 +155,7 @@ export function Reviews({
               <ul className="mt-2 grid gap-2">
                 {playerReviews.map((r) => {
                   const prof = reviewerProfiles[r.reviewer_id];
-                  const name = prof?.display_name ?? "Jogador";
+                  const name = prof?.display_name ?? "Atleta";
                   const safe = Math.max(0, Math.min(5, Number(r.rating) || 0));
                   return (
                     <li key={r.id} className="brutal-card p-3 bg-paper">
@@ -265,7 +265,7 @@ function GameReviewForm({
 
   return (
     <form onSubmit={submit} className="brutal-card-lg mt-3 p-4 bg-zap grid gap-3">
-      <p className="font-bold uppercase text-sm">Como foi o jogo{sportName ? ` de ${sportName}` : ""}?</p>
+      <p className="font-bold uppercase text-sm">Como foi a atividade{sportName ? ` de ${sportName}` : ""}?</p>
       <Stars value={rating} onChange={setRating} size={28} />
       <textarea
         value={comment}
@@ -307,7 +307,7 @@ function PlayerReviewsPanel({
             key={p.user_id}
             gameId={gameId}
             revieweeId={p.user_id}
-            name={p.profiles?.display_name ?? "Jogador"}
+            name={p.profiles?.display_name ?? "Atleta"}
             done={done}
             onSaved={onSaved}
           />

@@ -39,7 +39,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
       .eq("id", gameId);
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Jogo encerrado.");
+    toast.success("Atividade encerrada.");
     qc.invalidateQueries({ queryKey: ["games"] });
     close();
     navigate({ to: "/discover" });
@@ -57,7 +57,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
     }
     await supabase.from("game_participants").delete().eq("game_id", gameId);
     setBusy(false);
-    toast.success("Jogo cancelado.");
+    toast.success("Atividade cancelada.");
     qc.invalidateQueries({ queryKey: ["games"] });
     close();
     navigate({ to: "/discover" });
@@ -80,7 +80,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
   const items = [
     {
       icon: Pencil,
-      label: "Editar Jogo",
+      label: "Editar Atividade",
       onClick: () => {
         close();
         navigate({ to: "/games/$id/edit", params: { id: gameId } });
@@ -88,20 +88,20 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
     },
     {
       icon: Flag,
-      label: "Encerrar Jogo",
+      label: "Encerrar Atividade",
       onClick: () =>
         setConfirm({
-          title: "Encerrar este jogo?",
+          title: "Encerrar esta atividade?",
           message: "Os participantes serão notificados.",
           onConfirm: finishGame,
         }),
     },
     {
       icon: XCircle,
-      label: "Cancelar Jogo",
+      label: "Cancelar Atividade",
       onClick: () =>
         setConfirm({
-          title: "Cancelar este jogo?",
+          title: "Cancelar esta atividade?",
           message: "Todos os participantes serão removidos.",
           onConfirm: cancelGame,
         }),
@@ -127,7 +127,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
       >
         <div className="mx-auto mb-4 h-1 w-11 rounded-full bg-border" />
         <h3 className="text-base font-bold uppercase tracking-wider mb-3 px-2 text-foreground">
-          Gerenciar Jogo
+          Gerenciar Atividade
         </h3>
         <ul className="grid gap-1">
           {items.map((it) => (

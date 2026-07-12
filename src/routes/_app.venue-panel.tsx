@@ -99,7 +99,7 @@ function VenuePanel() {
     .map(([id, count]) => ({
       id,
       count,
-      display_name: profilesMap?.[id]?.display_name ?? "Jogador",
+      display_name: profilesMap?.[id]?.display_name ?? "Atleta",
       avatar_url: profilesMap?.[id]?.avatar_url ?? null,
     }));
 
@@ -118,17 +118,17 @@ function VenuePanel() {
       </header>
 
       <section className="grid grid-cols-3 gap-3 mb-8">
-        <Stat label="Jogos" value={totalGames} />
+        <Stat label="Atividades" value={totalGames} />
         <Stat label="Presenças" value={totalConfirmed} />
-        <Stat label="Jogadores únicos" value={uniquePlayers} />
+        <Stat label="Atletas únicos" value={uniquePlayers} />
       </section>
 
       <section className="mb-8">
         <h2 className="text-base font-bold uppercase tracking-wide mb-3 flex items-center gap-2">
-          <CalendarDays className="size-4" /> Jogos no espaço
+          <CalendarDays className="size-4" /> Atividades no espaço
         </h2>
         {totalGames === 0 ? (
-          <p className="text-sm text-ink/60">Nenhum jogo criado ainda.</p>
+          <p className="text-sm text-ink/60">Nenhuma atividade criada ainda.</p>
         ) : (
           <div className="grid gap-3">
             {games!.map((g: any) => {
@@ -145,7 +145,7 @@ function VenuePanel() {
                     <CardContent className="p-4 flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-bold truncate">
-                          {g.sport?.emoji} {g.sport?.name ?? "Jogo"}
+                          {g.sport?.emoji} {g.sport?.name ?? "Atividade"}
                         </p>
                         <p className="text-xs text-ink/60 mt-0.5">{date}</p>
                       </div>
@@ -184,7 +184,7 @@ function VenuePanel() {
                       </div>
                     )}
                     <p className="flex-1 font-semibold truncate">{f.display_name}</p>
-                    <span className="text-sm font-bold">{f.count}× jogos</span>
+                    <span className="text-sm font-bold">{f.count}× atividades</span>
                   </CardContent>
                 </Card>
               </Link>

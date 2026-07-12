@@ -178,7 +178,7 @@ function AuthPage() {
         </h1>
         {!forgotMode && (
           <p className="mt-2 text-ink/70">
-            {mode === "signup" ? "Bora pro próximo jogo." : "Já é da pelada?"}
+            {mode === "signup" ? "Bora pra próxima atividade." : "Já é da pelada?"}
           </p>
         )}
 

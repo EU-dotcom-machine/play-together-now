@@ -6,7 +6,7 @@ import { StickFigureRating } from "@/components/stick-figure-rating";
 import { brandGradient } from "@/lib/brands";
 
 export const Route = createFileRoute("/_app/profile/$id")({
-  head: () => ({ meta: [{ title: "Jogador — Esportes Unidos" }] }),
+  head: () => ({ meta: [{ title: "Atleta — Esportes Unidos" }] }),
   component: PublicProfile,
 });
 
@@ -31,7 +31,7 @@ function PublicProfile() {
   if (!profile) {
     return (
       <main className="max-w-md mx-auto p-6 text-center">
-        <p className="text-ink/60">Jogador não encontrado.</p>
+        <p className="text-ink/60">Atleta não encontrado.</p>
         <Link to="/discover" className="text-pop font-bold underline mt-3 inline-block">
           Voltar
         </Link>
@@ -39,7 +39,7 @@ function PublicProfile() {
     );
   }
 
-  const name = profile.display_name || "Jogador";
+  const name = profile.display_name || "Atleta";
 
   return (
     <main className="max-w-md mx-auto pb-24">
@@ -59,7 +59,7 @@ function PublicProfile() {
             )}
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#888]">jogador</p>
+            <p className="text-xs uppercase font-semibold text-[#888]">atleta</p>
             <h1 className="text-2xl font-extrabold leading-none text-pop">{name}</h1>
           </div>
         </div>

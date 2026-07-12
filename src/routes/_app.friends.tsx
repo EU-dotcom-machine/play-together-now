@@ -262,7 +262,7 @@ function FriendsPage() {
                 <Avatar name={p?.display_name} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-sm truncate">
-                    {p?.display_name ?? "Jogador"}
+                    {p?.display_name ?? "Atleta"}
                   </p>
                   <p className="text-xs text-[#FFD600] font-bold">
                     ⚡ {p?.points ?? 0} pts
@@ -308,14 +308,14 @@ function FriendsPage() {
                 <Avatar name={p?.display_name} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-sm truncate">
-                    {p?.display_name ?? "Jogador"}
+                    {p?.display_name ?? "Atleta"}
                   </p>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="text-xs text-[#FFD600] font-bold">
                       ⚡ {p?.points ?? 0} pts
                     </span>
                     <span className="text-xs text-[#888] font-bold">
-                      🎮 {games} jogos
+                      🎮 {games} atividades
                     </span>
                     <RatingBadge avg={p?.avg_rating} total={p?.total_reviews} />
                   </div>
