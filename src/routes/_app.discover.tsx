@@ -697,7 +697,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
           <Users className="size-3" />
           {filled >= game.slots_total
             ? "Completo"
-            : `Falta${game.slots_total - filled === 1 ? "" : "m"} ${game.slots_total - filled} jogador${game.slots_total - filled === 1 ? "" : "es"}`}
+            : `Falta${game.slots_total - filled === 1 ? "" : "m"} ${game.slots_total - filled} atleta${game.slots_total - filled === 1 ? "" : "s"}`}
         </span>
         <span
           className={cn(

@@ -159,13 +159,13 @@ function SportDetail() {
 
       <section className="mt-8">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-bold uppercase">Avaliações de jogadores</h2>
+          <h2 className="text-lg font-bold uppercase">Avaliações de atletas</h2>
           <span className="text-xs text-ink/50">visíveis a você</span>
         </div>
         <ul className="mt-2 grid gap-2">
           {(playerReviews ?? []).length === 0 && (
             <li className="brutal-card p-4 text-center text-ink/60 text-sm bg-paper">
-              Você ainda não tem avaliações de jogadores neste esporte.
+              Você ainda não tem avaliações de atletas neste esporte.
             </li>
           )}
           {(playerReviews ?? []).map((r: any) => {

@@ -373,7 +373,7 @@ function ReviewFlow({
         <div className="p-5 space-y-5">
           <div>
             <p className="text-xs uppercase tracking-wider text-ink/60 font-bold">
-              Avaliar jogadores · {idx + 1}/{game.coparticipants.length}
+              Avaliar atletas · {idx + 1}/{game.coparticipants.length}
             </p>
             <p className="text-sm font-bold mt-1 line-clamp-1">{game.game_title}</p>
           </div>

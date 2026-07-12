@@ -112,7 +112,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
       onClick: () =>
         setConfirm({
           title: "Fechar vagas agora?",
-          message: "Novos jogadores não poderão entrar.",
+          message: "Novos atletas não poderão entrar.",
           onConfirm: closeSlots,
         }),
     },

@@ -264,7 +264,7 @@ function Profile() {
             />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#888]">jogador</p>
+            <p className="text-xs uppercase font-semibold text-[#888]">atleta</p>
             <h1 className="text-2xl font-extrabold leading-none text-pop">{display || "—"}</h1>
           </div>
         </div>

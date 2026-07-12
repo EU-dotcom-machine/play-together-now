@@ -149,7 +149,7 @@ export function Reviews({
               </p>
             ) : playerReviews.length === 0 ? (
               <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">
-                Nenhuma avaliação de jogador ainda.
+                Nenhuma avaliação de atleta ainda.
               </p>
             ) : (
               <ul className="mt-2 grid gap-2">
@@ -299,7 +299,7 @@ function PlayerReviewsPanel({
   if (participants.length === 0) return null;
   return (
     <div className="mt-4 grid gap-2">
-      <p className="font-bold uppercase text-sm">Avalie os jogadores</p>
+      <p className="font-bold uppercase text-sm">Avalie os atletas</p>
       {participants.map((p) => {
         const done = existing.find((r) => r.reviewee_id === p.user_id);
         return (

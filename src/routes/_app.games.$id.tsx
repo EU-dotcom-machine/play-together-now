@@ -196,7 +196,7 @@ function GameDetail() {
   const slotsLabel = full
     ? "Completo"
     : filled === 0
-      ? `Aguardando ${slotsTotal} ${slotsTotal === 1 ? "jogador" : "jogadores"}`
+      ? `Aguardando ${slotsTotal} ${slotsTotal === 1 ? "atleta" : "atletas"}`
       : `${filled}/${slotsTotal} confirmados`;
 
   const chatUnlocked = isHost || myStatus === "confirmed";
