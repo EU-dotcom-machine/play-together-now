@@ -18,7 +18,15 @@ type NotificationRow = {
     | "venue_claim_rejected";
   title: string;
   body: string;
-  data: { game_id?: string; requester_id?: string; venue_id?: string; claim_id?: string } | null;
+  data: {
+    game_id?: string;
+    requester_id?: string;
+    venue_id?: string;
+    claim_id?: string;
+    title?: string;
+    distance_km?: number;
+    starts_at?: string;
+  } | null;
   read: boolean;
   created_at: string;
 };
