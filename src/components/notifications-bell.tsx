@@ -18,7 +18,15 @@ type NotificationRow = {
     | "venue_claim_rejected";
   title: string;
   body: string;
-  data: { game_id?: string; requester_id?: string; venue_id?: string; claim_id?: string } | null;
+  data: {
+    game_id?: string;
+    requester_id?: string;
+    venue_id?: string;
+    claim_id?: string;
+    title?: string;
+    distance_km?: number;
+    starts_at?: string;
+  } | null;
   read: boolean;
   created_at: string;
 };
@@ -175,7 +183,22 @@ export function NotificationsBell() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-white">{n.title}</p>
-                  <p className="text-xs text-white/70 mt-0.5">{n.body}</p>
+                  {n.type === "game_nearby" && (n.data?.title || n.data?.distance_km != null) ? (
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {n.data?.title && (
+                        <span className="text-xs font-semibold text-white truncate max-w-[180px]">
+                          {n.data.title}
+                        </span>
+                      )}
+                      {n.data?.distance_km != null && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FFD600] text-[#111] text-[10px] font-extrabold uppercase px-2 py-0.5">
+                          <MapPin className="size-3" />~{n.data.distance_km} km
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-white/70 mt-0.5">{n.body}</p>
+                  )}
                   <p className="text-[10px] uppercase text-white/50 mt-1 inline-flex items-center gap-1">
                     <Calendar className="size-3" />
                     {timeAgo(n.created_at)}
