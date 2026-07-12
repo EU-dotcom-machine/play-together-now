@@ -366,10 +366,16 @@ function GameDetail() {
       )}
 
 
-      <div className="mt-8 brutal-card p-3 bg-zap">
-        <p className="text-xs font-bold uppercase text-[#111]/70">Criado por</p>
-        <p className="font-bold text-[#111]">{game.host?.display_name ?? "—"}</p>
+      <div className="mt-8 brutal-card p-3 bg-zap flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold uppercase text-[#111]/70">Criado por</p>
+          <p className="font-bold text-[#111] truncate">{game.host?.display_name ?? "—"}</p>
+        </div>
+        {game.host_id && user && user.id !== game.host_id && (
+          <AddFriendButton targetId={game.host_id} />
+        )}
       </div>
+
 
       <h2 className="mt-6 text-lg font-bold uppercase">Quem confirmou</h2>
       <ul className="mt-2 grid gap-2">
