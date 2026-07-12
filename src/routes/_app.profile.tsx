@@ -264,7 +264,7 @@ function Profile() {
             />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#888]">jogador</p>
+            <p className="text-xs uppercase font-semibold text-[#888]">atleta</p>
             <h1 className="text-2xl font-extrabold leading-none text-pop">{display || "—"}</h1>
           </div>
         </div>
@@ -403,7 +403,7 @@ function Profile() {
         <p id="cep-help" className={cn("text-xs -mt-2", cepFormatError ? "text-red-500 font-semibold" : "text-ink/60")}>
           {cepFormatError
             ? cepFormatError
-            : "Opcional. Preencha para visualizar jogos de condomínio, empresa ou espaço privado com o mesmo CEP."}
+            : "Opcional. Preencha para visualizar atividades de condomínio, empresa ou espaço privado com o mesmo CEP."}
         </p>
 
 
@@ -617,7 +617,7 @@ function HistoryList({ items }: { items: any[] }) {
   if (!items || items.length === 0) {
     return (
       <p className="text-sm text-ink/60 text-center py-4">
-        Nenhum jogo ainda. Que tal criar o primeiro?
+        Nenhuma atividade ainda. Que tal criar o primeiro?
       </p>
     );
   }

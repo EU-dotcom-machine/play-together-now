@@ -6,9 +6,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Esportes Unidos — bora jogar?" },
-      { name: "description", content: "Ache jogos rolando perto de você. Diga EU e levanta o braço." },
+      { name: "description", content: "Ache atividades rolando perto de você. Diga EU e levanta o braço." },
       { property: "og:title", content: "Esportes Unidos — bora jogar?" },
-      { property: "og:description", content: "Ache jogos rolando perto de você." },
+      { property: "og:description", content: "Ache atividades rolando perto de você." },
     ],
   }),
   component: Landing,
@@ -31,7 +31,7 @@ function Landing() {
             Bora<br />jogar<span className="text-pop">.</span>
           </h1>
           <p className="mt-5 text-lg font-medium text-ink/80 max-w-sm">
-            Falta gente pra completar o time? O Esportes Unidos conecta você com jogos rolando agora, perto de você. Diga EU! e entra no jogo.
+            Falta gente pra completar o time? O Esportes Unidos conecta você com atividades rolando agora, perto de você. Diga EU! e entra na atividade.
           </p>
 
           <div className="mt-8 flex flex-col gap-3">
@@ -48,8 +48,8 @@ function Landing() {
       <section className="px-5 pb-24">
         <div className="max-w-md mx-auto grid gap-3">
           <Feature icon={Zap} title="Diga EU" text="Toque um botão, levante o braço, garanta sua vaga." />
-          <Feature icon={MapPin} title="Perto de você" text="A gente mostra jogos por distância, em tempo real." />
-          <Feature icon={Users} title="Match e chat" text="Confirmou? Já cai no grupo do jogo." />
+          <Feature icon={MapPin} title="Perto de você" text="A gente mostra atividades por distância, em tempo real." />
+          <Feature icon={Users} title="Match e chat" text="Confirmou? Já cai no grupo da atividade." />
         </div>
       </section>
     </main>

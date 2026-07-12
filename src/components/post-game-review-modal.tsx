@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 const TAG_ROWS = [
   ["Pontual", "Respeitoso", "Animado", "Bem-humorado"],
-  ["Habilidoso", "Justo no jogo", "Comunicativo", "Competitivo saudável"],
+  ["Habilidoso", "Justo na atividade", "Comunicativo", "Competitivo saudável"],
   ["Trabalho em equipe", "Voltaria a jogar", "Organizado", "Deixou o espaço limpo"],
 ];
 
@@ -126,10 +126,10 @@ export function PostGameReviewGate() {
     const finishedGames = new Map<string, GInfo>();
     for (const p of (myParts ?? []) as any[]) {
       const g = p.games;
-      if (g && isFinishedRecent(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
+      if (g && isFinishedRecent(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Atividade", host_id: g.host_id });
     }
     for (const g of (hosted ?? []) as any[]) {
-      if (isFinishedRecent(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Jogo", host_id: g.host_id });
+      if (isFinishedRecent(g)) finishedGames.set(g.id, { id: g.id, title: g.title ?? "Atividade", host_id: g.host_id });
     }
     // Filter out games the user skipped locally during this session
     for (const id of skippedGamesRef.current) finishedGames.delete(id);
@@ -194,12 +194,12 @@ export function PostGameReviewGate() {
     for (const [game_id, userIds] of byGame) {
       out.push({
         game_id,
-        game_title: finishedGames.get(game_id)?.title ?? "Jogo",
+        game_title: finishedGames.get(game_id)?.title ?? "Atividade",
         coparticipants: Array.from(userIds).map((uid) => {
           const p = profMap.get(uid);
           return {
             user_id: uid,
-            display_name: p?.display_name ?? "Jogador",
+            display_name: p?.display_name ?? "Atleta",
             avatar_url: p?.avatar_url ?? null,
           };
         }),
@@ -344,9 +344,9 @@ function ReviewFlow({
         setFailedAttempts((n) => n + 1);
         setSubmitStatus({
           type: "error",
-          message: "Não foi possível salvar agora. Vamos pular este jogo para não travar você.",
+          message: "Não foi possível salvar agora. Vamos pular esta atividade para não travar você.",
         });
-        toast.error("Não foi possível enviar a avaliação. Pulando este jogo.");
+        toast.error("Não foi possível enviar a avaliação. Pulando esta atividade.");
         window.setTimeout(onSkipGame, 900);
         return;
       }
@@ -360,7 +360,7 @@ function ReviewFlow({
         type: "error",
         message: "Erro ao enviar. Vamos seguir mesmo assim para não bloquear o app.",
       });
-      toast.error("Erro ao enviar avaliação. Pulando este jogo.");
+      toast.error("Erro ao enviar avaliação. Pulando esta atividade.");
       window.setTimeout(onSkipGame, 900);
     } finally {
       setSubmitting(false);
@@ -373,7 +373,7 @@ function ReviewFlow({
         <div className="p-5 space-y-5">
           <div>
             <p className="text-xs uppercase tracking-wider text-ink/60 font-bold">
-              Avaliar jogadores · {idx + 1}/{game.coparticipants.length}
+              Avaliar atletas · {idx + 1}/{game.coparticipants.length}
             </p>
             <p className="text-sm font-bold mt-1 line-clamp-1">{game.game_title}</p>
           </div>

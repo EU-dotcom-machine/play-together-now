@@ -134,9 +134,9 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
         await supabase.from("games").update({ status: "full" } as any).eq("id", gameId);
         qc.invalidateQueries({ queryKey: ["game", gameId] });
       }
-      toast.success("Jogador confirmado!");
+      toast.success("Atleta confirmado!");
     } else {
-      toast("Jogador recusado.");
+      toast("Atleta recusado.");
     }
     qc.invalidateQueries({ queryKey: ["candidates", gameId] });
     qc.invalidateQueries({ queryKey: ["participants", gameId] });
@@ -154,7 +154,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
           className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 border border-border bg-surface text-foreground"
           onClick={() => setManageOpen(true)}
         >
-          <Settings2 className="size-3" /> Gerenciar Jogo
+          <Settings2 className="size-3" /> Gerenciar Atividade
         </button>
       </div>
 
@@ -192,7 +192,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold truncate text-foreground">
-                        {p?.display_name ?? "Jogador"}
+                        {p?.display_name ?? "Atleta"}
                       </p>
                       <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 bg-pop text-[#111]">
                         <Zap className="size-3" /> {p?.points ?? 0} pts
@@ -207,12 +207,12 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                       <p className="text-xs mt-1 font-bold text-foreground">
                         {gameSport?.emoji ?? "🎯"} {gameSport?.name ?? "Esporte"}:{" "}
                         <span className="text-[#FFB400]">⭐ {Number(rating?.sport_avg ?? 0).toFixed(1)}</span>{" "}
-                        <span className="text-muted-foreground font-normal">· {sportTotal} {sportTotal === 1 ? "jogo" : "jogos"}</span>
+                        <span className="text-muted-foreground font-normal">· {sportTotal} {sportTotal === 1 ? "atividade" : "atividades"}</span>
                       </p>
                     )}
                     {overallTotal > 0 && (
                       <p className="text-[11px] mt-0.5 text-muted-foreground">
-                        Geral: ⭐ {Number(rating?.overall_avg ?? 0).toFixed(1)} · {overallTotal} {overallTotal === 1 ? "jogo" : "jogos"}
+                        Geral: ⭐ {Number(rating?.overall_avg ?? 0).toFixed(1)} · {overallTotal} {overallTotal === 1 ? "atividade" : "atividades"}
                       </p>
                     )}
                     {topTags.length > 0 && (

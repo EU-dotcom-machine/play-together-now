@@ -72,7 +72,7 @@ function Consent() {
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 p-6">
       <h1 className="text-2xl font-semibold">Conectar {clientName} à sua conta</h1>
       <p className="text-muted-foreground">
-        Isso permite que {clientName} acesse o Esportes Unidos como você — visualizando seus jogos e agendas.
+        Isso permite que {clientName} acesse o Esportes Unidos como você — visualizando suas atividades e agendas.
       </p>
       {error && (
         <p role="alert" className="text-sm text-destructive">

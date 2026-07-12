@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/games/$id")({
-  head: () => ({ meta: [{ title: "Jogo — Esportes Unidos" }] }),
+  head: () => ({ meta: [{ title: "Atividade — Esportes Unidos" }] }),
   component: GameDetail,
 });
 
@@ -196,7 +196,7 @@ function GameDetail() {
   const slotsLabel = full
     ? "Completo"
     : filled === 0
-      ? `Aguardando ${slotsTotal} ${slotsTotal === 1 ? "jogador" : "jogadores"}`
+      ? `Aguardando ${slotsTotal} ${slotsTotal === 1 ? "atleta" : "atletas"}`
       : `${filled}/${slotsTotal} confirmados`;
 
   const chatUnlocked = isHost || myStatus === "confirmed";
@@ -245,7 +245,7 @@ function GameDetail() {
               `📍 ${game.venues?.name}\n` +
               `📅 ${date} às ${time}\n` +
               `💰 ${price}\n\n` +
-              `Diz EU! e entra no jogo 👇\n${gameUrl}`
+              `Diz EU! e entra na atividade 👇\n${gameUrl}`
             );
             window.open(`https://wa.me/?text=${text}`, "_blank");
           }}
@@ -322,7 +322,7 @@ function GameDetail() {
               className="w-auto mx-auto px-4 py-2 text-xs font-bold uppercase rounded-full bg-transparent border flex items-center gap-2"
               style={{ borderColor: "#FF4444", color: "#FF4444" }}
             >
-              <LogOut className="size-3" /> Sair do jogo
+              <LogOut className="size-3" /> Sair da atividade
             </button>
           </div>
         ) : myStatus === "pending" ? (
@@ -338,7 +338,7 @@ function GameDetail() {
             className="w-full px-5 py-5 font-bold text-base uppercase rounded-full flex items-center justify-center gap-2"
             style={{ background: "#2A2A2A", color: "#888" }}
           >
-            Jogo iniciado
+            Atividade iniciada
           </div>
         ) : (
           <button
@@ -361,7 +361,7 @@ function GameDetail() {
       <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
         <AlertDialogContent className="bg-[#1A1A1A] border-[#333] text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Tem certeza que quer sair do jogo?</AlertDialogTitle>
+            <AlertDialogTitle>Tem certeza que quer sair da atividade?</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowLeaveDialog(false)} className="bg-surface text-white border-none hover:bg-surface/80">
@@ -551,7 +551,7 @@ function Chat({ gameId }: { gameId: string }) {
 
   return (
     <section className="mt-8">
-      <h2 className="text-lg font-bold uppercase">Conversa do jogo</h2>
+      <h2 className="text-lg font-bold uppercase">Conversa da atividade</h2>
       <div ref={scrollRef} className="brutal-card mt-2 bg-paper p-3 max-h-80 overflow-y-auto grid gap-2">
         {messages.length === 0 && <p className="text-center text-sm text-ink/60 py-4">Sem mensagens ainda.</p>}
         {messages.map((m) => {

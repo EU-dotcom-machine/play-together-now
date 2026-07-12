@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { usePendingRequestCount } from "@/components/friends-section";
 
 const items = [
-  { to: "/discover", label: "Jogos", icon: Compass },
+  { to: "/discover", label: "Atividades", icon: Compass },
   { to: "/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/friends", label: "Amigos", icon: Users },
   { to: "/profile", label: "Perfil", icon: User },

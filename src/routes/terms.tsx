@@ -35,7 +35,7 @@ function TermsPage() {
           <h2 className="text-xl font-extrabold uppercase">2. O serviço</h2>
           <p className="text-ink/80">
             O Esportes Unidos é uma plataforma para conexão de pessoas que desejam praticar
-            esportes. Não organizamos, financiamos nem somos responsáveis pelos jogos criados
+            esportes. Não organizamos, financiamos nem somos responsáveis pelas atividades criadas
             pelos usuários.
           </p>
         </section>
@@ -44,7 +44,7 @@ function TermsPage() {
           <h2 className="text-xl font-extrabold uppercase">3. Conduta do usuário</h2>
           <p className="text-ink/80">
             É proibido: criar perfis falsos; usar linguagem ofensiva no chat; assediar outros
-            usuários; manipular o sistema de pontos; criar jogos com informações falsas. O
+            usuários; manipular o sistema de pontos; criar atividades com informações falsas. O
             descumprimento pode resultar em suspensão ou exclusão da conta.
           </p>
         </section>
@@ -53,7 +53,7 @@ function TermsPage() {
           <h2 className="text-xl font-extrabold uppercase">4. Responsabilidade</h2>
           <p className="text-ink/80">
             A prática de atividades físicas envolve riscos inerentes. O Esportes Unidos não se
-            responsabiliza por lesões, acidentes ou danos ocorridos durante os jogos. Cada
+            responsabiliza por lesões, acidentes ou danos ocorridos durante as atividades. Cada
             usuário é responsável pela sua própria segurança.
           </p>
         </section>

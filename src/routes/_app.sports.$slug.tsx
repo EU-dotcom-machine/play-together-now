@@ -64,7 +64,7 @@ function SportDetail() {
           .in("id", ids);
         names = Object.fromEntries(((profs ?? []) as any[]).map((p: any) => [p.id, p.display_name]));
       }
-      return rows.map((r) => ({ ...r, reviewer_name: names[r.reviewer_id] ?? "Jogador" }));
+      return rows.map((r) => ({ ...r, reviewer_name: names[r.reviewer_id] ?? "Atleta" }));
     },
   });
 
@@ -92,8 +92,8 @@ function SportDetail() {
       }
       return rows.map((r) => ({
         ...r,
-        reviewer_name: names[r.reviewer_id] ?? "Jogador",
-        reviewee_name: names[r.reviewee_id] ?? "Jogador",
+        reviewer_name: names[r.reviewer_id] ?? "Atleta",
+        reviewee_name: names[r.reviewee_id] ?? "Atleta",
       }));
     },
   });
@@ -131,7 +131,7 @@ function SportDetail() {
       </div>
 
       <section className="mt-6">
-        <h2 className="text-lg font-bold uppercase">Avaliações dos jogos</h2>
+        <h2 className="text-lg font-bold uppercase">Avaliações das atividades</h2>
         <ul className="mt-2 grid gap-2">
           {(gameReviews ?? []).length === 0 && (
             <li className="brutal-card p-4 text-center text-ink/60 text-sm bg-paper">
@@ -159,13 +159,13 @@ function SportDetail() {
 
       <section className="mt-8">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-bold uppercase">Avaliações de jogadores</h2>
+          <h2 className="text-lg font-bold uppercase">Avaliações de atletas</h2>
           <span className="text-xs text-ink/50">visíveis a você</span>
         </div>
         <ul className="mt-2 grid gap-2">
           {(playerReviews ?? []).length === 0 && (
             <li className="brutal-card p-4 text-center text-ink/60 text-sm bg-paper">
-              Você ainda não tem avaliações de jogadores neste esporte.
+              Você ainda não tem avaliações de atletas neste esporte.
             </li>
           )}
           {(playerReviews ?? []).map((r: any) => {

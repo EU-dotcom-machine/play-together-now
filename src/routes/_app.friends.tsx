@@ -146,7 +146,7 @@ function FriendsPage() {
         (r.requester_id === user?.id && r.addressee_id === targetId) ||
         (r.requester_id === targetId && r.addressee_id === user?.id),
     );
-    if (existing) return toast.info("Já existe um pedido com esse jogador");
+    if (existing) return toast.info("Já existe um pedido com esse atleta");
     const { error } = await supabase
       .from("friendships" as any)
       .insert({ requester_id: user!.id, addressee_id: targetId } as any);
@@ -194,7 +194,7 @@ function FriendsPage() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar jogador por nome..."
+            placeholder="Buscar atleta por nome..."
             className="flex-1 bg-transparent text-sm text-white placeholder:text-[#666] outline-none"
           />
         </label>
@@ -262,7 +262,7 @@ function FriendsPage() {
                 <Avatar name={p?.display_name} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-sm truncate">
-                    {p?.display_name ?? "Jogador"}
+                    {p?.display_name ?? "Atleta"}
                   </p>
                   <p className="text-xs text-[#FFD600] font-bold">
                     ⚡ {p?.points ?? 0} pts
@@ -308,14 +308,14 @@ function FriendsPage() {
                 <Avatar name={p?.display_name} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-sm truncate">
-                    {p?.display_name ?? "Jogador"}
+                    {p?.display_name ?? "Atleta"}
                   </p>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="text-xs text-[#FFD600] font-bold">
                       ⚡ {p?.points ?? 0} pts
                     </span>
                     <span className="text-xs text-[#888] font-bold">
-                      🎮 {games} jogos
+                      🎮 {games} atividades
                     </span>
                     <RatingBadge avg={p?.avg_rating} total={p?.total_reviews} />
                   </div>

@@ -110,7 +110,7 @@ export function FriendsSection() {
         (r.requester_id === user?.id && r.addressee_id === targetId) ||
         (r.requester_id === targetId && r.addressee_id === user?.id),
     );
-    if (existing) return toast.info("Já existe um pedido com esse jogador");
+    if (existing) return toast.info("Já existe um pedido com esse atleta");
     const { error } = await supabase
       .from("friendships" as any)
       .insert({ requester_id: user!.id, addressee_id: targetId } as any);
@@ -149,7 +149,7 @@ export function FriendsSection() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar jogador pelo nome"
+            placeholder="Buscar atleta pelo nome"
             className="flex-1 bg-transparent text-sm text-white placeholder:text-[#666] outline-none"
           />
         </label>
@@ -208,7 +208,7 @@ export function FriendsSection() {
               >
                 <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
-                  {p?.display_name ?? "Jogador"}
+                  {p?.display_name ?? "Atleta"}
                 </p>
                 <button
                   type="button"
@@ -248,7 +248,7 @@ export function FriendsSection() {
               >
                 <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
-                  {p?.display_name ?? "Jogador"}
+                  {p?.display_name ?? "Atleta"}
                 </p>
                 <button
                   type="button"

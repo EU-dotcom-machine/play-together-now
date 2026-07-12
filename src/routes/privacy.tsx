@@ -28,17 +28,17 @@ function PrivacyPage() {
           <p className="text-ink/80">
             Nome, e-mail e senha para criação de conta. Dados opcionais de perfil: bio, peso,
             altura, esportes, posições e nível. Localização geográfica (latitude/longitude) para
-            mostrar jogos próximos — coletada somente com sua autorização explícita. Marca
-            patrocinadora escolhida por você. Mensagens de chat em jogos confirmados. Avaliações
-            de jogos e jogadores. Dados de uso anônimos para melhoria do serviço.
+            mostrar atividades próximas — coletada somente com sua autorização explícita. Marca
+            patrocinadora escolhida por você. Mensagens de chat em atividades confirmadas. Avaliações
+            de atividades e atletas. Dados de uso anônimos para melhoria do serviço.
           </p>
         </section>
 
         <section className="mt-6 grid gap-3">
           <h2 className="text-xl font-extrabold uppercase">2. Como usamos seus dados</h2>
           <p className="text-ink/80">
-            Para conectar você a jogos próximos e a outros jogadores. Para calcular sua pontuação
-            e exibir seu perfil público. Para enviar notificações sobre jogos e amizades. Nunca
+            Para conectar você a atividades próximas e a outros atletas. Para calcular sua pontuação
+            e exibir seu perfil público. Para enviar notificações sobre atividades e amizades. Nunca
             vendemos seus dados a terceiros nem exibimos anúncios de terceiros.
           </p>
         </section>
@@ -49,7 +49,7 @@ function PrivacyPage() {
             Seus dados de perfil público (nome, pontos, esportes, nível) são visíveis a outros
             usuários cadastrados. Sua localização precisa, peso e altura são visíveis somente a
             você. Mensagens de chat são visíveis apenas ao organizador e participantes confirmados
-            do jogo.
+            da atividade.
           </p>
         </section>
 
