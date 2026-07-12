@@ -199,6 +199,7 @@ export function NotificationsBell() {
                   ) : (
                     <p className="text-xs text-white/70 mt-0.5">{n.body}</p>
                   )}
+                  <p className="text-[10px] uppercase text-white/50 mt-1 inline-flex items-center gap-1">
                     <Calendar className="size-3" />
                     {timeAgo(n.created_at)}
                   </p>
