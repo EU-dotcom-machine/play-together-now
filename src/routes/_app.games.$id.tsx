@@ -219,8 +219,22 @@ function GameDetail() {
             const price = game.price_cents === 0
               ? "de graça"
               : "R$ " + (game.price_cents / 100).toFixed(2);
+            const sportName = game.sports?.name ?? "";
+            const sportActionMap: Record<string, string> = {
+              "Corrida": "Bora correr!",
+              "Ciclismo": "Bora pedalar!",
+              "Surf": "Bora surfar!",
+              "Skate": "Bora skatear!",
+              "Natação": "Bora nadar!",
+              "MMA": "Bora treinar MMA!",
+              "Crossfit": "Bora fazer Crossfit!",
+              "Futebol": "Bora jogar Futebol!",
+              "Basquete": "Bora jogar Basquete!",
+              "Vôlei": "Bora jogar Vôlei!",
+            };
+            const action = sportActionMap[sportName] ?? `Bora jogar ${sportName}!`;
             const text = encodeURIComponent(
-              `🏅 Bora jogar ${game.sports?.name}!\n\n` +
+              `🏅 ${action}\n\n` +
               `*${game.title}*\n` +
               `📍 ${game.venues?.name}\n` +
               `📅 ${date} às ${time}\n` +
