@@ -229,10 +229,16 @@ function GameDetail() {
               "MMA": "Bora treinar MMA!",
               "Crossfit": "Bora fazer Crossfit!",
               "Futebol": "Bora jogar Futebol!",
+              "Futsal": "Bora jogar Futsal!",
               "Basquete": "Bora jogar Basquete!",
               "Vôlei": "Bora jogar Vôlei!",
+              "Handebol": "Bora jogar Handebol!",
+              "Tênis": "Bora jogar Tênis!",
+              "Padel": "Bora jogar Padel!",
+              "Beach Tennis": "Bora jogar Beach Tennis!",
+              "Pickleball": "Bora jogar Pickleball!",
             };
-            const action = sportActionMap[sportName] ?? `Bora jogar ${sportName}!`;
+            const action = sportActionMap[sportName] ?? (sportName ? `Bora jogar ${sportName}!` : "Bora jogar!");
             const text = encodeURIComponent(
               `🏅 ${action}\n\n` +
               `*${game.title}*\n` +
