@@ -475,7 +475,7 @@ function Discover() {
             <div className="brutal-card p-6 text-center">
               <p className="font-bold uppercase">Nenhum estabelecimento por perto</p>
               <p className="text-sm text-ink/70 mt-1">
-                Não há jogos abertos em locais públicos no raio selecionado.
+                Não há atividades abertas em locais públicos no raio selecionado.
               </p>
             </div>
           )}
@@ -511,7 +511,7 @@ function Discover() {
               )}
               <div className="mt-3 flex items-center justify-between gap-2">
                 <p className="text-xs font-bold text-ink/80">
-                  {v.count} {v.count === 1 ? "jogo disponível" : "jogos disponíveis"}
+                  {v.count} {v.count === 1 ? "atividade disponível" : "atividades disponíveis"}
                 </p>
                 <button
                   onClick={() => {
@@ -521,7 +521,7 @@ function Discover() {
                   }}
                   className="brutal-chip bg-pop text-[#111] text-xs font-bold px-3 py-1.5"
                 >
-                  Ver jogos
+                  Ver atividades
                 </button>
               </div>
               {(() => {
