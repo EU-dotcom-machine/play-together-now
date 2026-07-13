@@ -4,12 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown, Camera } from "lucide-react";
+import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown, Camera, Bell, BellOff } from "lucide-react";
 import { cn, formatDateDisplay } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { brandGradient } from "@/lib/brands";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { StickFigureRating } from "@/components/stick-figure-rating";
+import { usePushNotificationControl } from "@/hooks/use-push-notifications";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
