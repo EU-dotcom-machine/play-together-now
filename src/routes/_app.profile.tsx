@@ -515,6 +515,8 @@ function Profile() {
 
 
 
+        <PushNotificationsToggle />
+
         {acceptedClaim && (
           <Link
             to="/venue-panel"
