@@ -401,6 +401,45 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          endpoint: string | null
+          id: string
+          subscription: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          subscription: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          subscription?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sports: {
         Row: {
           avg_rating: number
