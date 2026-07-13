@@ -4,12 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown, Camera } from "lucide-react";
+import { LogOut, Save, Trophy, MapPin, RefreshCw, ChevronDown, Camera, Bell, BellOff } from "lucide-react";
 import { cn, formatDateDisplay } from "@/lib/utils";
 import { trackEvent } from "@/lib/posthog";
 import { brandGradient } from "@/lib/brands";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { StickFigureRating } from "@/components/stick-figure-rating";
+import { usePushNotificationControl } from "@/hooks/use-push-notifications";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
@@ -514,6 +515,8 @@ function Profile() {
 
 
 
+        <PushNotificationsToggle />
+
         {acceptedClaim && (
           <Link
             to="/venue-panel"
@@ -531,6 +534,47 @@ function Profile() {
         </button>
       </section>
     </main>
+  );
+}
+
+function PushNotificationsToggle() {
+  const { status, busy, enable, disable } = usePushNotificationControl();
+  if (status === "unsupported") return null;
+
+  const isOn = status === "enabled";
+  const denied = status === "denied";
+
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-4 grid gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {isOn ? <Bell className="size-4 text-pop" /> : <BellOff className="size-4 text-ink/60" />}
+          <span className="font-bold text-sm uppercase tracking-wide text-foreground">
+            Notificações push
+          </span>
+        </div>
+        <button
+          type="button"
+          disabled={busy || denied}
+          onClick={isOn ? disable : enable}
+          className={cn(
+            "px-4 py-2 rounded-full text-xs font-bold uppercase transition-colors disabled:opacity-50",
+            isOn
+              ? "bg-transparent border border-pop text-pop"
+              : "bg-pop text-[#111]",
+          )}
+        >
+          {busy ? "..." : isOn ? "Desativar" : "Ativar"}
+        </button>
+      </div>
+      <p className="text-xs text-ink/60">
+        {denied
+          ? "Permissão bloqueada no navegador. Ajuste nas configurações do site para reativar."
+          : isOn
+            ? "Você receberá avisos de novas atividades perto de você."
+            : "Ative para receber avisos quando aparecerem atividades perto de você."}
+      </p>
+    </div>
   );
 }
 
