@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -27,16 +27,39 @@ function isPreviewOrDev(): boolean {
   );
 }
 
+function isPushSupported(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    "serviceWorker" in navigator &&
+    "PushManager" in window &&
+    "Notification" in window
+  );
+}
+
+async function saveSubscription(userId: string, sub: PushSubscription) {
+  const subJson = sub.toJSON();
+  const endpoint = subJson.endpoint!;
+  // Deduplicate por endpoint: se já existe registro com este endpoint,
+  // atualiza user_id/subscription; caso contrário insere um novo.
+  const { error } = await supabase
+    .from("push_subscriptions" as any)
+    .upsert(
+      { user_id: userId, subscription: subJson as any, endpoint } as any,
+      { onConflict: "endpoint" } as any,
+    );
+  if (error) {
+    console.warn("[push] save subscription failed", error.message);
+    throw error;
+  }
+}
+
 export function usePushNotifications() {
   const { user } = useAuth();
 
   useEffect(() => {
     if (!user) return;
-    if (typeof window === "undefined") return;
     if (isPreviewOrDev()) return;
-    if (!("serviceWorker" in navigator)) return;
-    if (!("PushManager" in window)) return;
-    if (!("Notification" in window)) return;
+    if (!isPushSupported()) return;
 
     let cancelled = false;
 
@@ -48,11 +71,8 @@ export function usePushNotifications() {
         await navigator.serviceWorker.ready;
         if (cancelled) return;
 
-        let permission = Notification.permission;
-        if (permission === "default") {
-          permission = await Notification.requestPermission();
-        }
-        if (permission !== "granted") return;
+        // Só reativa se o usuário já concedeu permissão antes.
+        if (Notification.permission !== "granted") return;
 
         let sub = await reg.pushManager.getSubscription();
         if (!sub) {
@@ -65,15 +85,7 @@ export function usePushNotifications() {
             ) as ArrayBuffer,
           });
         }
-
-        const subJson = sub.toJSON();
-        // Upsert by endpoint (unique). Ignore duplicate-key errors.
-        const { error } = await supabase
-          .from("push_subscriptions" as any)
-          .insert({ user_id: user.id, subscription: subJson as any });
-        if (error && !/duplicate|unique/i.test(error.message)) {
-          console.warn("[push] save subscription failed", error.message);
-        }
+        await saveSubscription(user.id, sub);
       } catch (err) {
         console.warn("[push] setup failed", err);
       }
@@ -83,4 +95,89 @@ export function usePushNotifications() {
       cancelled = true;
     };
   }, [user]);
+}
+
+type PushStatus = "unsupported" | "denied" | "disabled" | "enabled" | "unknown";
+
+export function usePushNotificationControl() {
+  const { user } = useAuth();
+  const [status, setStatus] = useState<PushStatus>("unknown");
+  const [busy, setBusy] = useState(false);
+
+  const refresh = useCallback(async () => {
+    if (!isPushSupported() || isPreviewOrDev()) {
+      setStatus("unsupported");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      setStatus("denied");
+      return;
+    }
+    const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+    const sub = await reg?.pushManager.getSubscription();
+    setStatus(sub && Notification.permission === "granted" ? "enabled" : "disabled");
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh, user?.id]);
+
+  const enable = useCallback(async () => {
+    if (!user) return;
+    if (!isPushSupported() || isPreviewOrDev()) return;
+    setBusy(true);
+    try {
+      const reg =
+        (await navigator.serviceWorker.getRegistration("/sw.js")) ??
+        (await navigator.serviceWorker.register("/sw.js"));
+      await navigator.serviceWorker.ready;
+      let permission = Notification.permission;
+      if (permission === "default") permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        setStatus(permission === "denied" ? "denied" : "disabled");
+        return;
+      }
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: key.buffer.slice(
+            key.byteOffset,
+            key.byteOffset + key.byteLength,
+          ) as ArrayBuffer,
+        });
+      }
+      await saveSubscription(user.id, sub);
+      setStatus("enabled");
+    } finally {
+      setBusy(false);
+    }
+  }, [user]);
+
+  const disable = useCallback(async () => {
+    if (!isPushSupported()) return;
+    setBusy(true);
+    try {
+      const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+      const sub = await reg?.pushManager.getSubscription();
+      if (sub) {
+        const endpoint = sub.endpoint;
+        try {
+          await sub.unsubscribe();
+        } catch (err) {
+          console.warn("[push] unsubscribe failed", err);
+        }
+        await supabase
+          .from("push_subscriptions" as any)
+          .delete()
+          .eq("endpoint", endpoint);
+      }
+      setStatus("disabled");
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  return { status, busy, enable, disable, refresh };
 }
