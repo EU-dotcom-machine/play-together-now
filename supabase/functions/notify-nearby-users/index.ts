@@ -60,6 +60,16 @@ Deno.serve(async (req) => {
     }
 
     const game = payload.record;
+    const visibility = (game.visibility ?? "public") as string;
+
+    // Private activities never trigger notifications.
+    if (visibility === "private") {
+      return new Response(
+        JSON.stringify({ ok: true, skipped: "private", notified: 0, pushed: 0 }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(supabaseUrl, serviceKey, {
