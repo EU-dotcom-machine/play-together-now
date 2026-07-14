@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Navigate, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/bottom-nav";
@@ -14,6 +15,21 @@ function AppLayout() {
   const { user, loading } = useAuth();
   const location = useLocation();
   usePushNotifications();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        // Detect stale/invalid refresh tokens on PWA reopen — kick to login cleanly.
+        if (event === "TOKEN_REFRESHED" && !session) {
+          console.warn("[auth] TOKEN_REFRESHED without session — signing out");
+          supabase.auth.signOut().finally(() => {
+            if (typeof window !== "undefined") window.location.href = "/auth";
+          });
+        }
+      },
+    );
+    return () => subscription.unsubscribe();
+  }, []);
 
   const { data: onboardingFlag, isLoading: flagLoading } = useQuery({
     queryKey: ["onboarding-completed", user?.id],
