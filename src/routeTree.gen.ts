@@ -16,7 +16,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthResetRouteImport } from './routes/auth.reset'
+import { Route as AuthResetRouteImport } from './routes/auth_.reset'
 import { Route as AppVenuePanelRouteImport } from './routes/_app.venue-panel'
 import { Route as AppSportsRouteImport } from './routes/_app.sports'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
@@ -69,9 +69,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthResetRoute = AuthResetRouteImport.update({
-  id: '/reset',
-  path: '/reset',
-  getParentRoute: () => AuthRoute,
+  id: '/auth_/reset',
+  path: '/auth/reset',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppVenuePanelRoute = AppVenuePanelRouteImport.update({
   id: '/venue-panel',
@@ -159,7 +159,7 @@ const AppGamesIdEditRoute = AppGamesIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -184,7 +184,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -211,7 +211,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -226,7 +226,7 @@ export interface FileRoutesById {
   '/_app/profile': typeof AppProfileRouteWithChildren
   '/_app/sports': typeof AppSportsRouteWithChildren
   '/_app/venue-panel': typeof AppVenuePanelRoute
-  '/auth/reset': typeof AuthResetRoute
+  '/auth_/reset': typeof AuthResetRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_app/games/$id': typeof AppGamesIdRoute
@@ -304,7 +304,7 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/sports'
     | '/_app/venue-panel'
-    | '/auth/reset'
+    | '/auth_/reset'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_app/games/$id'
@@ -316,13 +316,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  AuthRoute: typeof AuthRouteWithChildren
+  AuthRoute: typeof AuthRoute
   McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  AuthResetRoute: typeof AuthResetRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -378,12 +379,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/reset': {
-      id: '/auth/reset'
-      path: '/reset'
+    '/auth_/reset': {
+      id: '/auth_/reset'
+      path: '/auth/reset'
       fullPath: '/auth/reset'
       preLoaderRoute: typeof AuthResetRouteImport
-      parentRoute: typeof AuthRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_app/venue-panel': {
       id: '/_app/venue-panel'
@@ -552,20 +553,10 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
-interface AuthRouteChildren {
-  AuthResetRoute: typeof AuthResetRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthResetRoute: AuthResetRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  AuthRoute: AuthRouteWithChildren,
+  AuthRoute: AuthRoute,
   McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
@@ -573,6 +564,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  AuthResetRoute: AuthResetRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
