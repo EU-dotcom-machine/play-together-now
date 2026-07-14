@@ -554,6 +554,7 @@ function PushNotificationsToggle() {
 
   const isOn = status === "enabled";
   const denied = status === "denied";
+  const desync = status === "desync";
 
   return (
     <div className="rounded-2xl border-2 border-pop bg-surface p-5 grid gap-3 shadow-[0_6px_18px_rgba(255,214,0,0.15)]">
@@ -578,11 +579,17 @@ function PushNotificationsToggle() {
           {busy ? "..." : isOn ? "Desativar" : "Ativar"}
         </button>
       </div>
-      <p className="text-xs text-ink/70 leading-relaxed">
-        {denied
-          ? "Permissão bloqueada no navegador. Ajuste nas configurações do site para reativar."
-          : "Ative para receber alertas de atividades próximas a você, mesmo com o app fechado."}
-      </p>
+      {desync ? (
+        <p className="text-xs font-semibold leading-relaxed rounded-lg border border-destructive/40 bg-destructive/10 text-destructive px-3 py-2">
+          Não foi possível salvar sua inscrição de notificações no servidor. Toque em <strong>Desativar</strong> e depois em <strong>Ativar</strong> novamente para tentar de novo.
+        </p>
+      ) : (
+        <p className="text-xs text-ink/70 leading-relaxed">
+          {denied
+            ? "Permissão bloqueada no navegador. Ajuste nas configurações do site para reativar."
+            : "Ative para receber alertas de atividades próximas a você, mesmo com o app fechado."}
+        </p>
+      )}
     </div>
   );
 }
