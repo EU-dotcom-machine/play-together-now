@@ -23,7 +23,7 @@ type AgendaGame = {
   latitude: number;
   longitude: number;
   sport_id: string | null;
-  visibility: "public" | "friends" | "cep";
+  visibility: "public" | "friends" | "cep" | "private";
   sports: { name: string; emoji: string } | null;
   venues: { name: string } | null;
   participants_count: number;

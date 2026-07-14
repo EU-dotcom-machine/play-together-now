@@ -32,7 +32,7 @@ type GameRow = {
   longitude: number;
   distance_meters: number | null;
   sport_id: string | null;
-  visibility: "public" | "friends" | "cep";
+  visibility: "public" | "friends" | "cep" | "private";
   cep: string | null;
   sports: { name: string; emoji: string; avg_rating: number | null; total_reviews: number | null } | null;
   venues: { name: string; address: string | null } | null;
