@@ -344,7 +344,7 @@ function AuthPage() {
         )}
         {mode === "signin" && (
           <Link
-            to="/auth_/reset"
+            to="/auth/reset"
             className="mt-3 text-xs text-ink/60 underline underline-offset-4 block text-center"
           >
             Esqueci minha senha
