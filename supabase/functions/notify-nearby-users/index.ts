@@ -95,10 +95,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    const users = (matches ?? []) as Array<{
+    let users = (matches ?? []) as Array<{
       user_id: string;
       distance_meters: number;
     }>;
+
+    // For "friends" visibility, restrict recipients to accepted friends of the host.
+    if (visibility === "friends" && users.length > 0) {
+      const { data: friendships, error: fErr } = await admin
+        .from("friendships")
+        .select("requester_id,addressee_id")
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${game.host_id},addressee_id.eq.${game.host_id}`);
+      if (fErr) {
+        console.error("friendships select error", fErr);
+        users = [];
+      } else {
+        const friendIds = new Set(
+          (friendships ?? []).map((f: any) =>
+            f.requester_id === game.host_id ? f.addressee_id : f.requester_id,
+          ),
+        );
+        users = users.filter((u) => friendIds.has(u.user_id));
+      }
+    }
 
     if (users.length === 0) {
       return new Response(JSON.stringify({ ok: true, notified: 0, pushed: 0 }), {
