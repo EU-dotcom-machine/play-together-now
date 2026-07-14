@@ -37,6 +37,13 @@ function isPushSupported(): boolean {
 }
 
 async function saveSubscription(_userId: string, sub: PushSubscription) {
+  // Guard: don't attempt to persist without a valid session — avoids 428C9/400 storms
+  // when the refresh token is stale (typical on PWA reopen).
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    console.warn("[push] skip save: no valid session");
+    return;
+  }
   const subJson = sub.toJSON();
   const endpoint = subJson.endpoint!;
   // Use RPC to bypass any REST/PostgREST quirks with upsert on this table.
