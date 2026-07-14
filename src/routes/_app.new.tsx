@@ -449,6 +449,7 @@ function NewGame() {
         .select("id")
         .maybeSingle();
       if (vErr) throw vErr;
+      if (!venue) throw new Error("Falha ao criar local");
 
       const { data: game, error: gErr } = await supabase
         .from("games")
@@ -472,6 +473,7 @@ function NewGame() {
         .select("id")
         .maybeSingle();
       if (gErr) throw gErr;
+      if (!game) throw new Error("Falha ao criar atividade");
 
       toast.success("Atividade criada!");
       trackEvent("game_created", { game_id: game.id });
