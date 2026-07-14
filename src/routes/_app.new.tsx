@@ -93,7 +93,7 @@ function NewGame() {
   const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
   const [durationMinutes, setDurationMinutes] = useState<number>(120);
-  const [visibility, setVisibility] = useState<"public" | "friends" | "cep">("public");
+  const [visibility, setVisibility] = useState<"public" | "friends" | "cep" | "private">("public");
   const [cep, setCep] = useState("");
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
