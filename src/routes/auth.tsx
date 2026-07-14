@@ -98,10 +98,11 @@ function AuthPage() {
     setForgotLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/auth/reset",
+        redirectTo: "https://esportesunidoseu.com.br/reset-password",
       });
       if (error) throw error;
       setForgotSent(email);
+      toast.success("Email enviado! Verifique sua caixa de entrada.");
     } catch (err: any) {
       if (isNetworkError(err)) {
         toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
