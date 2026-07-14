@@ -30,29 +30,55 @@ function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Supabase parses the recovery token from the URL hash automatically
-    // and fires a PASSWORD_RECOVERY event. We also check getSession() in case
-    // the event already fired before this component mounted.
     let mounted = true;
+
+    // Supabase puts errors in the URL hash on invalid/expired recovery links,
+    // e.g. #error=access_denied&error_code=otp_expired&error_description=...
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (hash.includes("error=") || hash.includes("error_code=")) {
+      const params = new URLSearchParams(hash.replace(/^#/, ""));
+      const code = params.get("error_code") || params.get("error");
+      const desc = params.get("error_description")?.replace(/\+/g, " ");
+      setLinkError(desc || code || "Link inválido");
+      return;
+    }
+
+    // Fallback timeout: if no session appears after 5s, treat the link as invalid.
+    const timeout = window.setTimeout(() => {
+      if (mounted) {
+        setSessionReady((ready) => {
+          if (!ready) setLinkError("Link de redefinição inválido ou expirado.");
+          return ready;
+        });
+      }
+    }, 5000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setSessionReady(true);
+        setLinkError(null);
+        window.clearTimeout(timeout);
       }
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      if (mounted && data.session) setSessionReady(true);
+      if (mounted && data.session) {
+        setSessionReady(true);
+        window.clearTimeout(timeout);
+      }
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      window.clearTimeout(timeout);
     };
   }, []);
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,10 +98,43 @@ function ResetPasswordPage() {
       toast.success("Senha alterada com sucesso!");
       navigate({ to: "/discover", replace: true });
     } catch (err: any) {
-      toast.error(err?.message ?? "Erro ao atualizar a senha");
+      const msg = String(err?.message ?? "");
+      if (/session|expired|invalid|jwt|token/i.test(msg)) {
+        setLinkError(msg || "Sessão de recuperação expirada.");
+      } else {
+        toast.error(msg || "Erro ao atualizar a senha");
+      }
     } finally {
       setLoading(false);
     }
+  }
+
+  if (linkError) {
+    return (
+      <main className="min-h-screen bg-paper px-5 py-10 flex flex-col">
+        <div className="max-w-md w-full mx-auto">
+          <h1 className="text-5xl font-extrabold uppercase leading-none">
+            Link inválido<span className="text-pop">.</span>
+          </h1>
+          <div className="mt-8 brutal-card-lg p-6 bg-paper">
+            <p className="font-bold uppercase tracking-wide text-lg">
+              Link de redefinição inválido ou expirado
+            </p>
+            <p className="mt-2 text-sm text-ink/70 break-words">{linkError}</p>
+            <p className="mt-4 text-sm text-ink/80">
+              Solicite um novo link para redefinir sua senha.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/auth", replace: true })}
+              className="brutal-card mt-5 w-full px-5 py-3 bg-pop text-[#111] font-bold uppercase tracking-wide"
+            >
+              Voltar ao login
+            </button>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -141,3 +200,4 @@ function ResetPasswordPage() {
     </main>
   );
 }
+
