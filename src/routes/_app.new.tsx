@@ -449,6 +449,7 @@ function NewGame() {
         .select("id")
         .maybeSingle();
       if (vErr) throw vErr;
+      if (!venue) throw new Error("Falha ao criar local");
 
       const { data: game, error: gErr } = await supabase
         .from("games")
