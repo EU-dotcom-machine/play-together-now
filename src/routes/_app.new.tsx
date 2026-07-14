@@ -473,6 +473,7 @@ function NewGame() {
         .select("id")
         .maybeSingle();
       if (gErr) throw gErr;
+      if (!game) throw new Error("Falha ao criar atividade");
 
       toast.success("Atividade criada!");
       trackEvent("game_created", { game_id: game.id });
