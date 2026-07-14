@@ -104,6 +104,34 @@ function ResetPasswordPage() {
     }
   }
 
+  if (linkError) {
+    return (
+      <main className="min-h-screen bg-paper px-5 py-10 flex flex-col">
+        <div className="max-w-md w-full mx-auto">
+          <h1 className="text-5xl font-extrabold uppercase leading-none">
+            Link inválido<span className="text-pop">.</span>
+          </h1>
+          <div className="mt-8 brutal-card-lg p-6 bg-paper">
+            <p className="font-bold uppercase tracking-wide text-lg">
+              Link de redefinição inválido ou expirado
+            </p>
+            <p className="mt-2 text-sm text-ink/70 break-words">{linkError}</p>
+            <p className="mt-4 text-sm text-ink/80">
+              Solicite um novo link para redefinir sua senha.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/auth", replace: true })}
+              className="brutal-card mt-5 w-full px-5 py-3 bg-pop text-[#111] font-bold uppercase tracking-wide"
+            >
+              Voltar ao login
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-paper px-5 py-10 flex flex-col">
       <div className="max-w-md w-full mx-auto">
@@ -167,3 +195,4 @@ function ResetPasswordPage() {
     </main>
   );
 }
+
