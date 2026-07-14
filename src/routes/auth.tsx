@@ -296,9 +296,11 @@ function AuthPage() {
                   {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
               </div>
-              <p className="text-xs text-ink/60 leading-relaxed">
-                At least 8 characters, including uppercase letters, numbers and special characters
-              </p>
+              {mode === "signup" && (
+                <p className="text-xs text-ink/60 leading-relaxed">
+                  Mínimo 8 caracteres, com letra maiúscula, número e caractere especial.
+                </p>
+              )}
             </Field>
 
             {mode === "signup" && (
