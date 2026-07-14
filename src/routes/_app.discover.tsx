@@ -10,6 +10,7 @@ import { cn, formatDateDisplay } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { VenueClaimDialog } from "@/components/venue-claim-dialog";
+import { VisibilityBadge } from "@/components/visibility-badge";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Atividades perto de você — Esportes Unidos" }] }),
