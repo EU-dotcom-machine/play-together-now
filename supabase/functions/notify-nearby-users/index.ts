@@ -16,6 +16,7 @@ type GameRow = {
   starts_at: string;
   latitude: number;
   longitude: number;
+  visibility?: "public" | "friends" | "cep" | "private" | string | null;
 };
 
 type WebhookPayload = {
