@@ -539,17 +539,28 @@ function Profile() {
 
 function PushNotificationsToggle() {
   const { status, busy, enable, disable } = usePushNotificationControl();
+  const autoPromptedRef = useRef(false);
+
+  useEffect(() => {
+    if (autoPromptedRef.current) return;
+    if (status !== "disabled") return;
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission !== "default") return;
+    autoPromptedRef.current = true;
+    void enable();
+  }, [status, enable]);
+
   if (status === "unsupported") return null;
 
   const isOn = status === "enabled";
   const denied = status === "denied";
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4 grid gap-2">
+    <div className="rounded-2xl border-2 border-pop bg-surface p-5 grid gap-3 shadow-[0_6px_18px_rgba(255,214,0,0.15)]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          {isOn ? <Bell className="size-4 text-pop" /> : <BellOff className="size-4 text-ink/60" />}
-          <span className="font-bold text-sm uppercase tracking-wide text-foreground">
+          {isOn ? <Bell className="size-5 text-pop" /> : <BellOff className="size-5 text-ink/60" />}
+          <span className="font-bold text-base uppercase tracking-wide text-foreground">
             Notificações push
           </span>
         </div>
@@ -567,16 +578,15 @@ function PushNotificationsToggle() {
           {busy ? "..." : isOn ? "Desativar" : "Ativar"}
         </button>
       </div>
-      <p className="text-xs text-ink/60">
+      <p className="text-xs text-ink/70 leading-relaxed">
         {denied
           ? "Permissão bloqueada no navegador. Ajuste nas configurações do site para reativar."
-          : isOn
-            ? "Você receberá avisos de novas atividades perto de você."
-            : "Ative para receber avisos quando aparecerem atividades perto de você."}
+          : "Ative para receber alertas de atividades próximas a você, mesmo com o app fechado."}
       </p>
     </div>
   );
 }
+
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
