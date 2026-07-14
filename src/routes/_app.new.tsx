@@ -376,7 +376,7 @@ function NewGame() {
   useEffect(() => {
     if (visibility !== "cep" || !user || cep) return;
     (async () => {
-      const { data } = await supabase.from("profiles").select("cep").eq("id", user.id).single();
+      const { data } = await supabase.from("profiles").select("cep").eq("id", user.id).maybeSingle();
       const c = (data as any)?.cep as string | null;
       if (c) setCep(c);
     })();
@@ -447,7 +447,7 @@ function NewGame() {
           venue_type: selectedPlaceId ? "establishment" : "personal",
         } as any)
         .select("id")
-        .single();
+        .maybeSingle();
       if (vErr) throw vErr;
 
       const { data: game, error: gErr } = await supabase
@@ -470,7 +470,7 @@ function NewGame() {
           longitude: coords.lng,
         } as any)
         .select("id")
-        .single();
+        .maybeSingle();
       if (gErr) throw gErr;
 
       toast.success("Atividade criada!");

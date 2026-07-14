@@ -72,7 +72,7 @@ function Discover() {
     queryKey: ["viewer-profile-cep", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("cep").eq("id", user!.id).single();
+      const { data } = await supabase.from("profiles").select("cep").eq("id", user!.id).maybeSingle();
       return (data as any) ?? null;
     },
   });
@@ -96,7 +96,7 @@ function Discover() {
         .from("profiles")
         .select("latitude,longitude")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       const lat = (prof as any)?.latitude as number | null;
       const lng = (prof as any)?.longitude as number | null;
       if (
@@ -144,7 +144,7 @@ function Discover() {
             .select("requester_id,addressee_id")
             .eq("status" as any, "accepted")
             .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
-          supabase.from("profiles").select("cep").eq("id", user.id).single(),
+          supabase.from("profiles").select("cep").eq("id", user.id).maybeSingle(),
           supabase
             .from("game_participants")
             .select("game_id")
