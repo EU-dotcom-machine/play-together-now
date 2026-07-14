@@ -98,7 +98,12 @@ function ResetPasswordPage() {
       toast.success("Senha alterada com sucesso!");
       navigate({ to: "/discover", replace: true });
     } catch (err: any) {
-      toast.error(err?.message ?? "Erro ao atualizar a senha");
+      const msg = String(err?.message ?? "");
+      if (/session|expired|invalid|jwt|token/i.test(msg)) {
+        setLinkError(msg || "Sessão de recuperação expirada.");
+      } else {
+        toast.error(msg || "Erro ao atualizar a senha");
+      }
     } finally {
       setLoading(false);
     }
