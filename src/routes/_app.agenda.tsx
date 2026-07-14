@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { getCourtImage } from "@/lib/sport-courts";
-import { MapPin, Users, Loader2, Lock, Zap } from "lucide-react";
+import { MapPin, Users, Loader2, Zap } from "lucide-react";
 import { cn, formatDateDisplay } from "@/lib/utils";
+import { VisibilityBadge } from "@/components/visibility-badge";
 
 export const Route = createFileRoute("/_app/agenda")({
   head: () => ({ meta: [{ title: "Agenda — Esportes Unidos" }] }),
@@ -22,7 +23,7 @@ type AgendaGame = {
   latitude: number;
   longitude: number;
   sport_id: string | null;
-  visibility: "public" | "friends" | "cep";
+  visibility: "public" | "friends" | "cep" | "private";
   sports: { name: string; emoji: string } | null;
   venues: { name: string } | null;
   participants_count: number;
@@ -263,7 +264,7 @@ function GameCard({ game }: { game: AgendaGame }) {
               className="text-white font-bold leading-tight inline-flex items-center gap-1.5"
               style={{ fontSize: "15px" }}
             >
-              {game.visibility !== "public" && <Lock className="size-3.5 text-white/80" />}
+              <VisibilityBadge visibility={game.visibility} />
               {game.title}
             </h3>
           </div>

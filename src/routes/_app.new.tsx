@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Loader2, MapPin, AlertTriangle, Search } from "lucide-react";
+import { Loader2, MapPin, AlertTriangle, Search, Globe, Users as UsersIcon, Lock, Home } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
 import { getGooglePlacesKey } from "@/lib/google-places.functions";
 
@@ -93,7 +93,7 @@ function NewGame() {
   const [price, setPrice] = useState("");
   const [urgency, setUrgency] = useState<"relaxado" | "normal" | "urgente">("normal");
   const [durationMinutes, setDurationMinutes] = useState<number>(120);
-  const [visibility, setVisibility] = useState<"public" | "friends" | "cep">("public");
+  const [visibility, setVisibility] = useState<"public" | "friends" | "cep" | "private">("public");
   const [cep, setCep] = useState("");
   const [description, setDescription] = useState("");
   const [gpsCoords, setGpsCoords] = useState<Coords | null>(null);
@@ -670,32 +670,36 @@ function NewGame() {
         </Field>
 
         <Field label="Visibilidade">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {([
-              { id: "public", label: "Público" },
-              { id: "friends", label: "Só amigos" },
-              { id: "cep", label: "Condomínio" },
+              { id: "public", label: "Público", Icon: Globe },
+              { id: "friends", label: "Amigos", Icon: UsersIcon },
+              { id: "private", label: "Privado", Icon: Lock },
+              { id: "cep", label: "Condomínio", Icon: Home },
             ] as const).map((v) => {
               const isActive = visibility === v.id;
+              const Icon = v.Icon;
               return (
                 <button
                   key={v.id}
                   type="button"
                   onClick={() => setVisibility(v.id)}
-                  className={`rounded-[10px] border py-2.5 text-xs font-bold uppercase tracking-wide ${
+                  className={`rounded-[10px] border py-2.5 text-xs font-bold uppercase tracking-wide inline-flex items-center justify-center gap-1.5 ${
                     isActive
                       ? "bg-[#FFD600] text-[#111] border-[#FFD600]"
                       : "bg-[#1E1E1E] border-[#2A2A2A] text-[#888]"
                   }`}
                 >
+                  <Icon className="size-3.5" />
                   {v.label}
                 </button>
               );
             })}
           </div>
           <p className="mt-1.5 text-[11px] text-ink/60 leading-snug">
-            {visibility === "public" && "Qualquer um na sua região vê essa atividade."}
-            {visibility === "friends" && "Só seus amigos enxergam essa atividade no Descobrir."}
+            {visibility === "public" && "Qualquer um na sua região vê essa atividade e recebe notificação."}
+            {visibility === "friends" && "Só seus amigos veem essa atividade e recebem notificação."}
+            {visibility === "private" && "Só convidados veem. Nenhuma notificação é enviada."}
             {visibility === "cep" && "Só pessoas com o mesmo CEP cadastrado enxergam."}
           </p>
         </Field>

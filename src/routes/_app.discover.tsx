@@ -10,6 +10,7 @@ import { cn, formatDateDisplay } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { VenueClaimDialog } from "@/components/venue-claim-dialog";
+import { VisibilityBadge } from "@/components/visibility-badge";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Atividades perto de você — Esportes Unidos" }] }),
@@ -31,7 +32,7 @@ type GameRow = {
   longitude: number;
   distance_meters: number | null;
   sport_id: string | null;
-  visibility: "public" | "friends" | "cep";
+  visibility: "public" | "friends" | "cep" | "private";
   cep: string | null;
   sports: { name: string; emoji: string; avg_rating: number | null; total_reviews: number | null } | null;
   venues: { name: string; address: string | null } | null;
@@ -670,7 +671,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
               {game.sports?.name}
             </p>
             <h3 className="text-white font-bold leading-tight inline-flex items-center gap-1.5" style={{ fontSize: "15px" }}>
-              {game.visibility !== "public" && <Lock className="size-3.5 text-white/80" />}
+              <VisibilityBadge visibility={game.visibility} />
               {game.title}
             </h3>
           </div>
