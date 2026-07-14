@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { getCourtImage } from "@/lib/sport-courts";
-import { MapPin, Users, Loader2, Lock, Zap } from "lucide-react";
+import { MapPin, Users, Loader2, Zap } from "lucide-react";
 import { cn, formatDateDisplay } from "@/lib/utils";
+import { VisibilityBadge } from "@/components/visibility-badge";
 
 export const Route = createFileRoute("/_app/agenda")({
   head: () => ({ meta: [{ title: "Agenda — Esportes Unidos" }] }),
