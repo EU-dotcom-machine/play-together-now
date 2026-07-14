@@ -264,7 +264,7 @@ function GameCard({ game }: { game: AgendaGame }) {
               className="text-white font-bold leading-tight inline-flex items-center gap-1.5"
               style={{ fontSize: "15px" }}
             >
-              {game.visibility !== "public" && <Lock className="size-3.5 text-white/80" />}
+              <VisibilityBadge visibility={game.visibility} />
               {game.title}
             </h3>
           </div>
