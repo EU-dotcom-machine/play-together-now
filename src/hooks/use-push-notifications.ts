@@ -36,26 +36,27 @@ function isPushSupported(): boolean {
   );
 }
 
-async function saveSubscription(userId: string, sub: PushSubscription) {
+async function saveSubscription(_userId: string, sub: PushSubscription) {
   const subJson = sub.toJSON();
   const endpoint = subJson.endpoint!;
-  // Deduplicate por endpoint: se já existe registro com este endpoint,
-  // atualiza user_id/subscription; caso contrário insere um novo.
-  const doUpsert = () =>
-    supabase
-      .from("push_subscriptions" as any)
-      .upsert(
-        { user_id: userId, subscription: subJson as any, endpoint } as any,
-        { onConflict: "endpoint" } as any,
-      );
-  let { error } = await doUpsert();
+  // Use RPC to bypass any REST/PostgREST quirks with upsert on this table.
+  const doCall = () =>
+    supabase.rpc("save_push_subscription" as any, {
+      p_subscription: subJson as any,
+      p_endpoint: endpoint,
+    } as any);
+  let { error } = await doCall();
   if (error) {
     console.error("[push] save subscription failed, retrying once", error);
-    ({ error } = await doUpsert());
+    ({ error } = await doCall());
   }
   if (error) {
     console.error("[push] save subscription failed after retry", error);
-    throw error;
+    const detail =
+      (error as any)?.code ||
+      (error as any)?.message ||
+      JSON.stringify(error);
+    throw new Error("Erro ao salvar: " + detail);
   }
 }
 
