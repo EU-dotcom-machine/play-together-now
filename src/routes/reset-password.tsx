@@ -30,29 +30,55 @@ function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Supabase parses the recovery token from the URL hash automatically
-    // and fires a PASSWORD_RECOVERY event. We also check getSession() in case
-    // the event already fired before this component mounted.
     let mounted = true;
+
+    // Supabase puts errors in the URL hash on invalid/expired recovery links,
+    // e.g. #error=access_denied&error_code=otp_expired&error_description=...
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (hash.includes("error=") || hash.includes("error_code=")) {
+      const params = new URLSearchParams(hash.replace(/^#/, ""));
+      const code = params.get("error_code") || params.get("error");
+      const desc = params.get("error_description")?.replace(/\+/g, " ");
+      setLinkError(desc || code || "Link inválido");
+      return;
+    }
+
+    // Fallback timeout: if no session appears after 5s, treat the link as invalid.
+    const timeout = window.setTimeout(() => {
+      if (mounted) {
+        setSessionReady((ready) => {
+          if (!ready) setLinkError("Link de redefinição inválido ou expirado.");
+          return ready;
+        });
+      }
+    }, 5000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setSessionReady(true);
+        setLinkError(null);
+        window.clearTimeout(timeout);
       }
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      if (mounted && data.session) setSessionReady(true);
+      if (mounted && data.session) {
+        setSessionReady(true);
+        window.clearTimeout(timeout);
+      }
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      window.clearTimeout(timeout);
     };
   }, []);
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
