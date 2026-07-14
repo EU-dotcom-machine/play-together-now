@@ -41,14 +41,20 @@ async function saveSubscription(userId: string, sub: PushSubscription) {
   const endpoint = subJson.endpoint!;
   // Deduplicate por endpoint: se já existe registro com este endpoint,
   // atualiza user_id/subscription; caso contrário insere um novo.
-  const { error } = await supabase
-    .from("push_subscriptions" as any)
-    .upsert(
-      { user_id: userId, subscription: subJson as any, endpoint } as any,
-      { onConflict: "endpoint" } as any,
-    );
+  const doUpsert = () =>
+    supabase
+      .from("push_subscriptions" as any)
+      .upsert(
+        { user_id: userId, subscription: subJson as any, endpoint } as any,
+        { onConflict: "endpoint" } as any,
+      );
+  let { error } = await doUpsert();
   if (error) {
-    console.warn("[push] save subscription failed", error.message);
+    console.error("[push] save subscription failed, retrying once", error);
+    ({ error } = await doUpsert());
+  }
+  if (error) {
+    console.error("[push] save subscription failed after retry", error);
     throw error;
   }
 }
