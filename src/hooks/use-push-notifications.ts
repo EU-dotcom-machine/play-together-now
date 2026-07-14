@@ -103,7 +103,13 @@ export function usePushNotifications() {
   }, [user]);
 }
 
-type PushStatus = "unsupported" | "denied" | "disabled" | "enabled" | "unknown";
+type PushStatus =
+  | "unsupported"
+  | "denied"
+  | "disabled"
+  | "enabled"
+  | "desync"
+  | "unknown";
 
 export function usePushNotificationControl() {
   const { user } = useAuth();
@@ -121,7 +127,22 @@ export function usePushNotificationControl() {
     }
     const reg = await navigator.serviceWorker.getRegistration("/sw.js");
     const sub = await reg?.pushManager.getSubscription();
-    setStatus(sub && Notification.permission === "granted" ? "enabled" : "disabled");
+    if (!sub || Notification.permission !== "granted") {
+      setStatus("disabled");
+      return;
+    }
+    // Check whether the DB has this endpoint registered.
+    const { data, error } = await supabase
+      .from("push_subscriptions" as any)
+      .select("endpoint")
+      .eq("endpoint", sub.endpoint)
+      .maybeSingle();
+    if (error) {
+      console.error("[push] refresh: db check failed", error);
+      setStatus("desync");
+      return;
+    }
+    setStatus(data ? "enabled" : "desync");
   }, []);
 
   useEffect(() => {
@@ -154,8 +175,13 @@ export function usePushNotificationControl() {
           ) as ArrayBuffer,
         });
       }
-      await saveSubscription(user.id, sub);
-      setStatus("enabled");
+      try {
+        await saveSubscription(user.id, sub);
+        setStatus("enabled");
+      } catch (err) {
+        console.error("[push] enable: could not persist subscription", err);
+        setStatus("desync");
+      }
     } finally {
       setBusy(false);
     }
