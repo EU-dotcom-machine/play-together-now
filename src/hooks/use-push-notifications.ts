@@ -45,12 +45,12 @@ async function saveSubscription(_userId: string, sub: PushSubscription) {
     return;
   }
   const subJson = sub.toJSON();
-  const endpoint = subJson.endpoint!;
   // Use RPC to bypass any REST/PostgREST quirks with upsert on this table.
+  // Note: `endpoint` is a GENERATED column derived from subscription->>'endpoint',
+  // so it must not be passed explicitly.
   const doCall = () =>
     supabase.rpc("save_push_subscription" as any, {
       p_subscription: subJson as any,
-      p_endpoint: endpoint,
     } as any);
   let { error } = await doCall();
   if (error) {

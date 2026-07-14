@@ -696,7 +696,7 @@ export type Database = {
       recalc_all_sport_ratings: { Args: never; Returns: undefined }
       recalc_sport_rating: { Args: { _sport_id: string }; Returns: undefined }
       save_push_subscription: {
-        Args: { p_endpoint: string; p_subscription: Json }
+        Args: { p_subscription: Json }
         Returns: undefined
       }
     }
