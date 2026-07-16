@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { friendlyError } from "@/lib/friendly-error";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -38,7 +39,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
       .update({ status: "finished" } as any)
       .eq("id", gameId);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success("Atividade encerrada.");
     qc.invalidateQueries({ queryKey: ["games"] });
     close();
@@ -53,9 +54,12 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
       .eq("id", gameId);
     if (gErr) {
       setBusy(false);
-      return toast.error(gErr.message);
+      return toast.error(friendlyError(gErr));
     }
-    await supabase.from("game_participants").delete().eq("game_id", gameId);
+    // Limpeza pós-cancelamento: o jogo já foi cancelado com sucesso acima.
+    // Se a remoção dos participantes falhar, apenas registra (não reverte o cancelamento).
+    const { error: pErr } = await supabase.from("game_participants").delete().eq("game_id", gameId);
+    if (pErr) console.warn("[manage-game] falha ao limpar participantes do jogo cancelado:", pErr.message);
     setBusy(false);
     toast.success("Atividade cancelada.");
     qc.invalidateQueries({ queryKey: ["games"] });
@@ -70,7 +74,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
       .update({ slots_total: Math.max(slotsFilled, 0), status: "full" } as any)
       .eq("id", gameId);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success("Vagas fechadas.");
     qc.invalidateQueries({ queryKey: ["game", gameId] });
     qc.invalidateQueries({ queryKey: ["games"] });

@@ -14,10 +14,14 @@ import { VisibilityBadge } from "@/components/visibility-badge";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Atividades perto de você — Esportes Unidos" }] }),
-  validateSearch: (search: Record<string, unknown>) => ({
-    tab: search.tab === "estabelecimentos" ? ("estabelecimentos" as const) : undefined,
-    venueId: typeof search.venueId === "string" ? search.venueId : undefined,
-  }),
+  // Chaves opcionais: sem elas, o TanStack Router exigiria `search` em toda
+  // navegação para /discover (Link/navigate). Manter opcional evita 14 erros de tipo.
+  validateSearch: (search: Record<string, unknown>): { tab?: "estabelecimentos"; venueId?: string } => {
+    const result: { tab?: "estabelecimentos"; venueId?: string } = {};
+    if (search.tab === "estabelecimentos") result.tab = "estabelecimentos";
+    if (typeof search.venueId === "string") result.venueId = search.venueId;
+    return result;
+  },
   component: Discover,
 });
 

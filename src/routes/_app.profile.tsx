@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { friendlyError } from "@/lib/friendly-error";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -188,7 +189,7 @@ function Profile() {
         cep: cepDigits ? cepDigits : null,
       } as any)
       .eq("id", user.id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success("Perfil salvo!");
     trackEvent("profile_updated");
     qc.invalidateQueries({ queryKey: ["profile", user.id] });
@@ -201,7 +202,7 @@ function Profile() {
       .from("profiles")
       .update({ sponsor_brand: id === "none" ? null : id } as any)
       .eq("id", user.id);
-    if (error) toast.error(error.message);
+    if (error) toast.error(friendlyError(error));
     else qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
@@ -214,7 +215,7 @@ function Profile() {
           .from("profiles")
           .update({ latitude: p.coords.latitude, longitude: p.coords.longitude } as any)
           .eq("id", user.id);
-        if (error) return toast.error(error.message);
+        if (error) return toast.error(friendlyError(error));
         toast.success("Localização atualizada!");
         qc.invalidateQueries({ queryKey: ["profile", user.id] });
       },

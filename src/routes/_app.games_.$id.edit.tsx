@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { friendlyError } from "@/lib/friendly-error";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,7 +75,7 @@ function EditGame() {
       } as any)
       .eq("id", id);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success("Atividade atualizada!");
     qc.invalidateQueries({ queryKey: ["game", id] });
     qc.invalidateQueries({ queryKey: ["games"] });
