@@ -83,7 +83,7 @@ export function Reviews({
   return (
     <section className="mt-8">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-lg font-bold uppercase">Avaliações</h2>
+        <h2 className="text-lg font-bold uppercase text-ink">Avaliações da atividade</h2>
         {avg && (
           <span className="brutal-chip bg-zap">
             <Star className="size-3 fill-ink" /> {avg} · {gameReviews.length}
@@ -115,7 +115,7 @@ export function Reviews({
       ) : (
         <ul className="mt-3 grid gap-2">
           {gameReviews.length === 0 && ended && (
-            <li className="brutal-card p-4 text-center text-ink/60 text-sm">Ainda sem avaliações.</li>
+            <li className="brutal-card p-4 text-center text-ink/60 text-sm">Atividade ainda sem avaliações.</li>
           )}
           {gameReviews.map((r) => (
             <li key={r.id} className="brutal-card p-3 bg-paper">
@@ -137,7 +137,7 @@ export function Reviews({
         return (
           <div className="mt-6">
             <div className="flex items-baseline justify-between gap-2">
-              <h3 className="text-base font-bold uppercase">Avaliações da atividade</h3>
+              <h3 className="text-base font-bold uppercase text-ink">Avaliações dos atletas</h3>
               {prAvg && (
                 <span className="brutal-chip bg-zap">
                   <Star className="size-3 fill-ink" /> {prAvg} · {playerReviews.length}
@@ -146,7 +146,7 @@ export function Reviews({
             </div>
             {!joined ? (
               <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">
-                Somente participantes confirmados podem ver as avaliações desta atividade.
+                Somente participantes confirmados podem ver as avaliações dos atletas desta atividade.
               </p>
             ) : playerReviews.length === 0 ? (
               <p className="brutal-card mt-2 p-4 text-center text-ink/60 text-sm">

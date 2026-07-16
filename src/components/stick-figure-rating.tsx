@@ -42,6 +42,34 @@ export function StickFigure({ filled, size = 16 }: { filled: number; size?: numb
   );
 }
 
+// Boneco comemorando (braços erguidos em V) para o overlay de confirmação.
+// SVG próprio no lugar do emoji 🙋: não corta em nenhuma plataforma/fonte
+// (o emoji em 120px com leading-none cortava o braço no mobile) e mantém a
+// identidade visual da marca.
+export function CelebrationFigure({ size = 140 }: { size?: number }) {
+  return (
+    <svg
+      viewBox="0 0 48 54"
+      width={size}
+      height={size * (54 / 48)}
+      className="mx-auto text-pop"
+      fill="none"
+      aria-hidden="true"
+    >
+      {/* cabeça */}
+      <circle cx="24" cy="11" r="6" fill="currentColor" />
+      {/* tronco */}
+      <line x1="24" y1="17" x2="24" y2="35" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+      {/* braços erguidos em V */}
+      <line x1="24" y1="22" x2="11" y2="9" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+      <line x1="24" y1="22" x2="37" y2="9" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+      {/* pernas */}
+      <line x1="24" y1="35" x2="14" y2="49" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+      <line x1="24" y1="35" x2="34" y2="49" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function StickFigureRating({ value, total = 0, size = "md", showLabel = true }: Props) {
   if (total <= 0) return null;
   const px = size === "sm" ? 14 : 22;
