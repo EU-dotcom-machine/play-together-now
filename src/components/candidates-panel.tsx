@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { friendlyError } from "@/lib/friendly-error";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -122,7 +123,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
       .eq("user_id", userId);
     if (error) {
       setBusy(null);
-      return toast.error(error.message);
+      return toast.error(friendlyError(error));
     }
     if (status === "confirmed") {
       const { count } = await supabase
@@ -131,8 +132,10 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
         .eq("game_id", gameId)
         .eq("status" as any, "confirmed");
       if ((count ?? 0) >= slotsTotal && gameStatus !== "full") {
-        await supabase.from("games").update({ status: "full" } as any).eq("id", gameId);
-        qc.invalidateQueries({ queryKey: ["game", gameId] });
+        // Estado derivado: se falhar, o jogo só não é marcado como "full"; participantes continuam corretos.
+        const { error: fullErr } = await supabase.from("games").update({ status: "full" } as any).eq("id", gameId);
+        if (fullErr) console.warn("[candidates] falha ao marcar jogo como full:", fullErr.message);
+        else qc.invalidateQueries({ queryKey: ["game", gameId] });
       }
       toast.success("Atleta confirmado!");
     } else {

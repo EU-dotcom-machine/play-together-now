@@ -93,7 +93,12 @@ export function NotificationsBell() {
       .map((n) => n.id);
     if (ids.length === 0) return;
     (async () => {
-      await supabase.from("notifications" as any).update({ read: true }).in("id", ids);
+      const { error } = await supabase.from("notifications" as any).update({ read: true }).in("id", ids);
+      if (error) {
+        // Operação passiva: apenas registra, sem incomodar o usuário com toast.
+        console.warn("[notifications] falha ao marcar como lidas:", error.message);
+        return;
+      }
       qc.invalidateQueries({ queryKey: ["notifications", user.id] });
     })();
   }, [open, user, notifications, qc]);
@@ -102,7 +107,11 @@ export function NotificationsBell() {
 
   async function markRead(n: NotificationRow) {
     if (!n.read) {
-      await supabase.from("notifications" as any).update({ read: true }).eq("id", n.id);
+      const { error } = await supabase.from("notifications" as any).update({ read: true }).eq("id", n.id);
+      if (error) {
+        console.warn("[notifications] falha ao marcar como lida:", error.message);
+        return;
+      }
       qc.invalidateQueries({ queryKey: ["notifications", user?.id] });
     }
   }

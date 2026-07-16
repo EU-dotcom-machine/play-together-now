@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { friendlyError } from "@/lib/friendly-error";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,12 +154,12 @@ function GameDetail() {
         .update({ status: "pending" } as any)
         .eq("game_id", id)
         .eq("user_id", user.id);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(friendlyError(error));
     } else {
       const { error } = await supabase
         .from("game_participants")
         .insert({ game_id: id, user_id: user.id, status: "pending" } as any);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(friendlyError(error));
     }
     toast.success("Pedido enviado! Aguarde a confirmação.");
     qc.invalidateQueries({ queryKey: ["participants", id] });
@@ -167,7 +168,8 @@ function GameDetail() {
 
   async function leave() {
     if (!user) return;
-    await supabase.from("game_participants").delete().eq("game_id", id).eq("user_id", user.id);
+    const { error } = await supabase.from("game_participants").delete().eq("game_id", id).eq("user_id", user.id);
+    if (error) return toast.error(friendlyError(error));
     qc.invalidateQueries({ queryKey: ["participants", id] });
   }
 
@@ -546,7 +548,12 @@ function Chat({ gameId }: { gameId: string }) {
     if (!user || !text.trim()) return;
     const content = text.trim().slice(0, 500);
     setText("");
-    await supabase.from("messages").insert({ game_id: gameId, user_id: user.id, content });
+    const { error } = await supabase.from("messages").insert({ game_id: gameId, user_id: user.id, content });
+    if (error) {
+      // Restaura o texto para o usuário não perder a mensagem digitada.
+      setText(content);
+      toast.error("Não foi possível enviar a mensagem. Tente novamente.");
+    }
   }
 
   return (

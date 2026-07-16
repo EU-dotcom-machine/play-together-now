@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { friendlyError } from "@/lib/friendly-error";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Star, Loader2 } from "lucide-react";
@@ -254,7 +255,7 @@ function GameReviewForm({
       comment: comment.trim().slice(0, 500) || null,
     });
     setSaving(false);
-    if (error) toast.error(error.message);
+    if (error) toast.error(friendlyError(error));
     else {
       toast.success("Avaliação enviada!");
       setRating(0);
@@ -350,7 +351,7 @@ function PlayerRow({
       comment: comment.trim().slice(0, 300) || null,
     });
     setSaving(false);
-    if (error) toast.error(error.message);
+    if (error) toast.error(friendlyError(error));
     else {
       toast.success(`Avaliação de ${name} enviada`);
       setOpen(false);

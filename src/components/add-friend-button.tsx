@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { friendlyError } from "@/lib/friendly-error";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
@@ -56,7 +57,7 @@ export function AddFriendButton({
       .from("friendships" as any)
       .insert({ requester_id: user!.id, addressee_id: targetId } as any);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success("Pedido enviado!");
     invalidate();
   }
@@ -68,7 +69,7 @@ export function AddFriendButton({
       .update({ status: "accepted" } as any)
       .eq("id", (data!.row as any).id);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success("Amizade confirmada!");
     invalidate();
   }
@@ -80,7 +81,7 @@ export function AddFriendButton({
       .delete()
       .eq("id", (data!.row as any).id);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     invalidate();
   }
 
