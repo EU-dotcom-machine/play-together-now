@@ -167,10 +167,25 @@ function Profile() {
   const cepFormatError =
     cepDigits.length > 0 && cepDigits.length !== 8 ? "CEP deve ter 8 dígitos." : null;
 
+  // Normaliza número digitado pelo usuário: aceita vírgula decimal ("1,76" → 1.76).
+  function parseUserNumber(raw: string): number | null {
+    const n = Number(raw.replace(",", "."));
+    return Number.isFinite(n) ? n : null;
+  }
+
   async function save() {
     if (!user) return;
     if (cepFormatError) {
       toast.error(cepFormatError);
+      return;
+    }
+    const weightKg = weight ? parseUserNumber(weight) : null;
+    // Altura: se vier em metros (ex.: 1,76), converte para cm; valida faixa plausível.
+    let heightCm = height ? parseUserNumber(height) : null;
+    if (heightCm != null && heightCm > 0 && heightCm < 3) heightCm = Math.round(heightCm * 100);
+    if (heightCm != null) heightCm = Math.round(heightCm);
+    if (heightCm != null && (heightCm < 100 || heightCm > 250)) {
+      toast.error("Altura inválida — informe em centímetros (ex.: 176).");
       return;
     }
     const { error } = await supabase
@@ -178,8 +193,8 @@ function Profile() {
       .update({
         display_name: display,
         bio,
-        weight_kg: weight ? Number(weight) : null,
-        height_cm: height ? Number(height) : null,
+        weight_kg: weightKg,
+        height_cm: heightCm,
         years_playing: years,
         dominant_side: side,
         skill_level: level,
@@ -679,7 +694,7 @@ function HistoryList({ items }: { items: any[] }) {
   if (!items || items.length === 0) {
     return (
       <p className="text-sm text-ink/60 text-center py-4">
-        Nenhuma atividade ainda. Que tal criar o primeiro?
+        Nenhuma atividade ainda. Que tal criar a primeira?
       </p>
     );
   }
