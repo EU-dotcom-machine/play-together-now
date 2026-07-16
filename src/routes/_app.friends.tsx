@@ -316,7 +316,7 @@ function FriendsPage() {
                       ⚡ {p?.points ?? 0} pts
                     </span>
                     <span className="text-xs text-[#888] font-bold">
-                      🎮 {games} atividades
+                      🎮 {games} {games === 1 ? "atividade" : "atividades"}
                     </span>
                     <RatingBadge avg={p?.avg_rating} total={p?.total_reviews} />
                   </div>

@@ -458,7 +458,7 @@ function Discover() {
                     Limpar filtro
                   </button>
                 ) : (
-                  "Que tal criar o primeiro?"
+                  "Que tal criar a primeira?"
                 )}
               </p>
             </div>
