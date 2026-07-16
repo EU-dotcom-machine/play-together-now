@@ -18,9 +18,12 @@ function getPasswordErrors(password: string) {
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar — Esportes Unidos" }, { name: "robots", content: "noindex" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
-  }),
+  // Chave opcional: evita que o TanStack Router exija `search` em navegações para /auth.
+  validateSearch: (s: Record<string, unknown>): { redirect?: string } => {
+    const result: { redirect?: string } = {};
+    if (typeof s.redirect === "string") result.redirect = s.redirect;
+    return result;
+  },
   component: AuthPage,
 });
 
