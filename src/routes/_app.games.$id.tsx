@@ -12,6 +12,7 @@ import { Reviews } from "@/components/reviews";
 import { CandidatesPanel } from "@/components/candidates-panel";
 import { trackEvent } from "@/lib/posthog";
 import { AddFriendButton } from "@/components/add-friend-button";
+import { CelebrationFigure } from "@/components/stick-figure-rating";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -449,7 +450,9 @@ function GameDetail() {
       {celebrate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-[fadeIn_0.2s_ease-out]">
           <div className="text-center">
-            <div className="text-[120px] leading-none animate-[pop_0.6s_ease-out]">🙋</div>
+            <div className="animate-[pop_0.6s_ease-out]">
+              <CelebrationFigure size={140} />
+            </div>
             <p className="mt-2 text-6xl font-extrabold uppercase text-pop tracking-tight">EU!</p>
             <p className="mt-3 text-lg font-bold text-white">Você foi confirmado!</p>
           </div>
