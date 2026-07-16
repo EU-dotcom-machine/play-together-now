@@ -176,7 +176,7 @@ export function ManageGameSheet({ open, onClose, gameId, slotsFilled }: Props) {
                 <button
                   disabled={busy}
                   onClick={() => confirm.onConfirm()}
-                  className="py-3 rounded-full font-bold flex items-center justify-center gap-2 bg-pop text-[#111]"
+                  className="py-3 rounded-full font-bold flex items-center justify-center gap-2 bg-pop text-primary-foreground"
                 >
                   {busy && <Loader2 className="size-4 animate-spin" />}
                   Confirmar

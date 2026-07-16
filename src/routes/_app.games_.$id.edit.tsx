@@ -164,7 +164,7 @@ function EditGame() {
                 key={u}
                 type="button"
                 onClick={() => setUrgency(u)}
-                className={`brutal-card py-2 text-xs font-bold uppercase ${urgency === u ? (u === "urgente" ? "bg-urgent text-white" : u === "normal" ? "bg-pop text-[#111]" : "bg-success text-white") : "bg-paper"}`}
+                className={`brutal-card py-2 text-xs font-bold uppercase ${urgency === u ? (u === "urgente" ? "bg-urgent text-white" : u === "normal" ? "bg-pop text-primary-foreground" : "bg-success text-white") : "bg-paper"}`}
               >
                 {u}
               </button>
@@ -182,7 +182,7 @@ function EditGame() {
 
         <button
           disabled={saving}
-          className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase flex items-center justify-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60"
+          className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-primary-foreground font-bold uppercase flex items-center justify-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60"
         >
           {saving && <Loader2 className="size-4 animate-spin" />}
           Salvar alterações

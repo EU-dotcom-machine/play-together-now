@@ -295,7 +295,7 @@ function GameDetail() {
               <span className="brutal-chip bg-paper">
                 {formatDateDisplay(start, { hour: "2-digit", minute: "2-digit" })}
               </span>
-              <span className={cn("brutal-chip", free ? "bg-zap text-[#111]" : "bg-paper")}>
+              <span className={cn("brutal-chip", free ? "bg-zap text-primary-foreground" : "bg-paper")}>
                 {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
               </span>
             </div>
@@ -347,7 +347,7 @@ function GameDetail() {
           <button
             onClick={sayEu}
             disabled={full}
-            className="w-full px-5 py-5 bg-pop text-[#111] font-extrabold text-2xl uppercase rounded-full active:translate-y-[1px] disabled:opacity-50 flex items-center justify-center gap-3 shadow-[0_8px_24px_rgba(255,214,0,0.25)]"
+            className="w-full px-5 py-5 bg-pop text-primary-foreground font-extrabold text-2xl uppercase rounded-full active:translate-y-[1px] disabled:opacity-50 flex items-center justify-center gap-3 shadow-[0_8px_24px_rgba(255,214,0,0.25)]"
           >
             <span className={cn("inline-block transition-transform origin-bottom-left", armRaised && "animate-[arm_1.4s_ease-out]")}>🙋</span>
             {full ? "Completo" : "EU!"}
@@ -370,7 +370,7 @@ function GameDetail() {
             <AlertDialogCancel onClick={() => setShowLeaveDialog(false)} className="bg-surface text-white border-none hover:bg-surface/80">
               Cancelar
             </AlertDialogCancel>
-            <AlertDialogAction onClick={leave} className="bg-[#FF4444] text-white hover:bg-[#FF4444]/90">
+            <AlertDialogAction onClick={leave} className="bg-urgent text-white hover:bg-urgent/90">
               Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -391,8 +391,8 @@ function GameDetail() {
 
       <div className="mt-8 brutal-card p-3 bg-zap flex items-center gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold uppercase text-[#111]/70">Criado por</p>
-          <p className="font-bold text-[#111] truncate">{game.host?.display_name ?? "—"}</p>
+          <p className="text-xs font-bold uppercase text-primary-foreground/70">Criado por</p>
+          <p className="font-bold text-primary-foreground truncate">{game.host?.display_name ?? "—"}</p>
         </div>
         {game.host_id && user && user.id !== game.host_id && (
           <AddFriendButton targetId={game.host_id} />
@@ -404,7 +404,7 @@ function GameDetail() {
       <ul className="mt-2 grid gap-2">
         {confirmed.map((p) => (
           <li key={p.user_id} className="brutal-card p-3 flex items-center gap-3 bg-paper">
-            <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-[#111]">
+            <div className="size-9 rounded-full bg-zap border border-ink/20 flex items-center justify-center font-bold text-primary-foreground">
               {p.profiles?.display_name?.[0]?.toUpperCase() ?? "?"}
             </div>
             <div className="flex-1 min-w-0">
@@ -567,7 +567,7 @@ function Chat({ gameId }: { gameId: string }) {
         {messages.map((m) => {
           const mine = m.user_id === user?.id;
           return (
-            <div key={m.id} className={cn("max-w-[80%] px-3 py-2 border border-ink/20 text-sm rounded-lg", mine ? "ml-auto bg-pop text-[#111]" : "bg-[#2A2A2A] text-white")}>
+            <div key={m.id} className={cn("max-w-[80%] px-3 py-2 border border-ink/20 text-sm rounded-lg", mine ? "ml-auto bg-pop text-primary-foreground" : "bg-border text-white")}>
               {!mine && <p className="text-[10px] font-bold uppercase opacity-70">{m.profiles?.display_name}</p>}
               {m.content}
             </div>
@@ -576,7 +576,7 @@ function Chat({ gameId }: { gameId: string }) {
       </div>
       <form onSubmit={send} className="mt-2 flex gap-2">
         <input value={text} onChange={(e) => setText(e.target.value)} className="input-brutal flex-1" placeholder="Mensagem…" maxLength={500} />
-        <button className="brutal-card-lg px-4 bg-pop text-[#111] font-bold">
+        <button className="brutal-card-lg px-4 bg-pop text-primary-foreground font-bold">
           <Send className="size-4" />
         </button>
       </form>

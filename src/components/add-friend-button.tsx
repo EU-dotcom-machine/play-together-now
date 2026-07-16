@@ -96,7 +96,7 @@ export function AddFriendButton({
         type="button"
         onClick={send}
         disabled={busy}
-        className={`${cls} rounded-full bg-pop text-[#111] font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
+        className={`${cls} rounded-full bg-pop text-primary-foreground font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
       >
         <UserPlus className="size-3.5" /> Adicionar
       </button>
@@ -108,7 +108,7 @@ export function AddFriendButton({
         type="button"
         onClick={remove}
         disabled={busy}
-        className={`${cls} rounded-full bg-[#1E1E1E] border border-pop text-pop font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
+        className={`${cls} rounded-full bg-surface border border-pop text-pop font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
       >
         <Clock className="size-3.5" /> Pendente
       </button>
@@ -120,7 +120,7 @@ export function AddFriendButton({
         type="button"
         onClick={accept}
         disabled={busy}
-        className={`${cls} rounded-full bg-pop text-[#111] font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
+        className={`${cls} rounded-full bg-pop text-primary-foreground font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
       >
         <Check className="size-3.5" /> Aceitar
       </button>
@@ -131,7 +131,7 @@ export function AddFriendButton({
       type="button"
       onClick={remove}
       disabled={busy}
-      className={`${cls} rounded-full bg-[#1E1E1E] border border-border text-foreground font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
+      className={`${cls} rounded-full bg-surface border border-border text-foreground font-bold uppercase inline-flex items-center gap-1.5 disabled:opacity-50`}
     >
       <UserMinus className="size-3.5" /> Amigos
     </button>
