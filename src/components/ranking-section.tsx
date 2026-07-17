@@ -17,6 +17,38 @@ function currentSeason(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
 }
 
+// Localização aproximada e SEM dados sensíveis: mostra no máximo "Bairro, Cidade",
+// nunca rua/número (muitos locais são endereços residenciais). Se não der para
+// extrair com segurança, retorna null (não mostra nada).
+const STREET_KEYWORDS =
+  /(rua|avenida|av\.?|alameda|al\.?|travessa|rodovia|estrada|pra[çc]a|largo|viela|passagem|residencial|condom[íi]nio)\b/i;
+function coarseLocation(address: string | null): string | null {
+  if (!address) return null;
+  const tokens = address
+    .split(/,|\s-\s/)
+    .map((t) => t.trim())
+    .filter(
+      (t) =>
+        t &&
+        !/^bra[sz]il$/i.test(t) &&
+        !/^\d{5}-?\d{3}$/.test(t) && // CEP
+        !/^regi[ãa]o/i.test(t),
+    );
+  let city: string | null = null;
+  let hood: string | null = null;
+  const ufIdx = tokens.findIndex((t) => /^[A-Z]{2}$/.test(t));
+  const anchorIdx =
+    ufIdx > 0 ? ufIdx - 1 : tokens.findIndex((t) => /s[ãa]o paulo/i.test(t));
+  if (anchorIdx > 0) {
+    city = tokens[anchorIdx];
+    const cand = tokens[anchorIdx - 1];
+    // bairro só se não tiver número nem parecer rua/estabelecimento
+    if (cand && !/\d/.test(cand) && !STREET_KEYWORDS.test(cand)) hood = cand;
+  }
+  const parts = [hood, city].filter(Boolean);
+  return parts.length ? parts.join(", ") : null;
+}
+
 function Segmented<T extends string>({
   value,
   onChange,
@@ -162,7 +194,7 @@ export function RankingSection() {
       </div>
 
       {/* Lista */}
-      <div className="mt-4 grid gap-2">
+      <div className="mt-4 space-y-2">
         {loading ? (
           <div className="py-8 flex justify-center">
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -179,7 +211,7 @@ export function RankingSection() {
             const name = isAthlete
               ? (row as AthleteRow).display_name ?? "Atleta"
               : (row as VenueRow).name ?? "Espaço";
-            const sub = isAthlete ? null : (row as VenueRow).address;
+            const sub = isAthlete ? null : coarseLocation((row as VenueRow).address);
             const avatar = isAthlete ? (row as AthleteRow).avatar_url : null;
             return (
               <div key={i} className="brutal-card p-3 flex items-center gap-3">
