@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "activities": "Atividades",
+    "agenda": "Agenda",
+    "friends": "Amigos",
+    "profile": "Perfil"
+  },
+  "landing": {
+    "beta": "v1 • beta",
+    "title_line1": "Bora",
+    "title_line2": "jogar",
+    "dot": ".",
+    "subtitle": "Falta gente pra completar o time? O Esportes Unidos conecta você com atividades rolando agora, perto de você. Diga EU! e entra na atividade.",
+    "cta": "Entrar / Criar conta",
+    "feature1_title": "Diga EU",
+    "feature1_text": "Toque um botão, levante o braço, garanta sua vaga.",
+    "feature2_title": "Perto de você",
+    "feature2_text": "A gente mostra atividades por distância, em tempo real.",
+    "feature3_title": "Match e chat",
+    "feature3_text": "Confirmou? Já cai no grupo da atividade."
+  },
+  "auth": {
+    "title_signin": "Entrar",
+    "title_signup": "Criar conta",
+    "subtitle_signup": "Bora pra próxima atividade.",
+    "subtitle_signin": "Já é da pelada?",
+    "name_label": "Como te chamam",
+    "name_placeholder": "Ex.: Bruno",
+    "email": "E-mail",
+    "email_placeholder": "voce@exemplo.com",
+    "password": "Senha",
+    "password_hint": "Mínimo 8 caracteres, com letra maiúscula, número e caractere especial.",
+    "show_password": "Mostrar senha",
+    "hide_password": "Ocultar senha",
+    "terms_accept": "Li e aceito os <1>Termos de Uso</1> e a <3>Política de Privacidade</3>",
+    "submit_signin": "Entrar",
+    "submit_signup": "Criar conta",
+    "forgot_link": "Esqueci minha senha",
+    "forgot_submit": "Enviar link de redefinição",
+    "forgot_sent_title": "Verifique seu e-mail ✉️",
+    "forgot_sent_body": "Enviamos um link para {{email}}. Clique nele para criar uma nova senha.",
+    "back_to_login": "Voltar ao login",
+    "no_account": "Não tem conta? Criar uma",
+    "have_account": "Já tem conta? Entrar",
+    "terms": "Termos de Uso",
+    "privacy": "Política de Privacidade",
+    "verify_title": "Verifique seu e-mail ✉️",
+    "verify_body": "Enviamos um link de confirmação para {{email}}. Verifique sua caixa de entrada antes de entrar.",
+    "resend": "Reenviar e-mail",
+    "retry": "Tentar novamente"
+  },
+  "lang": {
+    "label": "Idioma",
+    "pt": "Português",
+    "ja": "日本語"
+  }
+}

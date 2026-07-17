@@ -1,6 +1,8 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Zap, MapPin, Users } from "lucide-react";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,6 +18,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
   if (loading) return null;
   if (user) return <Navigate to="/discover" replace />;
 
@@ -26,20 +29,23 @@ function Landing() {
         <div className="absolute -top-24 -left-20 size-52 rounded-full bg-zap border-2 border-ink" aria-hidden />
 
         <div className="relative z-10 max-w-md mx-auto">
-          <span className="brutal-chip bg-zap">v1 • beta</span>
+          <div className="flex items-center justify-between">
+            <span className="brutal-chip bg-zap">{t("landing.beta")}</span>
+            <LanguageSwitcher />
+          </div>
           <h1 className="mt-6 text-6xl font-extrabold leading-[0.9] uppercase [text-shadow:0_2px_14px_rgba(0,0,0,0.45)]">
-            Bora<br />jogar<span className="text-pop">.</span>
+            {t("landing.title_line1")}<br />
+            {t("landing.title_line2")}
+            <span className="text-pop">{t("landing.dot")}</span>
           </h1>
-          <p className="mt-5 text-lg font-medium text-ink max-w-sm">
-            Falta gente pra completar o time? O Esportes Unidos conecta você com atividades rolando agora, perto de você. Diga EU! e entra na atividade.
-          </p>
+          <p className="mt-5 text-lg font-medium text-ink max-w-sm">{t("landing.subtitle")}</p>
 
           <div className="mt-8 flex flex-col gap-3">
             <Link
               to="/auth"
               className="brutal-card-lg flex items-center justify-between px-5 py-4 bg-ink text-paper font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             >
-              Entrar / Criar conta <ArrowRight className="size-5" />
+              {t("landing.cta")} <ArrowRight className="size-5" />
             </Link>
           </div>
         </div>
@@ -47,9 +53,9 @@ function Landing() {
 
       <section className="px-5 pb-24">
         <div className="max-w-md mx-auto grid gap-3">
-          <Feature icon={Zap} title="Diga EU" text="Toque um botão, levante o braço, garanta sua vaga." />
-          <Feature icon={MapPin} title="Perto de você" text="A gente mostra atividades por distância, em tempo real." />
-          <Feature icon={Users} title="Match e chat" text="Confirmou? Já cai no grupo da atividade." />
+          <Feature icon={Zap} title={t("landing.feature1_title")} text={t("landing.feature1_text")} />
+          <Feature icon={MapPin} title={t("landing.feature2_title")} text={t("landing.feature2_text")} />
+          <Feature icon={Users} title={t("landing.feature3_title")} text={t("landing.feature3_text")} />
         </div>
       </section>
     </main>
