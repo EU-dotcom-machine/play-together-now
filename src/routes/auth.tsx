@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { trackEvent } from "@/lib/posthog";
+import { useTranslation, Trans } from "react-i18next";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 function getPasswordErrors(password: string) {
   const errors: string[] = [];
@@ -29,6 +31,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -176,13 +179,16 @@ function AuthPage() {
   return (
     <main className="min-h-screen bg-paper px-5 py-10 flex flex-col">
       <div className="max-w-md w-full mx-auto">
-        <h1 className="text-5xl font-extrabold uppercase leading-none">
-          {forgotMode ? "Redefinir senha" : mode === "signup" ? "Criar conta" : "Entrar"}
+        <div className="flex justify-end">
+          <LanguageSwitcher />
+        </div>
+        <h1 className="mt-2 text-5xl font-extrabold uppercase leading-none">
+          {mode === "signup" ? t("auth.title_signup") : t("auth.title_signin")}
           <span className="text-pop">.</span>
         </h1>
         {!forgotMode && (
           <p className="mt-2 text-ink/70">
-            {mode === "signup" ? "Bora pra próxima atividade." : "Já é da pelada?"}
+            {mode === "signup" ? t("auth.subtitle_signup") : t("auth.subtitle_signin")}
           </p>
         )}
 
@@ -191,12 +197,8 @@ function AuthPage() {
             <div className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-zap/20 text-pop">
               <Mail className="size-7" />
             </div>
-            <h2 className="text-2xl font-extrabold uppercase">Verifique seu e-mail ✉️</h2>
-            <p className="mt-3 text-ink/80">
-              Enviamos um link de confirmação para{" "}
-              <span className="font-semibold text-ink">{verificationEmail}</span>. Verifique sua
-              caixa de entrada antes de entrar.
-            </p>
+            <h2 className="text-2xl font-extrabold uppercase">{t("auth.verify_title")}</h2>
+            <p className="mt-3 text-ink/80">{t("auth.verify_body", { email: verificationEmail })}</p>
             <button
               type="button"
               onClick={resendVerification}
@@ -204,7 +206,7 @@ function AuthPage() {
               className="brutal-card mt-5 w-full px-5 py-3 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {resendLoading && <Loader2 className="size-4 animate-spin" />}
-              Reenviar e-mail
+              {t("auth.resend")}
             </button>
           </div>
         ) : forgotMode ? (
@@ -259,27 +261,27 @@ function AuthPage() {
         ) : (
           <form id="auth-form" onSubmit={submit} className="mt-8 grid gap-3">
             {mode === "signup" && (
-              <Field label="Como te chamam">
+              <Field label={t("auth.name_label")}>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
-                  placeholder="Ex.: Bruno"
+                  placeholder={t("auth.name_placeholder")}
                   required
                 />
               </Field>
             )}
-            <Field label="E-mail">
+            <Field label={t("auth.email")}>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full brutal-card px-4 py-3 bg-paper outline-none focus:bg-zap/20"
-                placeholder="voce@exemplo.com"
+                placeholder={t("auth.email_placeholder")}
                 required
               />
             </Field>
-            <Field label="Senha">
+            <Field label={t("auth.password")}>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -294,15 +296,13 @@ function AuthPage() {
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/60 hover:text-ink focus:text-ink"
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-label={showPassword ? t("auth.hide_password") : t("auth.show_password")}
                 >
                   {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
               </div>
               {mode === "signup" && (
-                <p className="text-xs text-ink/60 leading-relaxed">
-                  Mínimo 8 caracteres, com letra maiúscula, número e caractere especial.
-                </p>
+                <p className="text-xs text-ink/60 leading-relaxed">{t("auth.password_hint")}</p>
               )}
             </Field>
 
@@ -316,14 +316,16 @@ function AuthPage() {
                   className="mt-0.5 accent-[#FFD600]"
                 />
                 <span>
-                  Li e aceito os{" "}
-                  <Link to="/terms" className="underline text-pop">
-                    Termos de Uso
-                  </Link>{" "}
-                  e a{" "}
-                  <Link to="/privacy" className="underline text-pop">
-                    Política de Privacidade
-                  </Link>
+                  <Trans i18nKey="auth.terms_accept">
+                    Li e aceito os{" "}
+                    <Link to="/terms" className="underline text-pop">
+                      Termos de Uso
+                    </Link>{" "}
+                    e a{" "}
+                    <Link to="/privacy" className="underline text-pop">
+                      Política de Privacidade
+                    </Link>
+                  </Trans>
                 </span>
               </label>
             )}
@@ -334,13 +336,13 @@ function AuthPage() {
               className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="size-4 animate-spin" />}
-              {mode === "signup" ? "Criar conta" : "Entrar"}
+              {mode === "signup" ? t("auth.submit_signup") : t("auth.submit_signin")}
             </button>
             {mode === "signin" && (
               <p className="mt-3 text-xs text-ink/60 text-center">
-                <a href="/terms" target="_blank" className="underline">Termos de Uso</a>
+                <a href="/terms" target="_blank" className="underline">{t("auth.terms")}</a>
                 {" · "}
-                <a href="/privacy" target="_blank" className="underline">Política de Privacidade</a>
+                <a href="/privacy" target="_blank" className="underline">{t("auth.privacy")}</a>
               </p>
             )}
           </form>
@@ -350,7 +352,7 @@ function AuthPage() {
             to="/auth/reset"
             className="mt-3 text-xs text-ink/60 underline underline-offset-4 block text-center"
           >
-            Esqueci minha senha
+            {t("auth.forgot_link")}
           </Link>
         )}
 
@@ -360,7 +362,7 @@ function AuthPage() {
             onClick={retry}
             className="brutal-card mt-4 w-full px-5 py-3 bg-paper font-bold uppercase tracking-wide text-sm"
           >
-            Tentar novamente
+            {t("auth.retry")}
           </button>
         )}
 
@@ -370,7 +372,7 @@ function AuthPage() {
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
             className="mt-6 text-sm font-semibold underline underline-offset-4 decoration-2"
           >
-            {mode === "signin" ? "Não tem conta? Criar uma" : "Já tem conta? Entrar"}
+            {mode === "signin" ? t("auth.no_account") : t("auth.have_account")}
           </button>
         )}
       </div>

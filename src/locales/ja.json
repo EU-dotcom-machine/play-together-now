@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "activities": "アクティビティ",
+    "agenda": "予定",
+    "friends": "友だち",
+    "profile": "プロフィール"
+  },
+  "landing": {
+    "beta": "v1 • ベータ",
+    "title_line1": "さあ、",
+    "title_line2": "遊ぼう",
+    "dot": "。",
+    "subtitle": "チームの人数が足りない？Esportes Unidos なら、今すぐ近くで開催中のアクティビティとあなたをつなげます。「参加！」を押して仲間に加わろう。",
+    "cta": "ログイン / 新規登録",
+    "feature1_title": "「参加！」",
+    "feature1_text": "ボタンを押して手を挙げれば、枠を確保。",
+    "feature2_title": "近くで",
+    "feature2_text": "距離順に、アクティビティをリアルタイム表示。",
+    "feature3_title": "マッチ＆チャット",
+    "feature3_text": "確定したら、そのままグループチャットへ。"
+  },
+  "auth": {
+    "title_signin": "ログイン",
+    "title_signup": "新規登録",
+    "subtitle_signup": "次のアクティビティへ。",
+    "subtitle_signin": "もう仲間ですか？",
+    "name_label": "お名前",
+    "name_placeholder": "例：たろう",
+    "email": "メールアドレス",
+    "email_placeholder": "you@example.com",
+    "password": "パスワード",
+    "password_hint": "8文字以上、大文字・数字・記号を含めてください。",
+    "show_password": "パスワードを表示",
+    "hide_password": "パスワードを非表示",
+    "terms_accept": "<1>利用規約</1>と<3>プライバシーポリシー</3>に同意します",
+    "submit_signin": "ログイン",
+    "submit_signup": "登録する",
+    "forgot_link": "パスワードを忘れた方",
+    "forgot_submit": "再設定リンクを送信",
+    "forgot_sent_title": "メールを確認してください ✉️",
+    "forgot_sent_body": "{{email}} にリンクを送信しました。そちらから新しいパスワードを設定してください。",
+    "back_to_login": "ログインに戻る",
+    "no_account": "アカウントをお持ちでない方は 新規登録",
+    "have_account": "アカウントをお持ちの方は ログイン",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "verify_title": "メールを確認してください ✉️",
+    "verify_body": "{{email}} に確認リンクを送信しました。ログインする前に受信トレイをご確認ください。",
+    "resend": "メールを再送信",
+    "retry": "もう一度試す"
+  },
+  "lang": {
+    "label": "言語",
+    "pt": "Português",
+    "ja": "日本語"
+  }
+}
