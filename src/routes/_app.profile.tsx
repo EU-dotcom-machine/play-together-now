@@ -13,6 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { StickFigureRating } from "@/components/stick-figure-rating";
 import { usePushNotificationControl } from "@/hooks/use-push-notifications";
 import { useAthletePointsMap } from "@/hooks/use-athlete-points";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
@@ -49,6 +50,7 @@ function positionsForSport(name: string): string[] {
 
 function Profile() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: pointsMap } = useAthletePointsMap();
 
@@ -207,7 +209,7 @@ function Profile() {
       } as any)
       .eq("id", user.id);
     if (error) return toast.error(friendlyError(error));
-    toast.success("Perfil salvo!");
+    toast.success(t("profile.saved"));
     trackEvent("profile_updated");
     qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
@@ -233,7 +235,7 @@ function Profile() {
           .update({ latitude: p.coords.latitude, longitude: p.coords.longitude } as any)
           .eq("id", user.id);
         if (error) return toast.error(friendlyError(error));
-        toast.success("Localização atualizada!");
+        toast.success(t("profile.location_updated"));
         qc.invalidateQueries({ queryKey: ["profile", user.id] });
       },
       () => toast.error("Não foi possível obter sua localização"),
@@ -269,7 +271,7 @@ function Profile() {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              aria-label="Trocar foto"
+              aria-label={t("profile.change_photo")}
               className="absolute -bottom-0.5 -right-0.5 size-5 bg-pop text-primary-foreground rounded-full p-0.5 cursor-pointer border border-background flex items-center justify-center disabled:opacity-60"
             >
               <Camera className="size-3" />
@@ -283,14 +285,14 @@ function Profile() {
             />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-muted-foreground">atleta</p>
+            <p className="text-xs uppercase font-semibold text-muted-foreground">{t("profile.athlete")}</p>
             <h1 className="text-2xl font-extrabold leading-none text-pop">{display || "—"}</h1>
           </div>
         </div>
 
         <div className="mt-5 flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center gap-1.5 bg-pop text-primary-foreground px-3 py-1.5 rounded-full text-xs font-bold">
-            <Trophy className="size-3.5" /> {pointsMap?.[user?.id ?? ""] ?? 0} pontos
+            <Trophy className="size-3.5" /> {pointsMap?.[user?.id ?? ""] ?? 0} {t("profile.points")}
           </div>
           {((profile as any)?.total_reviews ?? 0) > 0 && (
             <div className="inline-flex items-center gap-1.5 bg-black/30 text-white px-3 py-1.5 rounded-full">
@@ -305,29 +307,29 @@ function Profile() {
           <div className="inline-flex items-center gap-2 bg-black/30 text-white px-3 py-1.5 rounded-full text-xs">
             <MapPin className="size-3.5" />
             {(profile as any)?.latitude != null
-              ? "Localização salva"
-              : "Sem localização"}
+              ? t("profile.location_saved")
+              : t("profile.location_none")}
             <button
               type="button"
               onClick={updateLocation}
               className="ml-1 inline-flex items-center gap-1 bg-pop text-primary-foreground px-2 py-0.5 rounded-full font-bold uppercase"
             >
-              <RefreshCw className="size-3" /> Atualizar
+              <RefreshCw className="size-3" /> {t("profile.update")}
             </button>
           </div>
         </div>
       </header>
 
       <section className="px-5 py-6 grid gap-4">
-        <Field label="Nome">
+        <Field label={t("profile.name")}>
           <input value={display} onChange={(e) => setDisplay(e.target.value)} className="input-brutal" />
         </Field>
-        <Field label="Bio">
+        <Field label={t("profile.bio")}>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             className="input-brutal min-h-20"
-            placeholder="Joga o quê, em que nível…"
+            placeholder={t("profile.bio_ph")}
           />
         </Field>
 
@@ -335,7 +337,7 @@ function Profile() {
         <Collapsible open={sponsorOpen} onOpenChange={setSponsorOpen}>
           <CollapsibleTrigger className="w-full flex items-center justify-between bg-surface rounded-xl px-4 py-3 cursor-pointer text-left">
             <span className="text-base font-bold uppercase tracking-wide text-foreground">
-              Patrocinador (estilo do perfil)
+              {t("profile.sponsor")}
             </span>
             <ChevronDown
               className={cn("size-5 transition-transform duration-200", sponsorOpen && "rotate-180")}
@@ -376,10 +378,10 @@ function Profile() {
         </Collapsible>
 
         {/* Sobre você */}
-        <SectionTitle>Sobre você</SectionTitle>
+        <SectionTitle>{t("profile.about_you")}</SectionTitle>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Peso (kg)">
+          <Field label={t("profile.weight")}>
             <input
               type="number"
               inputMode="decimal"
@@ -389,7 +391,7 @@ function Profile() {
               placeholder="72"
             />
           </Field>
-          <Field label="Altura (cm)">
+          <Field label={t("profile.height")}>
             <input
               type="number"
               inputMode="decimal"
@@ -401,7 +403,7 @@ function Profile() {
           </Field>
         </div>
 
-        <Field label="CEP">
+        <Field label={t("profile.cep")}>
           <input
             inputMode="numeric"
             autoComplete="postal-code"
@@ -420,29 +422,27 @@ function Profile() {
           />
         </Field>
         <p id="cep-help" className={cn("text-xs -mt-2", cepFormatError ? "text-red-500 font-semibold" : "text-ink/60")}>
-          {cepFormatError
-            ? cepFormatError
-            : "Opcional. Preencha para visualizar atividades de condomínio, empresa ou espaço privado com o mesmo CEP."}
+          {cepFormatError ? cepFormatError : t("profile.cep_help")}
         </p>
 
 
 
-        <Field label="Tempo jogando">
-          <ChipRow options={YEARS as unknown as string[]} value={years} onChange={setYears} />
+        <Field label={t("profile.years")}>
+          <ChipRow options={YEARS as unknown as string[]} value={years} onChange={setYears} labelFor={(v) => t(`profile.years_opts.${v}`)} />
         </Field>
 
-        <Field label="Lado dominante">
-          <ChipRow options={SIDES as unknown as string[]} value={side} onChange={setSide} />
+        <Field label={t("profile.side")}>
+          <ChipRow options={SIDES as unknown as string[]} value={side} onChange={setSide} labelFor={(v) => t(`profile.sides.${v}`)} />
         </Field>
 
-        <Field label="Nível">
-          <ChipRow options={LEVELS as unknown as string[]} value={level} onChange={setLevel} />
+        <Field label={t("profile.level")}>
+          <ChipRow options={LEVELS as unknown as string[]} value={level} onChange={setLevel} labelFor={(v) => t(`profile.levels.${v}`)} />
         </Field>
 
         {/* Esportes selection */}
         <Collapsible open={sportsOpen} onOpenChange={setSportsOpen}>
           <CollapsibleTrigger className="w-full flex items-center justify-between bg-surface rounded-xl px-4 py-3 cursor-pointer text-left">
-            <span className="text-base font-bold uppercase tracking-wide text-foreground">Seus esportes</span>
+            <span className="text-base font-bold uppercase tracking-wide text-foreground">{t("profile.your_sports")}</span>
             <ChevronDown
               className={cn("size-5 transition-transform duration-200", sportsOpen && "rotate-180")}
             />
@@ -476,7 +476,7 @@ function Profile() {
         {selectedSports.length > 0 && (
           <Collapsible open={bySportOpen} onOpenChange={setBySportOpen}>
             <CollapsibleTrigger className="w-full flex items-center justify-between bg-surface rounded-xl px-4 py-3 cursor-pointer text-left">
-              <span className="text-base font-bold uppercase tracking-wide text-foreground">Por esporte</span>
+              <span className="text-base font-bold uppercase tracking-wide text-foreground">{t("profile.by_sport")}</span>
               <ChevronDown
                 className={cn("size-5 transition-transform duration-200", bySportOpen && "rotate-180")}
               />
@@ -502,7 +502,7 @@ function Profile() {
                           }
                           className="input-brutal mt-2"
                         >
-                          <option value="">Posição preferida…</option>
+                          <option value="">{t("profile.position_ph")}</option>
                           {opts.map((o) => (
                             <option key={o} value={o}>
                               {o}
@@ -527,7 +527,7 @@ function Profile() {
           disabled={!!cepFormatError}
           className="mt-4 px-5 py-4 bg-pop text-primary-foreground font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         >
-          <Save className="size-4" /> Salvar
+          <Save className="size-4" /> {t("profile.save")}
         </button>
 
 
@@ -548,7 +548,7 @@ function Profile() {
           onClick={signOut}
           className="px-5 py-3 bg-transparent border border-pop text-pop font-bold uppercase rounded-full flex items-center justify-center gap-2"
         >
-          <LogOut className="size-4" /> Sair
+          <LogOut className="size-4" /> {t("profile.logout")}
         </button>
       </section>
     </main>
@@ -556,6 +556,7 @@ function Profile() {
 }
 
 function PushNotificationsToggle() {
+  const { t } = useTranslation();
   const { status, busy, enable, disable } = usePushNotificationControl();
   const autoPromptedRef = useRef(false);
 
@@ -580,7 +581,7 @@ function PushNotificationsToggle() {
         <div className="flex items-center gap-2">
           {isOn ? <Bell className="size-5 text-pop" /> : <BellOff className="size-5 text-ink/60" />}
           <span className="font-bold text-base uppercase tracking-wide text-foreground">
-            Notificações push
+            {t("profile.push_title")}
           </span>
         </div>
         <button
@@ -594,18 +595,16 @@ function PushNotificationsToggle() {
               : "bg-pop text-primary-foreground",
           )}
         >
-          {busy ? "..." : isOn ? "Desativar" : "Ativar"}
+          {busy ? "..." : isOn ? t("profile.push_on") : t("profile.push_off")}
         </button>
       </div>
       {desync ? (
         <p className="text-xs font-semibold leading-relaxed rounded-lg border border-destructive/40 bg-destructive/10 text-destructive px-3 py-2">
-          Não foi possível salvar sua inscrição de notificações no servidor. Toque em <strong>Desativar</strong> e depois em <strong>Ativar</strong> novamente para tentar de novo.
+          {t("profile.push_desync")}
         </p>
       ) : (
         <p className="text-xs text-ink/70 leading-relaxed">
-          {denied
-            ? "Permissão bloqueada no navegador. Ajuste nas configurações do site para reativar."
-            : "Ative para receber alertas de atividades próximas a você, mesmo com o app fechado."}
+          {denied ? t("profile.push_denied") : t("profile.push_enable")}
         </p>
       )}
     </div>
@@ -625,10 +624,12 @@ function ChipRow({
   options,
   value,
   onChange,
+  labelFor,
 }: {
   options: string[];
   value: string | null;
   onChange: (v: string) => void;
+  labelFor?: (v: string) => string;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -644,7 +645,7 @@ function ChipRow({
               on ? "bg-pop text-primary-foreground border-pop" : "bg-surface text-foreground border-border",
             )}
           >
-            {o}
+            {labelFor ? labelFor(o) : o}
           </button>
         );
       })}

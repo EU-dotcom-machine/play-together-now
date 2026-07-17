@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_app/onboarding")({
   head: () => ({ meta: [{ title: "Bem-vindo — Esportes Unidos" }, { name: "robots", content: "noindex" }] }),
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_app/onboarding")({
 
 function Onboarding() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -65,9 +67,9 @@ function Onboarding() {
               () => resolve(),
               (err) => {
                 if (err?.code === err?.PERMISSION_DENIED) {
-                  toast.info("Tudo bem, você pode ativar depois nas configurações.");
+                  toast.info(t("onboarding.loc_denied"));
                 } else {
-                  toast.info("Não conseguimos sua localização agora, seguindo mesmo assim.");
+                  toast.info(t("onboarding.loc_failed"));
                 }
                 resolve();
               },
@@ -75,7 +77,7 @@ function Onboarding() {
             );
           });
         } else {
-          toast.info("Geolocalização indisponível neste dispositivo.");
+          toast.info(t("onboarding.loc_unavailable"));
         }
       }
       const { error } = await supabase
@@ -98,17 +100,15 @@ function Onboarding() {
           <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
             <div className="text-8xl" aria-hidden>🤾</div>
             <h1 className="text-4xl font-extrabold uppercase leading-none">
-              Bem-vindo ao Esportes Unidos<span className="text-pop">!</span>
+              {t("onboarding.welcome_title")}<span className="text-pop">{t("onboarding.welcome_excl")}</span>
             </h1>
-            <p className="text-ink/70 text-lg">
-              Conecte-se com quem quer jogar perto de você.
-            </p>
+            <p className="text-ink/70 text-lg">{t("onboarding.welcome_subtitle")}</p>
             <button
               type="button"
               onClick={() => setStep(2)}
               className="brutal-card-lg mt-4 w-full px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             >
-              Vamos lá →
+              {t("onboarding.lets_go")}
             </button>
           </div>
         )}
@@ -116,12 +116,8 @@ function Onboarding() {
         {step === 2 && (
           <div className="flex-1 flex flex-col gap-6">
             <div>
-              <h1 className="text-3xl font-extrabold uppercase leading-tight">
-                Quais esportes você pratica?
-              </h1>
-              <p className="mt-2 text-ink/70">
-                Você vai ver atividades desses esportes primeiro.
-              </p>
+              <h1 className="text-3xl font-extrabold uppercase leading-tight">{t("onboarding.sports_title")}</h1>
+              <p className="mt-2 text-ink/70">{t("onboarding.sports_subtitle")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {sports?.map((s: any) => {
@@ -150,7 +146,7 @@ function Onboarding() {
                 className="brutal-card-lg w-full px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 className="size-4 animate-spin" />}
-                Continuar →
+                {t("onboarding.continue")}
               </button>
             </div>
           </div>
@@ -161,10 +157,8 @@ function Onboarding() {
             <div className="grid size-20 place-items-center rounded-full bg-zap/20 text-pop">
               <MapPin className="size-10" />
             </div>
-            <h1 className="text-3xl font-extrabold uppercase leading-tight">
-              Ative sua localização
-            </h1>
-            <p className="text-ink/70">Para encontrar atividades perto de você.</p>
+            <h1 className="text-3xl font-extrabold uppercase leading-tight">{t("onboarding.location_title")}</h1>
+            <p className="text-ink/70">{t("onboarding.location_subtitle")}</p>
             <div className="w-full grid gap-3 mt-4">
               <button
                 type="button"
@@ -173,7 +167,7 @@ function Onboarding() {
                 className="brutal-card-lg w-full px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 className="size-4 animate-spin" />}
-                Ativar agora
+                {t("onboarding.activate_now")}
               </button>
               <button
                 type="button"
@@ -181,7 +175,7 @@ function Onboarding() {
                 onClick={() => finish(false)}
                 className="brutal-card w-full px-5 py-3 bg-paper font-bold uppercase tracking-wide disabled:opacity-60"
               >
-                Agora não
+                {t("onboarding.not_now")}
               </button>
             </div>
           </div>
