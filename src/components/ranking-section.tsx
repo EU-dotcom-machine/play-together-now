@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Trophy, MapPin } from "lucide-react";
+import { Loader2, Trophy, MapPin, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type RankingMode = "atletas" | "espacos";
@@ -197,6 +198,19 @@ export function RankingSection({
           />
         )}
       </div>
+
+      {/* CTA: cadastrar espaço (dono) */}
+      {mode === "espacos" && (
+        <Link
+          to="/venues/new"
+          className="mt-4 flex items-center gap-2 brutal-card p-3 text-sm font-bold text-ink"
+        >
+          <span className="size-8 rounded-full bg-pop text-primary-foreground flex items-center justify-center shrink-0">
+            <Plus className="size-4" />
+          </span>
+          É dono de um espaço? Cadastre aqui
+        </Link>
+      )}
 
       {/* Lista */}
       <div className="mt-4 space-y-2">

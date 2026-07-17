@@ -27,6 +27,7 @@ import { Route as AppDiscoverRouteImport } from './routes/_app.discover'
 import { Route as AppAgendaRouteImport } from './routes/_app.agenda'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as AppVenuesNewRouteImport } from './routes/_app.venues.new'
 import { Route as AppSportsSlugRouteImport } from './routes/_app.sports.$slug'
 import { Route as AppProfileIdRouteImport } from './routes/_app.profile.$id'
 import { Route as AppGamesIdRouteImport } from './routes/_app.games.$id'
@@ -125,6 +126,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AppVenuesNewRoute = AppVenuesNewRouteImport.update({
+  id: '/venues/new',
+  path: '/venues/new',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSportsSlugRoute = AppSportsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/games/$id': typeof AppGamesIdRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/sports/$slug': typeof AppSportsSlugRoute
+  '/venues/new': typeof AppVenuesNewRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/games/$id': typeof AppGamesIdRoute
   '/profile/$id': typeof AppProfileIdRoute
   '/sports/$slug': typeof AppSportsSlugRoute
+  '/venues/new': typeof AppVenuesNewRoute
   '/games/$id/edit': typeof AppGamesIdEditRoute
 }
 export interface FileRoutesById {
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/_app/games/$id': typeof AppGamesIdRoute
   '/_app/profile/$id': typeof AppProfileIdRoute
   '/_app/sports/$slug': typeof AppSportsSlugRoute
+  '/_app/venues/new': typeof AppVenuesNewRoute
   '/_app/games_/$id/edit': typeof AppGamesIdEditRoute
 }
 export interface FileRouteTypes {
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/games/$id'
     | '/profile/$id'
     | '/sports/$slug'
+    | '/venues/new'
     | '/games/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/games/$id'
     | '/profile/$id'
     | '/sports/$slug'
+    | '/venues/new'
     | '/games/$id/edit'
   id:
     | '__root__'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/_app/games/$id'
     | '/_app/profile/$id'
     | '/_app/sports/$slug'
+    | '/_app/venues/new'
     | '/_app/games_/$id/edit'
   fileRoutesById: FileRoutesById
 }
@@ -456,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/venues/new': {
+      id: '/_app/venues/new'
+      path: '/venues/new'
+      fullPath: '/venues/new'
+      preLoaderRoute: typeof AppVenuesNewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/sports/$slug': {
       id: '/_app/sports/$slug'
       path: '/$slug'
@@ -535,6 +554,7 @@ interface AppRouteChildren {
   AppSportsRoute: typeof AppSportsRouteWithChildren
   AppVenuePanelRoute: typeof AppVenuePanelRoute
   AppGamesIdRoute: typeof AppGamesIdRoute
+  AppVenuesNewRoute: typeof AppVenuesNewRoute
   AppGamesIdEditRoute: typeof AppGamesIdEditRoute
 }
 
@@ -548,6 +568,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSportsRoute: AppSportsRouteWithChildren,
   AppVenuePanelRoute: AppVenuePanelRoute,
   AppGamesIdRoute: AppGamesIdRoute,
+  AppVenuesNewRoute: AppVenuesNewRoute,
   AppGamesIdEditRoute: AppGamesIdEditRoute,
 }
 
@@ -571,13 +592,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
