@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Search, Check, X } from "lucide-react";
 import { RankingSection, type RankingMode } from "@/components/ranking-section";
 import { useAthletePointsMap } from "@/hooks/use-athlete-points";
+import { FriendSuggestions } from "@/components/friend-suggestions";
 
 export const Route = createFileRoute("/_app/friends")({
   head: () => ({ meta: [{ title: "Amigos — Esportes Unidos" }] }),
@@ -281,6 +282,8 @@ function FriendsPage() {
           <p className="mt-2 text-xs text-[#666] px-2">Ninguém encontrado.</p>
         )}
       </section>
+
+      <FriendSuggestions />
 
       {/* PENDENTES */}
       {incoming.length > 0 && (
