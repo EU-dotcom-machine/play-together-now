@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Trophy, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Mode = "atletas" | "espacos";
+export type RankingMode = "atletas" | "espacos";
 type Season = "temporada" | "todos";
 type Scope = "todos" | "amigos";
 
@@ -84,8 +84,13 @@ function rankAccent(i: number): string {
   return "text-muted-foreground";
 }
 
-export function RankingSection() {
-  const [mode, setMode] = useState<Mode>("atletas");
+export function RankingSection({
+  mode,
+  onModeChange,
+}: {
+  mode: RankingMode;
+  onModeChange: (m: RankingMode) => void;
+}) {
   const [sportId, setSportId] = useState<string | null>(null);
   const [season, setSeason] = useState<Season>("temporada");
   const [scope, setScope] = useState<Scope>("todos");
@@ -140,9 +145,9 @@ export function RankingSection() {
   return (
     <section className="mt-6">
       {/* Atletas | Espaços */}
-      <Segmented<Mode>
+      <Segmented<RankingMode>
         value={mode}
-        onChange={setMode}
+        onChange={onModeChange}
         options={[
           { value: "atletas", label: "Atletas" },
           { value: "espacos", label: "Espaços" },

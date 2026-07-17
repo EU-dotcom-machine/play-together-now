@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Search, Check, X } from "lucide-react";
-import { RankingSection } from "@/components/ranking-section";
+import { RankingSection, type RankingMode } from "@/components/ranking-section";
+import { useAthletePointsMap } from "@/hooks/use-athlete-points";
 
 export const Route = createFileRoute("/_app/friends")({
   head: () => ({ meta: [{ title: "Amigos — Esportes Unidos" }] }),
@@ -113,6 +114,16 @@ function FriendsPage() {
   });
 
   const [view, setView] = useState<"amigos" | "ranking">("amigos");
+  const [rankMode, setRankMode] = useState<RankingMode>("atletas");
+  const { data: pointsMap } = useAthletePointsMap();
+
+  // Título/subtítulo do cabeçalho conforme a aba/modo atual.
+  const header =
+    view === "amigos"
+      ? { title: "Amigos", sub: "Conecte com a galera e jogue junto" }
+      : rankMode === "espacos"
+        ? { title: "Espaços", sub: "Ache lugares pra jogar junto com a galera" }
+        : { title: "Ranking", sub: "Quem mais pontua na plataforma" };
 
   // Search
   const [q, setQ] = useState("");
@@ -178,18 +189,18 @@ function FriendsPage() {
     return [...accepted].sort((a, b) => {
       const aId = a.requester_id === user?.id ? a.addressee_id : a.requester_id;
       const bId = b.requester_id === user?.id ? b.addressee_id : b.requester_id;
-      return (profilesMap[bId]?.points ?? 0) - (profilesMap[aId]?.points ?? 0);
+      return (pointsMap?.[bId] ?? 0) - (pointsMap?.[aId] ?? 0);
     });
-  }, [accepted, profilesMap, user?.id]);
+  }, [accepted, pointsMap, user?.id]);
 
   if (!user) return null;
 
   return (
     <main className="px-5 pt-8 pb-24 max-w-md mx-auto bg-background min-h-screen">
       <h1 className="text-4xl font-extrabold uppercase leading-none text-white">
-        Amigos<span className="text-pop">.</span>
+        {header.title}<span className="text-pop">.</span>
       </h1>
-      <p className="mt-1 text-sm text-muted-foreground">Conecte com a galera e jogue junto</p>
+      <p className="mt-1 text-sm text-muted-foreground">{header.sub}</p>
 
       {/* TOGGLE Amigos | Ranking */}
       <div className="mt-5 inline-flex rounded-full bg-[#1E1E1E] border border-[#2A2A2A] p-0.5">
@@ -208,7 +219,7 @@ function FriendsPage() {
         ))}
       </div>
 
-      {view === "ranking" && <RankingSection />}
+      {view === "ranking" && <RankingSection mode={rankMode} onModeChange={setRankMode} />}
 
       {view === "amigos" && (
         <>
@@ -248,7 +259,7 @@ function FriendsPage() {
                     </p>
                     <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                       <span className="text-xs text-pop font-bold">
-                        ⚡ {p.points ?? 0} pts
+                        ⚡ {pointsMap?.[p.id] ?? 0} pts
                       </span>
                       <RatingBadge avg={p.avg_rating} total={p.total_reviews} />
                     </div>
@@ -290,7 +301,7 @@ function FriendsPage() {
                     {p?.display_name ?? "Atleta"}
                   </p>
                   <p className="text-xs text-pop font-bold">
-                    ⚡ {p?.points ?? 0} pts
+                    ⚡ {pointsMap?.[r.requester_id] ?? 0} pts
                   </p>
                 </div>
                 <button
@@ -337,7 +348,7 @@ function FriendsPage() {
                   </p>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="text-xs text-pop font-bold">
-                      ⚡ {p?.points ?? 0} pts
+                      ⚡ {pointsMap?.[otherId] ?? 0} pts
                     </span>
                     <span className="text-xs text-muted-foreground font-bold">
                       🎮 {games} {games === 1 ? "atividade" : "atividades"}

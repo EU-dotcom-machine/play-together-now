@@ -12,6 +12,7 @@ import { brandGradient } from "@/lib/brands";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { StickFigureRating } from "@/components/stick-figure-rating";
 import { usePushNotificationControl } from "@/hooks/use-push-notifications";
+import { useAthletePointsMap } from "@/hooks/use-athlete-points";
 
 export const Route = createFileRoute("/_app/profile")({
   head: () => ({ meta: [{ title: "Perfil — Esportes Unidos" }] }),
@@ -49,6 +50,7 @@ function positionsForSport(name: string): string[] {
 function Profile() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { data: pointsMap } = useAthletePointsMap();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -288,7 +290,7 @@ function Profile() {
 
         <div className="mt-5 flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center gap-1.5 bg-pop text-primary-foreground px-3 py-1.5 rounded-full text-xs font-bold">
-            <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
+            <Trophy className="size-3.5" /> {pointsMap?.[user?.id ?? ""] ?? 0} pontos
           </div>
           {((profile as any)?.total_reviews ?? 0) > 0 && (
             <div className="inline-flex items-center gap-1.5 bg-black/30 text-white px-3 py-1.5 rounded-full">
