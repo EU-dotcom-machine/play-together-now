@@ -106,7 +106,7 @@ function Onboarding() {
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="brutal-card-lg mt-4 w-full px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+              className="brutal-card-lg mt-4 w-full px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             >
               Vamos lá →
             </button>
@@ -133,7 +133,7 @@ function Onboarding() {
                     onClick={() => toggle(s.id)}
                     className={cn(
                       "brutal-card px-4 py-2 text-sm font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
-                      active ? "bg-pop text-[#111]" : "bg-paper",
+                      active ? "bg-pop text-primary-foreground" : "bg-paper",
                     )}
                   >
                     <span className="mr-1">{s.emoji ?? "🏅"}</span>
@@ -147,7 +147,7 @@ function Onboarding() {
                 type="button"
                 disabled={selected.size === 0 || saving}
                 onClick={saveSportsAndContinue}
-                className="brutal-card-lg w-full px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+                className="brutal-card-lg w-full px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 className="size-4 animate-spin" />}
                 Continuar →
@@ -170,7 +170,7 @@ function Onboarding() {
                 type="button"
                 disabled={saving}
                 onClick={() => finish(true)}
-                className="brutal-card-lg w-full px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+                className="brutal-card-lg w-full px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 className="size-4 animate-spin" />}
                 Ativar agora

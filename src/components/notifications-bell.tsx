@@ -43,12 +43,12 @@ function timeAgo(iso: string) {
 }
 
 function iconFor(type: NotificationRow["type"]) {
-  if (type === "game_confirmed") return <Check className="size-5 text-[#FFD600]" />;
+  if (type === "game_confirmed") return <Check className="size-5 text-pop" />;
   if (type === "game_declined") return <XIcon className="size-5 text-[#FF6B6B]" />;
-  if (type === "friend_request") return <UserPlus className="size-5 text-[#FFD600]" />;
-  if (type === "venue_claim_accepted") return <Check className="size-5 text-[#FFD600]" />;
+  if (type === "friend_request") return <UserPlus className="size-5 text-pop" />;
+  if (type === "venue_claim_accepted") return <Check className="size-5 text-pop" />;
   if (type === "venue_claim_rejected") return <XIcon className="size-5 text-[#FF6B6B]" />;
-  return <MapPin className="size-5 text-[#FFD600]" />;
+  return <MapPin className="size-5 text-pop" />;
 }
 
 export function NotificationsBell() {
@@ -171,7 +171,7 @@ export function NotificationsBell() {
             {unread > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-xs font-bold uppercase text-[#FFD600] underline underline-offset-2"
+                className="text-xs font-bold uppercase text-pop underline underline-offset-2"
               >
                 Marcar tudo como lido
               </button>
@@ -213,7 +213,7 @@ export function NotificationsBell() {
                         </span>
                       )}
                       {n.data?.distance_km != null && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FFD600] text-[#111] text-[10px] font-extrabold uppercase px-2 py-0.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-pop text-primary-foreground text-[10px] font-extrabold uppercase px-2 py-0.5">
                           <MapPin className="size-3" />~{n.data.distance_km} km
                         </span>
                       )}
