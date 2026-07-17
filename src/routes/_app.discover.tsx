@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import { getCourtImage } from "@/lib/sport-courts";
 import { useAuth } from "@/hooks/use-auth";
+import { useTranslation } from "react-i18next";
 import { MapPin, Zap, Users, Loader2, Star, Lock, Plus, AlertTriangle } from "lucide-react";
 import { cn, formatDateDisplay } from "@/lib/utils";
 import { InstallPrompt } from "@/components/install-prompt";
@@ -46,6 +47,7 @@ type GameRow = {
 
 function Discover() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const search = Route.useSearch();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoDenied, setGeoDenied] = useState(false);
@@ -309,20 +311,20 @@ function Discover() {
     <main className="px-5 pt-8 pb-4 max-w-md mx-auto">
       <header className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-4xl font-extrabold uppercase leading-none">Atividades<span className="text-pop">.</span></h1>
+          <h1 className="text-4xl font-extrabold uppercase leading-none">{t("discover.title")}<span className="text-pop">.</span></h1>
           <p className="mt-1 text-sm text-ink/70">
             {coords
-              ? "Atividades acontecendo perto de você"
+              ? t("discover.subtitle_near")
               : geoDenied
-                ? "Ative a localização para ver atividades perto de você"
-                : "Buscando sua localização…"}
+                ? t("discover.subtitle_enable_loc")
+                : t("discover.subtitle_locating")}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <NotificationsBell />
           <Link
             to="/new"
-            aria-label="Criar atividade"
+            aria-label={t("discover.create_activity")}
             className="inline-flex items-center justify-center size-10 rounded-full bg-pop text-primary-foreground active:translate-y-[1px]"
           >
             <Plus className="size-5" strokeWidth={3} />
@@ -333,7 +335,7 @@ function Discover() {
       {coords && (
         <div className="mt-5 brutal-card-lg p-3 bg-paper">
           <div className="flex items-center justify-between text-xs font-bold uppercase">
-            <span>Raio</span>
+            <span>{t("discover.radius")}</span>
             <span className="bg-pop text-primary-foreground px-2 py-0.5">{radiusKm} km</span>
           </div>
           <div className="mt-2 flex gap-2">
@@ -357,11 +359,11 @@ function Discover() {
         <div className="mt-4 brutal-card-lg p-3 bg-paper flex items-start gap-2">
           <AlertTriangle className="size-4 shrink-0 mt-0.5 text-pop" />
           <div className="text-xs leading-snug">
-            <p className="font-bold uppercase">Preencha seu CEP</p>
+            <p className="font-bold uppercase">{t("discover.cep_title")}</p>
             <p className="text-ink/70 mt-0.5">
-              Atividades de condomínio só aparecem para quem tem o mesmo CEP.{" "}
+              {t("discover.cep_body")}{" "}
               <Link to="/profile" className="underline underline-offset-2 font-bold text-pop">
-                Atualizar perfil
+                {t("discover.update_profile")}
               </Link>
             </p>
           </div>
@@ -378,7 +380,7 @@ function Discover() {
             tab === "jogos" ? "bg-pop text-primary-foreground border-ink" : "bg-paper",
           )}
         >
-          Atividades
+          {t("discover.tab_activities")}
         </button>
         <button
           onClick={() => setTab("estabelecimentos")}
@@ -387,7 +389,7 @@ function Discover() {
             tab === "estabelecimentos" ? "bg-pop text-primary-foreground border-ink" : "bg-paper",
           )}
         >
-          Estabelecimentos
+          {t("discover.tab_venues")}
         </button>
       </div>
 
@@ -405,7 +407,7 @@ function Discover() {
                   filterSportId === null ? "bg-pop text-primary-foreground" : "bg-paper text-ink/70",
                 )}
               >
-                Todos
+                {t("discover.all")}
               </button>
               {sports.map((s) => (
                 <button
@@ -432,10 +434,10 @@ function Discover() {
       {tab === "jogos" && filterVenueId && (
         <div className="mt-3 flex items-center justify-between brutal-card p-2 bg-paper text-xs">
           <span className="font-bold uppercase truncate">
-            Filtrando por: {establishments.find((e) => e.id === filterVenueId)?.name ?? "Local"}
+            {t("discover.filtering_by")} {establishments.find((e) => e.id === filterVenueId)?.name ?? t("discover.local_fallback")}
           </span>
           <button onClick={() => setFilterVenueId(null)} className="font-bold text-pop underline">
-            Limpar
+            {t("discover.clear")}
           </button>
         </div>
       )}
@@ -451,16 +453,16 @@ function Discover() {
             <div className="brutal-card p-6 text-center">
               <p className="font-bold uppercase">
                 {selectedSport
-                  ? `Nenhuma atividade de ${selectedSport.emoji} ${selectedSport.name} perto de você`
-                  : "Nenhuma atividade rolando"}
+                  ? t("discover.empty_activities_sport", { sport: `${selectedSport.emoji} ${selectedSport.name}` })
+                  : t("discover.empty_activities")}
               </p>
               <p className="text-sm text-ink/70 mt-1">
                 {selectedSport ? (
                   <button onClick={() => setFilterSportId(null)} className="underline underline-offset-2 text-pop">
-                    Limpar filtro
+                    {t("discover.clear_filter")}
                   </button>
                 ) : (
-                  "Que tal criar a primeira?"
+                  t("discover.create_first")
                 )}
               </p>
             </div>
@@ -480,10 +482,8 @@ function Discover() {
           )}
           {!isLoading && establishments.length === 0 && (
             <div className="brutal-card p-6 text-center">
-              <p className="font-bold uppercase">Nenhum estabelecimento por perto</p>
-              <p className="text-sm text-ink/70 mt-1">
-                Não há atividades abertas em locais públicos no raio selecionado.
-              </p>
+              <p className="font-bold uppercase">{t("discover.empty_venues")}</p>
+              <p className="text-sm text-ink/70 mt-1">{t("discover.empty_venues_body")}</p>
             </div>
           )}
           {establishments.map((v) => (
@@ -521,7 +521,7 @@ function Discover() {
               )}
               <div className="mt-3 flex items-center justify-between gap-2">
                 <p className="text-xs font-bold text-ink/80">
-                  {v.count} {v.count === 1 ? "atividade disponível" : "atividades disponíveis"}
+                  {t("discover.available", { count: v.count })}
                 </p>
                 <button
                   onClick={() => {
@@ -531,19 +531,19 @@ function Discover() {
                   }}
                   className="brutal-chip bg-pop text-primary-foreground text-xs font-bold px-3 py-1.5"
                 >
-                  Ver atividades
+                  {t("discover.see_activities")}
                 </button>
               </div>
               {(() => {
                 const cs = claimByVenue.get(v.id);
                 const label =
                   cs === "accepted"
-                    ? "✓ Espaço reivindicado por você"
+                    ? t("discover.claimed_by_you")
                     : cs === "pending"
-                      ? "⏳ Solicitação pendente"
+                      ? t("discover.claim_pending")
                       : cs === "rejected"
-                        ? "Reivindicar este espaço (reenviar)"
-                        : "Reivindicar este espaço";
+                        ? t("discover.claim_resend")
+                        : t("discover.claim");
                 return (
                   <button
                     onClick={() => setClaimVenue({ id: v.id, name: v.name })}
@@ -645,6 +645,7 @@ const sportColor: Record<string, string> = {
 };
 
 function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng: number } | null }) {
+  const { t } = useTranslation();
   const borderColor = sportColor[game.sports?.name ?? ""] ?? "#FFD600";
   const distKm =
     game.distance_meters != null
@@ -692,12 +693,12 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         {distKm != null && (
           <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-pop text-primary-foreground font-bold">
             <MapPin className="size-3" />
-            {formatDistance(distKm)} · linha reta
+            {formatDistance(distKm)} · {t("discover.straight_line")}
           </span>
         )}
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           <MapPin className="size-3" />
-          {game.venues?.name ?? "Sem local"}
+          {game.venues?.name ?? t("discover.no_venue")}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           {formatDateDisplay(start, { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
@@ -706,8 +707,8 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           <Users className="size-3" />
           {filled >= game.slots_total
-            ? "Completo"
-            : `Falta${game.slots_total - filled === 1 ? "" : "m"} ${game.slots_total - filled} atleta${game.slots_total - filled === 1 ? "" : "s"}`}
+            ? t("discover.full")
+            : t("discover.slots_left", { count: game.slots_total - filled })}
         </span>
         <span
           className={cn(
@@ -715,7 +716,7 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
             free ? "bg-pop text-primary-foreground" : "bg-border text-white",
           )}
         >
-          {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
+          {free ? t("discover.free") : `R$ ${(game.price_cents / 100).toFixed(2)}`}
         </span>
         {game.sports?.total_reviews && game.sports.total_reviews > 0 ? (
           <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
@@ -729,21 +730,22 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
 }
 
 function UrgencyChip({ urgency }: { urgency: GameRow["urgency"] }) {
+  const { t } = useTranslation();
   if (urgency === "urgente")
     return (
       <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-urgent text-white text-xs" style={{ fontWeight: 800 }}>
-        <Zap className="size-3" /> URGENTE
+        <Zap className="size-3" /> {t("discover.urgency_urgent")}
       </span>
     );
   if (urgency === "normal")
     return (
       <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-pop text-primary-foreground text-xs" style={{ fontWeight: 800 }}>
-        NORMAL
+        {t("discover.urgency_normal")}
       </span>
     );
   return (
     <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-border text-white text-xs font-bold">
-      RELAX
+      {t("discover.urgency_relax")}
     </span>
   );
 }
