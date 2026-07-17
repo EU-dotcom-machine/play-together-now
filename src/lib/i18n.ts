@@ -23,6 +23,10 @@ if (!i18n.isInitialized) {
     supportedLngs: ["pt-BR", "ja"],
     nonExplicitSupportedLngs: true, // "ja-JP" -> "ja"
     lng: typeof window === "undefined" ? "pt-BR" : undefined,
+    // Recursos são embutidos (sem backend) -> init SÍNCRONO (initAsync=false na
+    // v26). Sem isso, o React renderiza antes do init terminar e os textos
+    // ficam presos nas chaves.
+    initAsync: false,
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
