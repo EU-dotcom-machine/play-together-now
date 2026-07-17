@@ -159,3 +159,17 @@
 .chips-filter::-webkit-scrollbar {
   display: none;
 }
+
+/* Logo: braço do boneco levanta uma vez ao montar e fica erguido. */
+@keyframes eu-arm-raise {
+  from { transform: rotate(40deg); }
+  to { transform: rotate(0deg); }
+}
+.eu-logo-arm {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  animation: eu-arm-raise 0.7s cubic-bezier(0.2, 0.8, 0.3, 1.25) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .eu-logo-arm { animation: none; }
+}
