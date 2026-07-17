@@ -22,15 +22,15 @@ function Landing() {
   return (
     <main className="min-h-screen bg-paper text-ink">
       <section className="relative px-5 pt-10 pb-12 overflow-hidden">
-        <div className="absolute -top-20 -right-20 size-72 rounded-full bg-pop/90 border-2 border-ink" aria-hidden />
-        <div className="absolute top-32 -left-16 size-48 rounded-full bg-zap border-2 border-ink" aria-hidden />
+        <div className="absolute -top-16 -right-16 size-56 rounded-full bg-pop/90 border-2 border-ink" aria-hidden />
+        <div className="absolute -top-24 -left-20 size-52 rounded-full bg-zap border-2 border-ink" aria-hidden />
 
-        <div className="relative max-w-md mx-auto">
+        <div className="relative z-10 max-w-md mx-auto">
           <span className="brutal-chip bg-zap">v1 • beta</span>
-          <h1 className="mt-6 text-6xl font-extrabold leading-[0.9] uppercase">
+          <h1 className="mt-6 text-6xl font-extrabold leading-[0.9] uppercase [text-shadow:0_2px_14px_rgba(0,0,0,0.45)]">
             Bora<br />jogar<span className="text-pop">.</span>
           </h1>
-          <p className="mt-5 text-lg font-medium text-ink/80 max-w-sm">
+          <p className="mt-5 text-lg font-medium text-ink max-w-sm">
             Falta gente pra completar o time? O Esportes Unidos conecta você com atividades rolando agora, perto de você. Diga EU! e entra na atividade.
           </p>
 
