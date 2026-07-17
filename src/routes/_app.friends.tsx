@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Search, Check, X } from "lucide-react";
+import { RankingSection } from "@/components/ranking-section";
 
 export const Route = createFileRoute("/_app/friends")({
   head: () => ({ meta: [{ title: "Amigos — Esportes Unidos" }] }),
@@ -111,6 +112,8 @@ function FriendsPage() {
     },
   });
 
+  const [view, setView] = useState<"amigos" | "ranking">("amigos");
+
   // Search
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Profile[]>([]);
@@ -188,6 +191,27 @@ function FriendsPage() {
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">Conecte com a galera e jogue junto</p>
 
+      {/* TOGGLE Amigos | Ranking */}
+      <div className="mt-5 inline-flex rounded-full bg-[#1E1E1E] border border-[#2A2A2A] p-0.5">
+        {(["amigos", "ranking"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={
+              "px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-colors " +
+              (view === v ? "bg-pop text-[#111]" : "text-[#888]")
+            }
+          >
+            {v === "amigos" ? "Amigos" : "Ranking"}
+          </button>
+        ))}
+      </div>
+
+      {view === "ranking" && <RankingSection />}
+
+      {view === "amigos" && (
+        <>
       {/* SEARCH */}
       <section className="mt-6 bg-surface rounded-2xl p-3">
         <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-background border border-border">
@@ -333,6 +357,8 @@ function FriendsPage() {
           })
         )}
       </section>
+        </>
+      )}
     </main>
   );
 }
