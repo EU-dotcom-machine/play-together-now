@@ -144,9 +144,9 @@ export function FriendsSection() {
       </h2>
 
       {/* Search */}
-      <div className="bg-[#1E1E1E] rounded-2xl p-3">
-        <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#111] border border-[#2A2A2A]">
-          <Search className="size-4 text-[#888]" />
+      <div className="bg-surface rounded-2xl p-3">
+        <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-background border border-border">
+          <Search className="size-4 text-muted-foreground" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -170,7 +170,7 @@ export function FriendsSection() {
               return (
                 <li
                   key={p.id}
-                  className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-[#2A2A2A]"
+                  className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-border"
                 >
                   <Avatar name={p.display_name} url={p.avatar_url} />
                   <p className="flex-1 text-sm font-semibold text-white">
@@ -180,7 +180,7 @@ export function FriendsSection() {
                     type="button"
                     disabled={!!f}
                     onClick={() => sendRequest(p.id)}
-                    className="px-3 py-1 text-xs rounded-full bg-pop text-[#111] font-bold uppercase disabled:opacity-50"
+                    className="px-3 py-1 text-xs rounded-full bg-pop text-primary-foreground font-bold uppercase disabled:opacity-50"
                   >
                     {label}
                   </button>
@@ -197,7 +197,7 @@ export function FriendsSection() {
       {/* Incoming requests */}
       {incoming.length > 0 && (
         <div className="grid gap-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Pedidos recebidos ({incoming.length})
           </p>
           {incoming.map((r) => {
@@ -205,7 +205,7 @@ export function FriendsSection() {
             return (
               <div
                 key={r.id}
-                className="bg-[#1E1E1E] rounded-2xl p-3 flex items-center gap-3"
+                className="bg-surface rounded-2xl p-3 flex items-center gap-3"
               >
                 <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
@@ -214,14 +214,14 @@ export function FriendsSection() {
                 <button
                   type="button"
                   onClick={() => accept(r.id)}
-                  className="px-3 py-1.5 rounded-full bg-pop text-[#111] text-xs font-bold uppercase inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-full bg-pop text-primary-foreground text-xs font-bold uppercase inline-flex items-center gap-1"
                 >
                   <Check className="size-3.5" /> Aceitar
                 </button>
                 <button
                   type="button"
                   onClick={() => remove(r.id)}
-                  className="px-3 py-1.5 rounded-full bg-[#111] border border-[#2A2A2A] text-white text-xs font-bold uppercase inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-full bg-background border border-border text-white text-xs font-bold uppercase inline-flex items-center gap-1"
                 >
                   <X className="size-3.5" /> Recusar
                 </button>
@@ -233,7 +233,7 @@ export function FriendsSection() {
 
       {/* Accepted friends */}
       <div className="grid gap-2">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#888]">
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Seus amigos ({accepted.length})
         </p>
         {accepted.length === 0 ? (
@@ -245,7 +245,7 @@ export function FriendsSection() {
             return (
               <div
                 key={r.id}
-                className="bg-[#1E1E1E] rounded-2xl p-3 flex items-center gap-3"
+                className="bg-surface rounded-2xl p-3 flex items-center gap-3"
               >
                 <Avatar name={p?.display_name} url={p?.avatar_url} />
                 <p className="flex-1 font-semibold text-white text-sm">
@@ -254,7 +254,7 @@ export function FriendsSection() {
                 <button
                   type="button"
                   onClick={() => remove(r.id)}
-                  className="px-3 py-1.5 rounded-full bg-[#111] border border-[#2A2A2A] text-white text-xs font-bold uppercase"
+                  className="px-3 py-1.5 rounded-full bg-background border border-border text-white text-xs font-bold uppercase"
                 >
                   Remover
                 </button>
@@ -269,7 +269,7 @@ export function FriendsSection() {
 
 function Avatar({ name, url }: { name?: string | null; url?: string | null }) {
   return (
-    <div className="size-9 rounded-full bg-pop text-[#111] flex items-center justify-center text-sm font-extrabold overflow-hidden">
+    <div className="size-9 rounded-full bg-pop text-primary-foreground flex items-center justify-center text-sm font-extrabold overflow-hidden">
       {url ? (
         <img src={url} alt="" className="size-9 rounded-full object-cover" />
       ) : (

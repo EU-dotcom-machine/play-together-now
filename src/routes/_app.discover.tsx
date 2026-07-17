@@ -321,7 +321,7 @@ function Discover() {
           <Link
             to="/new"
             aria-label="Criar atividade"
-            className="inline-flex items-center justify-center size-10 rounded-full bg-pop text-[#111] active:translate-y-[1px]"
+            className="inline-flex items-center justify-center size-10 rounded-full bg-pop text-primary-foreground active:translate-y-[1px]"
           >
             <Plus className="size-5" strokeWidth={3} />
           </Link>
@@ -332,7 +332,7 @@ function Discover() {
         <div className="mt-5 brutal-card-lg p-3 bg-paper">
           <div className="flex items-center justify-between text-xs font-bold uppercase">
             <span>Raio</span>
-            <span className="bg-pop text-[#111] px-2 py-0.5">{radiusKm} km</span>
+            <span className="bg-pop text-primary-foreground px-2 py-0.5">{radiusKm} km</span>
           </div>
           <div className="mt-2 flex gap-2">
             {[5, 10, 20, 50].map((r) => (
@@ -341,7 +341,7 @@ function Discover() {
                 onClick={() => setRadiusKm(r)}
                 className={cn(
                   "flex-1 brutal-chip justify-center text-xs font-bold",
-                  radiusKm === r ? "bg-pop text-[#111] border-ink" : "bg-paper",
+                  radiusKm === r ? "bg-pop text-primary-foreground border-ink" : "bg-paper",
                 )}
               >
                 {r}km
@@ -373,7 +373,7 @@ function Discover() {
           onClick={() => setTab("jogos")}
           className={cn(
             "flex-1 brutal-chip justify-center text-xs font-bold uppercase py-2",
-            tab === "jogos" ? "bg-pop text-[#111] border-ink" : "bg-paper",
+            tab === "jogos" ? "bg-pop text-primary-foreground border-ink" : "bg-paper",
           )}
         >
           Atividades
@@ -382,7 +382,7 @@ function Discover() {
           onClick={() => setTab("estabelecimentos")}
           className={cn(
             "flex-1 brutal-chip justify-center text-xs font-bold uppercase py-2",
-            tab === "estabelecimentos" ? "bg-pop text-[#111] border-ink" : "bg-paper",
+            tab === "estabelecimentos" ? "bg-pop text-primary-foreground border-ink" : "bg-paper",
           )}
         >
           Estabelecimentos
@@ -400,7 +400,7 @@ function Discover() {
                 onClick={() => setFilterSportId(null)}
                 className={cn(
                   "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold",
-                  filterSportId === null ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
+                  filterSportId === null ? "bg-pop text-primary-foreground" : "bg-paper text-ink/70",
                 )}
               >
                 Todos
@@ -411,7 +411,7 @@ function Discover() {
                   onClick={() => setFilterSportId(filterSportId === s.id ? null : s.id)}
                   className={cn(
                     "brutal-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5",
-                    filterSportId === s.id ? "bg-pop text-[#111]" : "bg-paper text-ink/70",
+                    filterSportId === s.id ? "bg-pop text-primary-foreground" : "bg-paper text-ink/70",
                   )}
                 >
                   <span>{s.emoji}</span>
@@ -497,7 +497,7 @@ function Discover() {
                   )}
                 </div>
                 {v.distKm != null && (
-                  <span className="shrink-0 text-[11px] font-bold bg-pop text-[#111] px-2 py-0.5 rounded-full">
+                  <span className="shrink-0 text-[11px] font-bold bg-pop text-primary-foreground px-2 py-0.5 rounded-full">
                     {formatDistance(v.distKm)}
                   </span>
                 )}
@@ -524,7 +524,7 @@ function Discover() {
                     setFilterSportId(null);
                     setTab("jogos");
                   }}
-                  className="brutal-chip bg-pop text-[#111] text-xs font-bold px-3 py-1.5"
+                  className="brutal-chip bg-pop text-primary-foreground text-xs font-bold px-3 py-1.5"
                 >
                   Ver atividades
                 </button>
@@ -685,20 +685,20 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
 
       <div className="relative z-10 mt-3 flex flex-wrap gap-2 text-xs">
         {distKm != null && (
-          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#FFD600] text-[#111] font-bold">
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-pop text-primary-foreground font-bold">
             <MapPin className="size-3" />
             {formatDistance(distKm)} · linha reta
           </span>
         )}
-        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           <MapPin className="size-3" />
           {game.venues?.name ?? "Sem local"}
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           {formatDateDisplay(start, { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
           {formatDateDisplay(start, { hour: "2-digit", minute: "2-digit" })}
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           <Users className="size-3" />
           {filled >= game.slots_total
             ? "Completo"
@@ -707,14 +707,14 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
         <span
           className={cn(
             "inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-bold",
-            free ? "bg-[#FFD600] text-[#111]" : "bg-[#2A2A2A] text-white",
+            free ? "bg-pop text-primary-foreground" : "bg-border text-white",
           )}
         >
           {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}
         </span>
         {game.sports?.total_reviews && game.sports.total_reviews > 0 ? (
-          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
-            <Star className="size-3 fill-[#FFD600] stroke-[#FFD600]" />
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
+            <Star className="size-3 fill-pop stroke-pop" />
             {game.sports.avg_rating?.toFixed(1)} · {game.sports.total_reviews}
           </span>
         ) : null}
@@ -726,18 +726,18 @@ function GameCard({ game, coords }: { game: GameRow; coords: { lat: number; lng:
 function UrgencyChip({ urgency }: { urgency: GameRow["urgency"] }) {
   if (urgency === "urgente")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#FF4444] text-white text-xs" style={{ fontWeight: 800 }}>
+      <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-urgent text-white text-xs" style={{ fontWeight: 800 }}>
         <Zap className="size-3" /> URGENTE
       </span>
     );
   if (urgency === "normal")
     return (
-      <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-[#FFD600] text-[#111] text-xs" style={{ fontWeight: 800 }}>
+      <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-pop text-primary-foreground text-xs" style={{ fontWeight: 800 }}>
         NORMAL
       </span>
     );
   return (
-    <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white text-xs font-bold">
+    <span className="inline-flex items-center rounded-full px-2.5 py-1 bg-border text-white text-xs font-bold">
       RELAX
     </span>
   );

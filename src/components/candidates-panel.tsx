@@ -185,7 +185,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                 className="rounded-xl p-3 border border-border bg-surface border-l-[3px] border-l-pop"
               >
                 <div className="flex items-start gap-3">
-                  <div className="size-10 rounded-full flex items-center justify-center font-extrabold text-base shrink-0 bg-pop text-[#111]">
+                  <div className="size-10 rounded-full flex items-center justify-center font-extrabold text-base shrink-0 bg-pop text-primary-foreground">
                     {p?.avatar_url ? (
                       <img src={p.avatar_url} alt="" className="size-10 rounded-full object-cover" />
                     ) : (
@@ -197,7 +197,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                       <p className="font-bold truncate text-foreground">
                         {p?.display_name ?? "Atleta"}
                       </p>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 bg-pop text-[#111]">
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 bg-pop text-primary-foreground">
                         <Zap className="size-3" /> {p?.points ?? 0} pts
                       </span>
                       {p?.total_reviews > 0 && sportTotal === 0 && (
@@ -259,7 +259,7 @@ export function CandidatesPanel({ gameId, gameLat, gameLng, slotsTotal, gameStat
                   <button
                     disabled={busy === c.user_id}
                     onClick={() => decide(c.user_id, "confirmed")}
-                    className="flex-1 px-4 py-2.5 rounded-full font-extrabold text-sm uppercase flex items-center justify-center gap-1 disabled:opacity-50 bg-pop text-[#111]"
+                    className="flex-1 px-4 py-2.5 rounded-full font-extrabold text-sm uppercase flex items-center justify-center gap-1 disabled:opacity-50 bg-pop text-primary-foreground"
                   >
                     <Check className="size-4" /> Confirmar
                   </button>

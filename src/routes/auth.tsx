@@ -201,7 +201,7 @@ function AuthPage() {
               type="button"
               onClick={resendVerification}
               disabled={resendLoading}
-              className="brutal-card mt-5 w-full px-5 py-3 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+              className="brutal-card mt-5 w-full px-5 py-3 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {resendLoading && <Loader2 className="size-4 animate-spin" />}
               Reenviar e-mail
@@ -242,7 +242,7 @@ function AuthPage() {
               <button
                 type="submit"
                 disabled={forgotLoading}
-                className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+                className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {forgotLoading && <Loader2 className="size-4 animate-spin" />}
                 Enviar link de redefinição
@@ -331,7 +331,7 @@ function AuthPage() {
             <button
               type="submit"
               disabled={loading || (mode === "signup" && !accepted)}
-              className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-[#111] font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
+              className="brutal-card-lg mt-2 px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="size-4 animate-spin" />}
               {mode === "signup" ? "Criar conta" : "Entrar"}

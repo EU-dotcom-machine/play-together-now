@@ -64,7 +64,7 @@ function Agenda() {
             onClick={() => setTab(t)}
             className={cn(
               "px-3 py-2 rounded-full text-xs font-bold uppercase transition-colors",
-              tab === t ? "bg-pop text-[#111]" : "bg-[#1E1E1E] text-ink/70",
+              tab === t ? "bg-pop text-primary-foreground" : "bg-surface text-ink/70",
             )}
           >
             {t === "upcoming" ? "Próximas" : "Histórico"}
@@ -271,7 +271,7 @@ function GameCard({ game }: { game: AgendaGame }) {
         </div>
         {game.urgency === "urgente" && (
           <span
-            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#FF4444] text-white text-xs"
+            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-urgent text-white text-xs"
             style={{ fontWeight: 800 }}
           >
             <Zap className="size-3" /> URGENTE
@@ -280,22 +280,22 @@ function GameCard({ game }: { game: AgendaGame }) {
       </div>
 
       <div className="relative z-10 mt-3 flex flex-wrap gap-2 text-xs">
-        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           <MapPin className="size-3" />
           {game.venues?.name ?? "Sem local"}
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           {formatDateDisplay(start, { weekday: "short", day: "2-digit", month: "2-digit" })}{" "}
           {formatDateDisplay(start, { hour: "2-digit", minute: "2-digit" })}
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-[#2A2A2A] text-white">
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-border text-white">
           <Users className="size-3" />
           {filled}/{game.slots_total}
         </span>
         <span
           className={cn(
             "inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-bold",
-            free ? "bg-[#FFD600] text-[#111]" : "bg-[#2A2A2A] text-white",
+            free ? "bg-pop text-primary-foreground" : "bg-border text-white",
           )}
         >
           {free ? "DE GRAÇA" : `R$ ${(game.price_cents / 100).toFixed(2)}`}

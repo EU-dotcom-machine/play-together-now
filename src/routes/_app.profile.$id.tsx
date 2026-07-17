@@ -51,7 +51,7 @@ function PublicProfile() {
           <ArrowLeft className="size-3.5" /> Voltar
         </Link>
         <div className="flex items-center gap-4">
-          <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold overflow-hidden">
+          <div className="size-16 rounded-full bg-pop text-primary-foreground flex items-center justify-center text-2xl font-extrabold overflow-hidden">
             {profile.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="size-16 rounded-full object-cover" />
             ) : (
@@ -59,13 +59,13 @@ function PublicProfile() {
             )}
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#888]">atleta</p>
+            <p className="text-xs uppercase font-semibold text-muted-foreground">atleta</p>
             <h1 className="text-2xl font-extrabold leading-none text-pop">{name}</h1>
           </div>
         </div>
 
         <div className="mt-5 flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-1.5 bg-pop text-[#111] px-3 py-1.5 rounded-full text-xs font-bold">
+          <div className="inline-flex items-center gap-1.5 bg-pop text-primary-foreground px-3 py-1.5 rounded-full text-xs font-bold">
             <Trophy className="size-3.5" /> {profile.points ?? 0} pontos
           </div>
           {(profile.total_reviews ?? 0) > 0 && (

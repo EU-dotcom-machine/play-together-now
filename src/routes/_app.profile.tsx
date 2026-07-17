@@ -252,7 +252,7 @@ function Profile() {
       >
         <div className="flex items-center gap-4">
           <div className="relative size-16 shrink-0">
-            <div className="size-16 rounded-full bg-pop text-[#111] flex items-center justify-center text-2xl font-extrabold overflow-hidden">
+            <div className="size-16 rounded-full bg-pop text-primary-foreground flex items-center justify-center text-2xl font-extrabold overflow-hidden">
               {(profile as any)?.avatar_url ? (
                 <img
                   src={(profile as any).avatar_url}
@@ -268,7 +268,7 @@ function Profile() {
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               aria-label="Trocar foto"
-              className="absolute -bottom-0.5 -right-0.5 size-5 bg-pop text-[#111] rounded-full p-0.5 cursor-pointer border border-[#111] flex items-center justify-center disabled:opacity-60"
+              className="absolute -bottom-0.5 -right-0.5 size-5 bg-pop text-primary-foreground rounded-full p-0.5 cursor-pointer border border-background flex items-center justify-center disabled:opacity-60"
             >
               <Camera className="size-3" />
             </button>
@@ -281,13 +281,13 @@ function Profile() {
             />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#888]">atleta</p>
+            <p className="text-xs uppercase font-semibold text-muted-foreground">atleta</p>
             <h1 className="text-2xl font-extrabold leading-none text-pop">{display || "—"}</h1>
           </div>
         </div>
 
         <div className="mt-5 flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-1.5 bg-pop text-[#111] px-3 py-1.5 rounded-full text-xs font-bold">
+          <div className="inline-flex items-center gap-1.5 bg-pop text-primary-foreground px-3 py-1.5 rounded-full text-xs font-bold">
             <Trophy className="size-3.5" /> {profile?.points ?? 0} pontos
           </div>
           {((profile as any)?.total_reviews ?? 0) > 0 && (
@@ -308,7 +308,7 @@ function Profile() {
             <button
               type="button"
               onClick={updateLocation}
-              className="ml-1 inline-flex items-center gap-1 bg-pop text-[#111] px-2 py-0.5 rounded-full font-bold uppercase"
+              className="ml-1 inline-flex items-center gap-1 bg-pop text-primary-foreground px-2 py-0.5 rounded-full font-bold uppercase"
             >
               <RefreshCw className="size-3" /> Atualizar
             </button>
@@ -331,7 +331,7 @@ function Profile() {
 
         {/* Patrocinador */}
         <Collapsible open={sponsorOpen} onOpenChange={setSponsorOpen}>
-          <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
+          <CollapsibleTrigger className="w-full flex items-center justify-between bg-surface rounded-xl px-4 py-3 cursor-pointer text-left">
             <span className="text-base font-bold uppercase tracking-wide text-foreground">
               Patrocinador (estilo do perfil)
             </span>
@@ -351,8 +351,8 @@ function Profile() {
                     className={cn(
                       "relative overflow-hidden rounded-xl p-4 text-left transition-all border-2",
                       selected
-                        ? "border-[#FFD600] shadow-[0_0_0_2px_rgba(255,214,0,0.25)]"
-                        : "border-[#2A2A2A]",
+                        ? "border-pop shadow-[0_0_0_2px_rgba(255,214,0,0.25)]"
+                        : "border-border",
                     )}
                     style={{ background: b.gradient ?? b.color ?? "#1E1E1E" }}
                   >
@@ -439,7 +439,7 @@ function Profile() {
 
         {/* Esportes selection */}
         <Collapsible open={sportsOpen} onOpenChange={setSportsOpen}>
-          <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
+          <CollapsibleTrigger className="w-full flex items-center justify-between bg-surface rounded-xl px-4 py-3 cursor-pointer text-left">
             <span className="text-base font-bold uppercase tracking-wide text-foreground">Seus esportes</span>
             <ChevronDown
               className={cn("size-5 transition-transform duration-200", sportsOpen && "rotate-180")}
@@ -457,7 +457,7 @@ function Profile() {
                     className={cn(
                       "px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors",
                       on
-                        ? "bg-pop text-[#111] border-pop"
+                        ? "bg-pop text-primary-foreground border-pop"
                         : "bg-surface text-foreground border-border",
                     )}
                   >
@@ -473,7 +473,7 @@ function Profile() {
         {/* Por esporte */}
         {selectedSports.length > 0 && (
           <Collapsible open={bySportOpen} onOpenChange={setBySportOpen}>
-            <CollapsibleTrigger className="w-full flex items-center justify-between bg-[#1E1E1E] rounded-xl px-4 py-3 cursor-pointer text-left">
+            <CollapsibleTrigger className="w-full flex items-center justify-between bg-surface rounded-xl px-4 py-3 cursor-pointer text-left">
               <span className="text-base font-bold uppercase tracking-wide text-foreground">Por esporte</span>
               <ChevronDown
                 className={cn("size-5 transition-transform duration-200", bySportOpen && "rotate-180")}
@@ -508,7 +508,7 @@ function Profile() {
                           ))}
                         </select>
                       ) : (
-                        <p className="mt-2 text-xs text-[#888]">
+                        <p className="mt-2 text-xs text-muted-foreground">
                           Sem posições específicas pra esse esporte.
                         </p>
                       )}
@@ -523,7 +523,7 @@ function Profile() {
         <button
           onClick={save}
           disabled={!!cepFormatError}
-          className="mt-4 px-5 py-4 bg-pop text-[#111] font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          className="mt-4 px-5 py-4 bg-pop text-primary-foreground font-bold uppercase rounded-full flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(255,214,0,0.25)] active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         >
           <Save className="size-4" /> Salvar
         </button>
@@ -589,7 +589,7 @@ function PushNotificationsToggle() {
             "px-4 py-2 rounded-full text-xs font-bold uppercase transition-colors disabled:opacity-50",
             isOn
               ? "bg-transparent border border-pop text-pop"
-              : "bg-pop text-[#111]",
+              : "bg-pop text-primary-foreground",
           )}
         >
           {busy ? "..." : isOn ? "Desativar" : "Ativar"}
@@ -639,7 +639,7 @@ function ChipRow({
             onClick={() => onChange(o)}
             className={cn(
               "px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors",
-              on ? "bg-pop text-[#111] border-pop" : "bg-surface text-foreground border-border",
+              on ? "bg-pop text-primary-foreground border-pop" : "bg-surface text-foreground border-border",
             )}
           >
             {o}
@@ -653,7 +653,7 @@ function ChipRow({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="grid gap-1.5">
-      <span className="text-xs font-bold uppercase tracking-wider text-[#888]">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
       {children}
     </label>
   );
@@ -710,13 +710,13 @@ function HistoryList({ items }: { items: any[] }) {
             })
           : "—";
         let label = "Aberto";
-        let chipCls = "bg-pop text-[#111]";
+        let chipCls = "bg-pop text-primary-foreground";
         if (g.status === "finished") {
           label = "Concluído";
-          chipCls = "bg-[#2D6A4F] text-white";
+          chipCls = "bg-success text-white";
         } else if (g.status === "cancelled") {
           label = "Cancelado";
-          chipCls = "bg-[#2A2A2A] text-[#888]";
+          chipCls = "bg-border text-muted-foreground";
         }
         return (
           <li key={g.id}>

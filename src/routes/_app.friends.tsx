@@ -39,7 +39,7 @@ type Friendship = {
 
 function Avatar({ name }: { name?: string | null }) {
   return (
-    <div className="size-10 rounded-full bg-pop text-[#111] flex items-center justify-center text-sm font-extrabold shrink-0">
+    <div className="size-10 rounded-full bg-pop text-primary-foreground flex items-center justify-center text-sm font-extrabold shrink-0">
       {name?.[0]?.toUpperCase() ?? "?"}
     </div>
   );
@@ -185,11 +185,11 @@ function FriendsPage() {
   if (!user) return null;
 
   return (
-    <main className="px-5 pt-8 pb-24 max-w-md mx-auto bg-[#111] min-h-screen">
+    <main className="px-5 pt-8 pb-24 max-w-md mx-auto bg-background min-h-screen">
       <h1 className="text-4xl font-extrabold uppercase leading-none text-white">
         Amigos<span className="text-pop">.</span>
       </h1>
-      <p className="mt-1 text-sm text-[#888]">Conecte com a galera e jogue junto</p>
+      <p className="mt-1 text-sm text-muted-foreground">Conecte com a galera e jogue junto</p>
 
       {/* TOGGLE Amigos | Ranking */}
       <div className="mt-5 inline-flex rounded-full bg-[#1E1E1E] border border-[#2A2A2A] p-0.5">
@@ -213,9 +213,9 @@ function FriendsPage() {
       {view === "amigos" && (
         <>
       {/* SEARCH */}
-      <section className="mt-6 bg-[#1E1E1E] rounded-2xl p-3">
-        <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#111] border border-[#2A2A2A]">
-          <Search className="size-4 text-[#888]" />
+      <section className="mt-6 bg-surface rounded-2xl p-3">
+        <label className="flex items-center gap-2 px-3 py-2 rounded-full bg-background border border-border">
+          <Search className="size-4 text-muted-foreground" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -239,7 +239,7 @@ function FriendsPage() {
               return (
                 <li
                   key={p.id}
-                  className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-[#2A2A2A]"
+                  className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-border"
                 >
                   <Avatar name={p.display_name} />
                   <div className="flex-1 min-w-0">
@@ -247,7 +247,7 @@ function FriendsPage() {
                       {p.display_name ?? "Sem nome"}
                     </p>
                     <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                      <span className="text-xs text-[#FFD600] font-bold">
+                      <span className="text-xs text-pop font-bold">
                         ⚡ {p.points ?? 0} pts
                       </span>
                       <RatingBadge avg={p.avg_rating} total={p.total_reviews} />
@@ -257,7 +257,7 @@ function FriendsPage() {
                     type="button"
                     disabled={!!f}
                     onClick={() => sendRequest(p.id)}
-                    className="px-3 py-1 text-xs rounded-full bg-pop text-[#111] font-bold uppercase disabled:opacity-50"
+                    className="px-3 py-1 text-xs rounded-full bg-pop text-primary-foreground font-bold uppercase disabled:opacity-50"
                   >
                     {label}
                   </button>
@@ -274,7 +274,7 @@ function FriendsPage() {
       {/* PENDENTES */}
       {incoming.length > 0 && (
         <section className="mt-6 grid gap-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#888]">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Pendentes ({incoming.length})
           </h2>
           {incoming.map((r) => {
@@ -282,21 +282,21 @@ function FriendsPage() {
             return (
               <div
                 key={r.id}
-                className="bg-[#1E1E1E] rounded-2xl p-3 flex items-center gap-3"
+                className="bg-surface rounded-2xl p-3 flex items-center gap-3"
               >
                 <Avatar name={p?.display_name} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-sm truncate">
                     {p?.display_name ?? "Atleta"}
                   </p>
-                  <p className="text-xs text-[#FFD600] font-bold">
+                  <p className="text-xs text-pop font-bold">
                     ⚡ {p?.points ?? 0} pts
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => accept(r.id)}
-                  className="px-3 py-1.5 rounded-full bg-pop text-[#111] text-xs font-bold uppercase inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-full bg-pop text-primary-foreground text-xs font-bold uppercase inline-flex items-center gap-1"
                 >
                   <Check className="size-3.5" /> Aceitar
                 </button>
@@ -315,7 +315,7 @@ function FriendsPage() {
 
       {/* AMIGOS */}
       <section className="mt-6 grid gap-2">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-[#888]">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Amigos ({accepted.length})
         </h2>
         {accepted.length === 0 ? (
@@ -328,7 +328,7 @@ function FriendsPage() {
             return (
               <div
                 key={r.id}
-                className="bg-[#1E1E1E] rounded-2xl p-3 flex items-center gap-3"
+                className="bg-surface rounded-2xl p-3 flex items-center gap-3"
               >
                 <Avatar name={p?.display_name} />
                 <div className="flex-1 min-w-0">
@@ -336,10 +336,10 @@ function FriendsPage() {
                     {p?.display_name ?? "Atleta"}
                   </p>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                    <span className="text-xs text-[#FFD600] font-bold">
+                    <span className="text-xs text-pop font-bold">
                       ⚡ {p?.points ?? 0} pts
                     </span>
-                    <span className="text-xs text-[#888] font-bold">
+                    <span className="text-xs text-muted-foreground font-bold">
                       🎮 {games} {games === 1 ? "atividade" : "atividades"}
                     </span>
                     <RatingBadge avg={p?.avg_rating} total={p?.total_reviews} />

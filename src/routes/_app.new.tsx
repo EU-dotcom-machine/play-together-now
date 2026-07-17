@@ -522,14 +522,14 @@ function NewGame() {
               autoComplete="off"
             />
             {showSuggestions && suggestions.length > 0 && (
-              <ul className="absolute z-20 mt-1 w-full rounded-[10px] border bg-[#1E1E1E] border-[#2A2A2A] text-white max-h-64 overflow-auto shadow-lg">
+              <ul className="absolute z-20 mt-1 w-full rounded-[10px] border bg-surface border-border text-white max-h-64 overflow-auto shadow-lg">
                 {suggestions.map((s, i) => (
                   <li key={i}>
                     <button
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => selectSuggestion(s)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-[#2A2A2A]"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-border"
                     >
                       {s.display_name}
                     </button>
@@ -541,8 +541,8 @@ function NewGame() {
         </Field>
 
         {noResults && (
-          <div className="-mt-1 grid gap-2 rounded-[10px] border border-[#2A2A2A] bg-[#1E1E1E] p-3">
-            <p className="text-xs text-[#FF4444]">Endereço não encontrado. Ajuste a busca abaixo:</p>
+          <div className="-mt-1 grid gap-2 rounded-[10px] border border-border bg-surface p-3">
+            <p className="text-xs text-urgent">Endereço não encontrado. Ajuste a busca abaixo:</p>
             <div className="flex gap-2">
               <input
                 value={fallbackQuery}
@@ -554,7 +554,7 @@ function NewGame() {
                 type="button"
                 onClick={runFallbackSearch}
                 disabled={fallbackSearching}
-                className="rounded-[10px] bg-pop text-[#111] px-3 py-2 text-xs font-bold uppercase inline-flex items-center gap-1 disabled:opacity-60"
+                className="rounded-[10px] bg-pop text-primary-foreground px-3 py-2 text-xs font-bold uppercase inline-flex items-center gap-1 disabled:opacity-60"
               >
                 {fallbackSearching ? <Loader2 className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
                 Buscar novamente
@@ -565,7 +565,7 @@ function NewGame() {
               onClick={useGpsAsLocation}
               className="text-xs text-ink/70 underline underline-offset-2 text-left inline-flex items-center gap-1"
             >
-              <AlertTriangle className="size-3.5 text-[#FFD600]" />
+              <AlertTriangle className="size-3.5 text-pop" />
               Ou usar minha localização atual (você está em outra cidade?)
             </button>
           </div>
@@ -574,10 +574,10 @@ function NewGame() {
         {(addressCoords || gpsExplicit || (!noResults && effectiveCoords)) && (
           <div
             className={`inline-flex items-center gap-1.5 w-fit rounded-full px-3 py-1.5 text-xs font-bold uppercase ${
-              addressCoords ? "bg-pop text-[#111]" : "bg-[#2A2A2A] text-ink"
+              addressCoords ? "bg-pop text-primary-foreground" : "bg-border text-ink"
             }`}
           >
-            {addressCoords ? <MapPin className="size-3.5" /> : <AlertTriangle className="size-3.5 text-[#FFD600]" />}
+            {addressCoords ? <MapPin className="size-3.5" /> : <AlertTriangle className="size-3.5 text-pop" />}
             {addressCoords
               ? `Localização: ${(addressLabel.split(",")[0] || venueName || "endereço selecionado").trim()}${addressApprox ? " (cidade aproximada)" : " (endereço)"}`
               : effectiveCoords
@@ -607,7 +607,7 @@ function NewGame() {
                   type="button"
                   onClick={() => setDurationMinutes(opt.v)}
                   className={`rounded-[10px] border px-2 py-2 text-xs font-bold uppercase ${
-                    isActive ? "bg-pop text-[#111] border-pop" : "bg-[#1E1E1E] text-ink border-[#2A2A2A]"
+                    isActive ? "bg-pop text-primary-foreground border-pop" : "bg-surface text-ink border-border"
                   }`}
                 >
                   {opt.label}
@@ -652,11 +652,11 @@ function NewGame() {
               const isActive = urgency === u;
               const activeCls =
                 u === "urgente"
-                  ? "bg-[#FF4444] text-white border-[#FF4444]"
+                  ? "bg-urgent text-white border-urgent"
                   : u === "normal"
-                    ? "bg-[#FFD600] text-[#111] border-[#FFD600]"
-                    : "bg-[#2D6A4F] text-white border-[#2D6A4F]";
-              const inactiveCls = "bg-[#1E1E1E] border-[#2A2A2A] text-[#888]";
+                    ? "bg-pop text-primary-foreground border-pop"
+                    : "bg-success text-white border-success";
+              const inactiveCls = "bg-surface border-border text-muted-foreground";
               return (
                 <button
                   key={u}
@@ -688,8 +688,8 @@ function NewGame() {
                   onClick={() => setVisibility(v.id)}
                   className={`rounded-[10px] border py-2.5 text-xs font-bold uppercase tracking-wide inline-flex items-center justify-center gap-1.5 ${
                     isActive
-                      ? "bg-[#FFD600] text-[#111] border-[#FFD600]"
-                      : "bg-[#1E1E1E] border-[#2A2A2A] text-[#888]"
+                      ? "bg-pop text-primary-foreground border-pop"
+                      : "bg-surface border-border text-muted-foreground"
                   }`}
                 >
                   <Icon className="size-3.5" />
