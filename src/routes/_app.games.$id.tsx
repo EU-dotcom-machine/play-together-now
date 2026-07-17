@@ -13,6 +13,7 @@ import { CandidatesPanel } from "@/components/candidates-panel";
 import { trackEvent } from "@/lib/posthog";
 import { AddFriendButton } from "@/components/add-friend-button";
 import { CelebrationFigure } from "@/components/stick-figure-rating";
+import { VerifiedBadge } from "@/components/verified-badge";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -50,7 +51,7 @@ function GameDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
-        .select("*,sports(name,emoji),venues(name,address)")
+        .select("*,sports(name,emoji),venues(name,address,is_verified)")
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;
@@ -281,7 +282,11 @@ function GameDetail() {
           </div>
 
           <div className="mt-4 grid gap-2 text-sm">
-            <Row icon={MapPin} text={`${game.venues?.name ?? "—"}${game.venues?.address ? " · " + game.venues.address : ""}`} />
+            <div className="flex items-center gap-2 text-ink/80">
+              <MapPin className="size-4 shrink-0" />
+              <span>{`${game.venues?.name ?? "—"}${game.venues?.address ? " · " + game.venues.address : ""}`}</span>
+              {(game.venues as any)?.is_verified && <VerifiedBadge showLabel />}
+            </div>
             {myVenueClaim && (
               <Link to="/venue-panel" className="text-xs font-bold text-ink/60 hover:text-ink hover:underline">
                 Ver painel do espaço →

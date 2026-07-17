@@ -11,6 +11,7 @@ import { InstallPrompt } from "@/components/install-prompt";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { VenueClaimDialog } from "@/components/venue-claim-dialog";
 import { VisibilityBadge } from "@/components/visibility-badge";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 export const Route = createFileRoute("/_app/discover")({
   head: () => ({ meta: [{ title: "Atividades perto de você — Esportes Unidos" }] }),
@@ -234,7 +235,7 @@ function Discover() {
       const ids = venuesAgg.map((v) => v.id);
       const { data: rows } = await supabase
         .from("venues")
-        .select("id,name,address,description,phone,instagram,latitude,longitude,is_public,venue_type" as any)
+        .select("id,name,address,description,phone,instagram,latitude,longitude,is_public,venue_type,is_verified" as any)
         .in("id", ids)
         .eq("is_public" as any, true)
         .eq("venue_type" as any, "establishment");
@@ -261,6 +262,7 @@ function Discover() {
           sports: Array.from(v.sports),
           count: v.count,
           distKm,
+          isVerified: !!pub.is_verified,
         };
       })
       .sort((a, b) => (a.distKm ?? Infinity) - (b.distKm ?? Infinity));
@@ -488,7 +490,10 @@ function Discover() {
             <div key={v.id} className="brutal-card p-4 bg-paper">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-white font-extrabold text-lg uppercase truncate leading-tight">{v.name}</h3>
+                  <h3 className="text-white font-extrabold text-lg uppercase leading-tight flex items-center gap-1.5">
+                    <span className="truncate">{v.name}</span>
+                    {v.isVerified && <VerifiedBadge />}
+                  </h3>
                   {v.address && (
                     <p className="text-xs text-ink/60 mt-1 flex items-center gap-1 truncate">
                       <MapPin className="size-3 shrink-0" />

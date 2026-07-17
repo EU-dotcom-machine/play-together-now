@@ -4,13 +4,14 @@ import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Trophy, MapPin, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 export type RankingMode = "atletas" | "espacos";
 type Season = "temporada" | "todos";
 type Scope = "todos" | "amigos";
 
 type AthleteRow = { user_id: string; display_name: string | null; avatar_url: string | null; points: number };
-type VenueRow = { venue_id: string; name: string | null; address: string | null; points: number };
+type VenueRow = { venue_id: string; name: string | null; address: string | null; points: number; is_verified?: boolean };
 
 // Primeiro dia do mês corrente no formato aceito pelo Postgres (date).
 function currentSeason(): string {
@@ -251,7 +252,10 @@ export function RankingSection({
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm text-ink truncate">{name}</p>
+                  <p className="font-bold text-sm text-ink truncate flex items-center gap-1">
+                    <span className="truncate">{name}</span>
+                    {!isAthlete && (row as VenueRow).is_verified && <VerifiedBadge />}
+                  </p>
                   {sub && <p className="text-xs text-muted-foreground truncate">{sub}</p>}
                 </div>
                 <span className="inline-flex items-center gap-1 text-pop font-extrabold text-sm shrink-0">
