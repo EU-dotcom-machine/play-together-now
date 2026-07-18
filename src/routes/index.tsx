@@ -61,16 +61,18 @@ function Landing() {
                 style={{ height: "1em" }}
               >
                 <span
-                  className="flex flex-col transition-transform duration-500 ease-out"
+                  className={`flex flex-col ${animate ? "transition-transform duration-500 ease-out" : ""}`}
                   style={{ transform: `translateY(-${wordIndex}em)` }}
                   aria-live="polite"
+                  onTransitionEnd={handleTransitionEnd}
                 >
-                  {words.map((w) => (
-                    <span key={w} className="block leading-[1]" style={{ height: "1em" }}>
+                  {[...words, words[0]].map((w, i) => (
+                    <span key={`${w}-${i}`} className="block leading-[1]" style={{ height: "1em" }}>
                       {w}
                     </span>
                   ))}
                 </span>
+
               </span>
               <span className="text-pop">{t("landing.dot")}</span>
             </span>
