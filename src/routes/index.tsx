@@ -21,12 +21,23 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { user, loading } = useAuth();
   const { t } = useTranslation();
-  const words = ["JOGAR", "CORRER", "NADAR", "SURFAR", "TREINAR", "EVOLUIR"];
+  const words = ["JOGAR", "CORRER", "NADAR", "SURFAR", "TREINAR", "EVOLUIR", "CRESCER"];
   const [wordIndex, setWordIndex] = useState(0);
+  const [animate, setAnimate] = useState(true);
   useEffect(() => {
-    const id = setInterval(() => setWordIndex((i) => (i + 1) % words.length), 2000);
+    const id = setInterval(() => {
+      setAnimate(true);
+      setWordIndex((i) => i + 1);
+    }, 2000);
     return () => clearInterval(id);
   }, []);
+  const handleTransitionEnd = () => {
+    if (wordIndex === words.length) {
+      setAnimate(false);
+      setWordIndex(0);
+    }
+  };
+
 
   if (loading) return null;
   if (user) return <Navigate to="/discover" replace />;
@@ -50,16 +61,18 @@ function Landing() {
                 style={{ height: "1em" }}
               >
                 <span
-                  className="flex flex-col transition-transform duration-500 ease-out"
+                  className={`flex flex-col ${animate ? "transition-transform duration-500 ease-out" : ""}`}
                   style={{ transform: `translateY(-${wordIndex}em)` }}
                   aria-live="polite"
+                  onTransitionEnd={handleTransitionEnd}
                 >
-                  {words.map((w) => (
-                    <span key={w} className="block leading-[1]" style={{ height: "1em" }}>
+                  {[...words, words[0]].map((w, i) => (
+                    <span key={`${w}-${i}`} className="block leading-[1]" style={{ height: "1em" }}>
                       {w}
                     </span>
                   ))}
                 </span>
+
               </span>
               <span className="text-pop">{t("landing.dot")}</span>
             </span>
