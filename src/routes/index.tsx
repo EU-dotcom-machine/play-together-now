@@ -21,6 +21,13 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { user, loading } = useAuth();
   const { t } = useTranslation();
+  const words = ["JOGAR", "CORRER", "NADAR", "SURFAR", "TREINAR", "EVOLUIR"];
+  const [wordIndex, setWordIndex] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setWordIndex((i) => (i + 1) % words.length), 2000);
+    return () => clearInterval(id);
+  }, []);
+
   if (loading) return null;
   if (user) return <Navigate to="/discover" replace />;
 
