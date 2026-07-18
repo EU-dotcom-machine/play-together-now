@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Zap, MapPin, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useEffect, useState } from "react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,6 +21,13 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { user, loading } = useAuth();
   const { t } = useTranslation();
+  const words = ["JOGAR", "CORRER", "NADAR", "SURFAR", "TREINAR", "EVOLUIR"];
+  const [wordIndex, setWordIndex] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setWordIndex((i) => (i + 1) % words.length), 2000);
+    return () => clearInterval(id);
+  }, []);
+
   if (loading) return null;
   if (user) return <Navigate to="/discover" replace />;
 
@@ -35,9 +44,27 @@ function Landing() {
           </div>
           <h1 className="mt-6 text-6xl font-extrabold leading-[0.9] uppercase [text-shadow:0_2px_14px_rgba(0,0,0,0.45)]">
             {t("landing.title_line1")}<br />
-            {t("landing.title_line2")}
-            <span className="text-pop">{t("landing.dot")}</span>
+            <span className="inline-flex items-baseline align-baseline">
+              <span
+                className="relative overflow-hidden inline-block align-baseline"
+                style={{ height: "1em" }}
+              >
+                <span
+                  className="flex flex-col transition-transform duration-500 ease-out"
+                  style={{ transform: `translateY(-${wordIndex}em)` }}
+                  aria-live="polite"
+                >
+                  {words.map((w) => (
+                    <span key={w} className="block leading-[1]" style={{ height: "1em" }}>
+                      {w}
+                    </span>
+                  ))}
+                </span>
+              </span>
+              <span className="text-pop">{t("landing.dot")}</span>
+            </span>
           </h1>
+
           <p className="mt-5 text-lg font-medium text-ink max-w-sm">{t("landing.subtitle")}</p>
 
           <div className="mt-8 flex flex-col gap-3">
