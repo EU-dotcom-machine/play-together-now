@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Zap, MapPin, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useEffect, useState } from "react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({

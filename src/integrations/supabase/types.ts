@@ -558,47 +558,62 @@ export type Database = {
       venues: {
         Row: {
           address: string | null
+          cnpj: string | null
           created_at: string
           created_by: string
           description: string | null
           id: string
           instagram: string | null
           is_public: boolean
+          is_verified: boolean
           latitude: number
+          legal_name: string | null
           longitude: number
           name: string
           notes: string | null
+          owner_id: string | null
           phone: string | null
+          registration_status: string
           venue_type: string
         }
         Insert: {
           address?: string | null
+          cnpj?: string | null
           created_at?: string
           created_by: string
           description?: string | null
           id?: string
           instagram?: string | null
           is_public?: boolean
+          is_verified?: boolean
           latitude: number
+          legal_name?: string | null
           longitude: number
           name: string
           notes?: string | null
+          owner_id?: string | null
           phone?: string | null
+          registration_status?: string
           venue_type?: string
         }
         Update: {
           address?: string | null
+          cnpj?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
           id?: string
           instagram?: string | null
           is_public?: boolean
+          is_verified?: boolean
           latitude?: number
+          legal_name?: string | null
           longitude?: number
           name?: string
           notes?: string | null
+          owner_id?: string | null
           phone?: string | null
+          registration_status?: string
           venue_type?: string
         }
         Relationships: []
@@ -644,8 +659,65 @@ export type Database = {
         }
         Relationships: []
       }
+      v_athlete_points: {
+        Row: {
+          points: number | null
+          season: string | null
+          sport_id: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_venue_points: {
+        Row: {
+          points: number | null
+          season: string | null
+          sport_id: string | null
+          venue_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "games_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      get_athlete_ranking: {
+        Args: {
+          p_limit?: number
+          p_scope?: string
+          p_season?: string
+          p_sport?: string
+        }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          points: number
+          user_id: string
+        }[]
+      }
+      get_friend_suggestions: {
+        Args: { p_limit?: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          mutual_friends: number
+          played_together: number
+          user_id: string
+        }[]
+      }
       get_player_sport_rating: {
         Args: { player_id: string; sport_id: string }
         Returns: {
@@ -654,6 +726,15 @@ export type Database = {
           sport_avg: number
           sport_total: number
           top_tags: string[]
+        }[]
+      }
+      get_venue_ranking: {
+        Args: { p_limit?: number; p_season?: string; p_sport?: string }
+        Returns: {
+          address: string
+          name: string
+          points: number
+          venue_id: string
         }[]
       }
       is_game_participant: {
