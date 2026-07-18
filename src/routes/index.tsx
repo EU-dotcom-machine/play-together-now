@@ -3,7 +3,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Zap, MapPin, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { Logo } from "@/components/logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,11 +30,10 @@ function Landing() {
 
         <div className="relative z-10 max-w-md mx-auto">
           <div className="flex items-center justify-between">
-            <Logo height={40} />
+            <span className="brutal-chip bg-zap">{t("landing.beta")}</span>
             <LanguageSwitcher />
           </div>
-          <span className="brutal-chip bg-zap mt-8 inline-flex">{t("landing.beta")}</span>
-          <h1 className="mt-4 text-6xl font-extrabold leading-[0.9] uppercase [text-shadow:0_2px_14px_rgba(0,0,0,0.45)]">
+          <h1 className="mt-6 text-6xl font-extrabold leading-[0.9] uppercase [text-shadow:0_2px_14px_rgba(0,0,0,0.45)]">
             {t("landing.title_line1")}<br />
             {t("landing.title_line2")}
             <span className="text-pop">{t("landing.dot")}</span>
