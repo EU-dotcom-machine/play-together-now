@@ -71,10 +71,19 @@ function Profile() {
     },
   });
 
+  // Mostra o Painel do Espaço se o usuário é DONO aprovado (owner_id) ou tem
+  // uma reivindicação aceita (fluxo legado).
   const { data: acceptedClaim } = useQuery({
-    queryKey: ["my-accepted-claim", user?.id],
+    queryKey: ["my-venue-access", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      const { data: owned } = await (supabase as any)
+        .from("venues")
+        .select("id")
+        .eq("owner_id", user!.id)
+        .limit(1)
+        .maybeSingle();
+      if (owned) return owned;
       const { data } = await supabase
         .from("venue_claims")
         .select("id")

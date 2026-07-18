@@ -1,10 +1,26 @@
 import { createFileRoute, Link, Navigate, redirect } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateDisplay } from "@/lib/utils";
-import { MapPin, Users, CalendarDays } from "lucide-react";
+import { MapPin, Users, CalendarDays, Save, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { friendlyError } from "@/lib/friendly-error";
+import { VerifiedBadge } from "@/components/verified-badge";
+
+type Venue = {
+  id: string;
+  name: string | null;
+  address: string | null;
+  description: string | null;
+  phone: string | null;
+  instagram: string | null;
+  is_public: boolean | null;
+  is_verified: boolean | null;
+  owner_id: string | null;
+};
 
 export const Route = createFileRoute("/_app/venue-panel")({
   ssr: false,
@@ -13,6 +29,13 @@ export const Route = createFileRoute("/_app/venue-panel")({
   beforeLoad: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw redirect({ to: "/auth" });
+    const { data: owned } = await supabase
+      .from("venues")
+      .select("id")
+      .eq("owner_id" as any, user.id)
+      .limit(1)
+      .maybeSingle();
+    if (owned) return;
     const { data: claim } = await supabase
       .from("venue_claims")
       .select("id")
@@ -25,23 +48,72 @@ export const Route = createFileRoute("/_app/venue-panel")({
 
 function VenuePanel() {
   const { user } = useAuth();
+  const qc = useQueryClient();
 
-  const { data: claim, isLoading: claimLoading } = useQuery({
-    queryKey: ["my-accepted-claim-full", user?.id],
+  const { data: venue, isLoading: venueLoading } = useQuery({
+    queryKey: ["my-venue", user?.id],
     enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
+    queryFn: async (): Promise<Venue | null> => {
+      const cols = "id,name,address,description,phone,instagram,is_public,is_verified,owner_id";
+      const { data: owned } = await (supabase as any)
+        .from("venues")
+        .select(cols)
+        .eq("owner_id", user!.id)
+        .limit(1)
+        .maybeSingle();
+      if (owned) return owned as Venue;
+      const { data: claim } = await (supabase as any)
         .from("venue_claims")
-        .select("id, venue_id, venues:venue_id(id,name,address)")
+        .select(`venues:venue_id(${cols})`)
         .eq("claimant_id", user!.id)
         .eq("status", "accepted")
         .limit(1)
         .maybeSingle();
-      return data;
+      return ((claim as any)?.venues ?? null) as Venue | null;
     },
   });
 
-  const venueId = claim?.venue_id as string | undefined;
+  const venueId = venue?.id;
+  const isOwner = !!venue && venue.owner_id === user?.id;
+
+  // Formulário de edição (só para o dono aprovado).
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [phone, setPhone] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (venue && !hydrated) {
+      setName(venue.name ?? "");
+      setDescription(venue.description ?? "");
+      setPhone(venue.phone ?? "");
+      setInstagram(venue.instagram ?? "");
+      setIsPublic(venue.is_public ?? true);
+      setHydrated(true);
+    }
+  }, [venue, hydrated]);
+
+  async function save() {
+    if (!venueId) return;
+    setSaving(true);
+    const { error } = await (supabase as any)
+      .from("venues")
+      .update({
+        name: name.trim() || venue?.name,
+        description: description.trim() || null,
+        phone: phone.trim() || null,
+        instagram: instagram.trim().replace(/^@/, "") || null,
+        is_public: isPublic,
+      })
+      .eq("id", venueId);
+    setSaving(false);
+    if (error) return toast.error(friendlyError(error));
+    toast.success("Espaço atualizado!");
+    qc.invalidateQueries({ queryKey: ["my-venue", user?.id] });
+  }
 
   const { data: games } = useQuery({
     queryKey: ["venue-panel-games", venueId],
@@ -68,8 +140,8 @@ function VenuePanel() {
         ),
       );
       if (ids.length === 0) return {} as Record<string, { display_name: string | null; avatar_url: string | null }>;
-      const { data } = await supabase
-        .from("profiles")
+      const { data } = await (supabase as any)
+        .from("profiles_public")
         .select("id, display_name, avatar_url")
         .in("id", ids);
       const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
@@ -79,8 +151,8 @@ function VenuePanel() {
   });
 
   if (!user) return null;
-  if (claimLoading) return <div className="px-5 py-8 text-ink/60">Carregando…</div>;
-  if (!claim) return <Navigate to="/profile" replace />;
+  if (venueLoading) return <div className="px-5 py-8 text-ink/60">Carregando…</div>;
+  if (!venue) return <Navigate to="/profile" replace />;
 
   const totalGames = games?.length ?? 0;
   let totalConfirmed = 0;
@@ -103,16 +175,17 @@ function VenuePanel() {
       avatar_url: profilesMap?.[id]?.avatar_url ?? null,
     }));
 
-  const venueName = (claim as any).venues?.name ?? "Seu espaço";
-
   return (
-    <main className="px-5 py-6 max-w-3xl mx-auto overflow-y-auto max-h-screen">
+    <main className="px-5 py-6 max-w-3xl mx-auto overflow-y-auto max-h-screen pb-24">
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-wider text-ink/60">Painel do Espaço</p>
-        <h1 className="text-3xl font-extrabold uppercase leading-tight">{venueName}</h1>
-        {(claim as any).venues?.address && (
+        <h1 className="text-3xl font-extrabold uppercase leading-tight flex items-center gap-2">
+          <span className="min-w-0 truncate">{venue.name ?? "Seu espaço"}</span>
+          {venue.is_verified && <VerifiedBadge />}
+        </h1>
+        {venue.address && (
           <p className="mt-1 flex items-center gap-1 text-sm text-ink/70">
-            <MapPin className="size-4" /> {(claim as any).venues.address}
+            <MapPin className="size-4 shrink-0" /> {venue.address}
           </p>
         )}
       </header>
@@ -122,6 +195,49 @@ function VenuePanel() {
         <Stat label="Presenças" value={totalConfirmed} />
         <Stat label="Atletas únicos" value={uniquePlayers} />
       </section>
+
+      {/* EDIÇÃO — só para o dono aprovado */}
+      {isOwner && (
+        <section className="mb-8 brutal-card-lg p-4 grid gap-4">
+          <h2 className="text-base font-bold uppercase tracking-wide">Editar espaço</h2>
+          <Field label="Nome">
+            <input value={name} onChange={(e) => setName(e.target.value)} className="input-brutal" />
+          </Field>
+          <Field label="Descrição">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="input-brutal min-h-20"
+              placeholder="Conte sobre o espaço, estrutura, horários…"
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Telefone">
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} className="input-brutal" placeholder="(11) 90000-0000" />
+            </Field>
+            <Field label="Instagram">
+              <input value={instagram} onChange={(e) => setInstagram(e.target.value)} className="input-brutal" placeholder="@seuespaco" />
+            </Field>
+          </div>
+          <label className="flex items-center justify-between gap-3 bg-surface rounded-xl px-4 py-3">
+            <span className="text-sm font-semibold">Visível na busca de estabelecimentos</span>
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              className="size-5 accent-[#FFD600]"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving}
+            className="brutal-card-lg px-5 py-4 bg-pop text-primary-foreground font-bold uppercase tracking-wide flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Salvar
+          </button>
+        </section>
+      )}
 
       <section className="mb-8">
         <h2 className="text-base font-bold uppercase tracking-wide mb-3 flex items-center gap-2">
@@ -193,6 +309,15 @@ function VenuePanel() {
         )}
       </section>
     </main>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="grid gap-1">
+      <span className="text-xs font-bold uppercase tracking-wide text-ink/60">{label}</span>
+      {children}
+    </label>
   );
 }
 
