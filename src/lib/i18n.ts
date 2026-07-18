@@ -21,7 +21,10 @@ if (!i18n.isInitialized) {
     resources,
     fallbackLng: "pt-BR",
     supportedLngs: ["pt-BR", "ja"],
-    nonExplicitSupportedLngs: true, // "ja-JP" -> "ja"
+    // NÃO usar nonExplicitSupportedLngs aqui: com supportedLngs contendo região
+    // ("pt-BR"), essa opção faz o i18next resolver "pt-BR" -> "pt" (sem recursos)
+    // e o t() devolve as chaves cruas. Sem ela, "ja-JP"->"ja" e "pt-*"->"pt-BR"
+    // resolvem corretamente via fallback. (Bug diagnosticado 17/07.)
     lng: typeof window === "undefined" ? "pt-BR" : undefined,
     // Recursos são embutidos (sem backend) -> init SÍNCRONO (initAsync=false na
     // v26). Sem isso, o React renderiza antes do init terminar e os textos
